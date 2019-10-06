@@ -11,8 +11,7 @@
 //    #define tokenScientific(t, s)   <definition>
 //    #define tokenFloat(ts)          <definition>
 //    #define <any other macros you needed>
-//[floating \E +? -? digit]				{tokenString(scientific,yytext);}
-/*[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*				{tokenFloat(float,yytext);}	 */
+
 #define MAX_LINE_LENG      256
 
 int Opt_S = 1;
@@ -23,8 +22,8 @@ char buf[MAX_LINE_LENG];
 
 digit 			[0-9]
 letter 			[a-zA-Z]
-floating	 	[+-]?([0-9]*[.])?[0-9]+	
-scientific 		[floating\E+?-?digit]
+floating		[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*	 | [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*	
+scientific 		{floating}[\E][+-]?(0|[1-9][0-9]*) |([1-9][0-9]*)[\E][+-]?(0|[1-9][0-9]*)
 
 %%
 "("     { tokenChar('('); }
@@ -75,12 +74,12 @@ scientific 		[floating\E+?-?digit]
 "while" 	{ token(KWwhile); }
 
 
-[+-]?(0|[1-9][0-9]*)[.][^0]*			{tokenFloat(float,yytext);}	 
-
+scientific 											{tokenString(scientific,yytext);}
+[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*				{tokenFloat(float,yytext);}	 
 [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*			{tokenFloat(float,yytext);}  
-[+-]?(0|[1-9][0-9]*)						{tokenInteger(integer,yytext);}
-{letter}({letter}|{digit})* 				{tokenString(id,yytext);} 
-[ \t] 										{LIST;}
+[+-]?(0|[1-9][0-9]*)|([0][1-9][0-9]*)				{tokenInteger(integer,yytext);}
+{letter}({letter}|{digit})* 						{tokenString(id,yytext);} 
+[ \t] 												{LIST;}
 
 \n      {
           LIST;

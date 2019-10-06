@@ -1,7 +1,9 @@
 begin
 	var a: integer;
 	var b: real;
-	var c:= 1.23;
+	var c:= 1E4;
+
+
     /\ ><
 	a:= 1+1;
 	b:= 1.23;
