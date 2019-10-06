@@ -1,15 +1,18 @@
 %{
-#define LIST               strcat(buf, yytext)
-#define token(t)           {LIST; if (Opt_T) printf("<%s>\n", #t);}
-#define tokenChar(t)       {LIST; if (Opt_T) printf("<%c>\n", (t));}
-#define tokenInteger(t, i) {LIST; if (Opt_T) printf("<%s: %d>\n", #t, (i));}
-#define tokenString(t, s)  {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
+#define LIST               		strcat(buf, yytext)
+#define token(t)           		{LIST; if (Opt_T) printf("<%s>\n", #t);}
+#define tokenChar(t)       		{LIST; if (Opt_T) printf("<%c>\n", (t));}
+#define tokenInteger(t, i) 		{LIST; if (Opt_T) printf("<%s: %s>\n", #t, (i));}
+#define tokenString(t, s)  		{LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
+#define tokenScientific(t, s)   {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
+#define tokenFloat(t,ts)        {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (ts));}
 // Define your token macros here
 //  for example :
 //    #define tokenScientific(t, s)   <definition>
 //    #define tokenFloat(ts)          <definition>
 //    #define <any other macros you needed>
-
+//[floating \E +? -? digit]				{tokenString(scientific,yytext);}
+/*[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*				{tokenFloat(float,yytext);}	 */
 #define MAX_LINE_LENG      256
 
 int Opt_S = 1;
@@ -18,9 +21,10 @@ int linenum = 1;
 char buf[MAX_LINE_LENG];
 %}
 
-digit [0-9]
-letter [a-zA-Z]
-
+digit 			[0-9]
+letter 			[a-zA-Z]
+floating	 	[+-]?([0-9]*[.])?[0-9]+	
+scientific 		[floating\E+?-?digit]
 
 %%
 "("     { tokenChar('('); }
@@ -37,6 +41,15 @@ letter [a-zA-Z]
 "="		{ tokenChar('='); }
 ">"		{ tokenChar('>'); }
 "<"		{ tokenChar('<'); }
+
+"mod"	{token(mod);}
+":="	{token(:=); }
+"<="	{token(<=); }
+">="	{token(>=); }
+"<>"	{token(<>); }
+"and"	{token(and);}
+"or"	{token(or); }
+"not"	{token(not);}
 
 "array" 	{ token(KWarray); }
 "begin" 	{ token(KWbegin); }
@@ -61,19 +74,24 @@ letter [a-zA-Z]
 "var" 		{ token(KWvar); }
 "while" 	{ token(KWwhile); }
 
-[a-zA-Z][a-zA-Z0-9]* {tokenString(id,yytext);} 
-[ \t] 		{LIST;}
+
+[+-]?(0|[1-9][0-9]*)[.][^0]*			{tokenFloat(float,yytext);}	 
+
+[+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*			{tokenFloat(float,yytext);}  
+[+-]?(0|[1-9][0-9]*)						{tokenInteger(integer,yytext);}
+{letter}({letter}|{digit})* 				{tokenString(id,yytext);} 
+[ \t] 										{LIST;}
 
 \n      {
           LIST;
           if (Opt_S)
-            printf("%d: %s\n", linenum, buf);
+           	printf("%d: %s\n", linenum, buf);
           linenum++;
           buf[0] = '\0';
         }
 .       {
           /* error */
-          printf("error at line %d: bad character \"%s\"\n", linenum, yytext );
+          printf("Error at line %d: bad character \"%s\"\n", linenum, yytext );
           exit(-1);
         }
 %%
