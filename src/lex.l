@@ -18,8 +18,52 @@ int linenum = 1;
 char buf[MAX_LINE_LENG];
 %}
 
+digit [0-9]
+letter [a-zA-Z]
+
+
 %%
 "("     { tokenChar('('); }
+")"		{ tokenChar(')'); }
+";"		{ tokenChar(';'); }
+":"		{ tokenChar(':'); }
+","		{ tokenChar(','); }
+"["		{ tokenChar('['); }
+"]"		{ tokenChar(']'); }
+"+"		{ tokenChar('+'); }
+"-"		{ tokenChar('-'); }
+"*"		{ tokenChar('*'); }
+"/"		{ tokenChar('/'); }
+"="		{ tokenChar('='); }
+">"		{ tokenChar('>'); }
+"<"		{ tokenChar('<'); }
+
+"array" 	{ token(KWarray); }
+"begin" 	{ token(KWbegin); }
+"boolean" 	{ token(KWboolean); }
+"def" 		{ token(KWdef); }
+"do"		{ token(KWdo); }
+"else" 		{ token(KWelse); }
+"end" 		{ token(KWend); }
+"false" 	{ token(KWfalse); }
+"for" 		{ token(KWfor); }
+"integer" 	{ token(KWinteger); }
+"if" 		{ token(KWif); }
+"of" 		{ token(KWof); }
+"print" 	{ token(KWprint); }
+"read" 		{ token(KWread); }
+"real" 		{ token(KWreal); }
+"string" 	{ token(KWstring); }
+"then" 		{ token(KWthen); }
+"to" 		{ token(KWto); }
+"true" 		{ token(KWtrue); }
+"return" 	{ token(KWreturn); }
+"var" 		{ token(KWvar); }
+"while" 	{ token(KWwhile); }
+
+[a-zA-Z][a-zA-Z0-9]* {tokenString(id,yytext);} 
+[ \t] 		{LIST;}
+
 \n      {
           LIST;
           if (Opt_S)
