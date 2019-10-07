@@ -2,7 +2,8 @@
 #define LIST               		strcat(buf, yytext)
 #define token(t)           		{LIST; if (Opt_T) printf("<%s>\n", #t);}
 #define tokenChar(t)       		{LIST; if (Opt_T) printf("<%c>\n", (t));}
-#define tokenInteger(t, i) 		{LIST; if (Opt_T) printf("<%s: %s>\n", #t, (i));}
+#define tokenInteger(t, i) 		{LIST; if (Opt_T) printf("<%s: %d>\n", #t, (i));}
+#define tokenOct(t, i) 			{LIST; if (Opt_T) printf("<%s: 00%d>\n", #t, (i));}
 #define tokenString(t, s)  		{LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
 #define tokenScientific(t, s)   {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
 #define tokenFloat(t,ts)        {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (ts));}
@@ -11,7 +12,7 @@
 //    #define tokenScientific(t, s)   <definition>
 //    #define tokenFloat(ts)          <definition>
 //    #define <any other macros you needed>
-
+// 
 #define MAX_LINE_LENG      256
 
 int Opt_S = 1;
@@ -20,11 +21,12 @@ int linenum = 1;
 char buf[MAX_LINE_LENG];
 %}
 
+
 digit 			[0-9]
 letter 			[a-zA-Z]
+oct_num			[+-]?([0][0][1-9][0-9]*)	
 floating		[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*	 | [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*	
-scientific 		{floating}[\E][+-]?(0|[1-9][0-9]*) |([1-9][0-9]*)[\E][+-]?(0|[1-9][0-9]*)
-
+scientific 		[+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*) 
 %%
 "("     { tokenChar('('); }
 ")"		{ tokenChar(')'); }
@@ -74,15 +76,28 @@ scientific 		{floating}[\E][+-]?(0|[1-9][0-9]*) |([1-9][0-9]*)[\E][+-]?(0|[1-9][
 "while" 	{ token(KWwhile); }
 
 
-scientific 											{tokenString(scientific,yytext);}
+{scientific} 										{tokenString(scientific,yytext);}
 [+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*				{tokenFloat(float,yytext);}	 
 [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*			{tokenFloat(float,yytext);}  
-[+-]?(0|[1-9][0-9]*)|([0][1-9][0-9]*)				{tokenInteger(integer,yytext);}
+{oct_num}											{tokenOct(oct_integer,atoi(yytext));}
+[+-]?(0|[1-9][0-9]*)								{tokenInteger(integer,atoi(yytext));}
 {letter}({letter}|{digit})* 						{tokenString(id,yytext);} 
+\"(\\.|[^\\])*\"									{
+														char str[256];
+														str[0] = '\0';
+														int count=0;
+														for(int i=1; i<yyleng-1; i++){
+															if(yytext[i] == '"'){
+																i++;
+															}
+															str[count] = yytext[i];
+															count++;
+														}
+														str[count+1]='\0';
+														tokenString(string,str);}
 [ \t] 												{LIST;}
 
 \n      {
-          LIST;
           if (Opt_S)
            	printf("%d: %s\n", linenum, buf);
           linenum++;
