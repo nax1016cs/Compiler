@@ -12,7 +12,7 @@
 //    #define tokenScientific(t, s)   <definition>
 //    #define tokenFloat(ts)          <definition>
 //    #define <any other macros you needed>
-// 
+// ([+-]?[1-9][0-9]*[E][+-]?(0|[1-9][0-9]*)) |
 #define MAX_LINE_LENG      256
 
 int Opt_S = 1;
@@ -26,7 +26,7 @@ digit 			[0-9]
 letter 			[a-zA-Z]
 oct_num			[+-]?([0][0][1-9][0-9]*)	
 floating		[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*	 | [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*	
-scientific 		[+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*) 
+scientific 		 ([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
 %%
 "("     { tokenChar('('); }
 ")"		{ tokenChar(')'); }
@@ -77,8 +77,9 @@ scientific 		[+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*)
 
 
 {scientific} 										{tokenString(scientific,yytext);}
-[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*				{tokenFloat(float,yytext);}	 
-[+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*			{tokenFloat(float,yytext);}  
+([+-]?[1-9][0-9]*[E][+-]?(0|[1-9][0-9]*)) 			{tokenString(scientific,yytext);}
+[+-]?(0|[1-9][0-9]*)[.][0]*[1-9][0-9]*				{tokenFloat(float,yytext);}	 
+[+-]?[0][0][1-9][0-9]*[.][0]*[1-9][0-9]*			{tokenFloat(float,yytext);}  
 {oct_num}											{tokenOct(oct_integer,atoi(yytext));}
 [+-]?(0|[1-9][0-9]*)								{tokenInteger(integer,atoi(yytext));}
 {letter}({letter}|{digit})* 						{tokenString(id,yytext);} 
@@ -93,7 +94,7 @@ scientific 		[+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*)
 															str[count] = yytext[i];
 															count++;
 														}
-														str[count+1]='\0';
+														str[count]='\0';
 														tokenString(string,str);}
 [ \t] 												{LIST;}
 
