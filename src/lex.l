@@ -27,99 +27,88 @@ letter 			[a-zA-Z]
 oct_num			[+-]?[0][0]([1-9][0-9]*)?	
 floating		[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*	 | [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*	
 scientific 		([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
+%Start COMMENT
+
 %%
-"("     { tokenChar('('); }
-")"		{ tokenChar(')'); }
-";"		{ tokenChar(';'); }
-":"		{ tokenChar(':'); }
-","		{ tokenChar(','); }
-"["		{ tokenChar('['); }
-"]"		{ tokenChar(']'); }
-"+"		{ tokenChar('+'); }
-"-"		{ tokenChar('-'); }
-"*"		{ tokenChar('*'); }
-"/"		{ tokenChar('/'); }
-"="		{ tokenChar('='); }
-">"		{ tokenChar('>'); }
-"<"		{ tokenChar('<'); }
 
-"mod"	{token(mod);}
-":="	{token(:=); }
-"<="	{token(<=); }
-">="	{token(>=); }
-"<>"	{token(<>); }
-"and"	{token(and);}
-"or"	{token(or); }
-"not"	{token(not);}
+<INITIAL>"/*".* {LIST;BEGIN COMMENT;}
+<COMMENT>.  	{LIST;}
+<COMMENT>.*"*/" {LIST;BEGIN INITIAL;}
+<INITIAL>"//&S+".* {Opt_S=1;LIST;}
+<INITIAL>"//&S-".* {Opt_S=0;LIST;}
+<INITIAL>"//&T+".* {Opt_T=1;LIST;}
+<INITIAL>"//&T-".* {Opt_T=0;LIST;}
+<INITIAL>"//".* {LIST;}
 
-"array" 	{ token(KWarray); }
-"begin" 	{ token(KWbegin); }
-"boolean" 	{ token(KWboolean); }
-"def" 		{ token(KWdef); }
-"do"		{ token(KWdo); }
-"else" 		{ token(KWelse); }
-"end" 		{ token(KWend); }
-"false" 	{ token(KWfalse); }
-"for" 		{ token(KWfor); }
-"integer" 	{ token(KWinteger); }
-"if" 		{ token(KWif); }
-"of" 		{ token(KWof); }
-"print" 	{ token(KWprint); }
-"read" 		{ token(KWread); }
-"real" 		{ token(KWreal); }
-"string" 	{ token(KWstring); }
-"then" 		{ token(KWthen); }
-"to" 		{ token(KWto); }
-"true" 		{ token(KWtrue); }
-"return" 	{ token(KWreturn); }
-"var" 		{ token(KWvar); }
-"while" 	{ token(KWwhile); }
+<INITIAL>"("     { tokenChar('('); }
+<INITIAL>")"		{ tokenChar(')'); }
+<INITIAL>";"		{ tokenChar(';'); }
+<INITIAL>":"		{ tokenChar(':'); }
+<INITIAL>","		{ tokenChar(','); }
+<INITIAL>"["		{ tokenChar('['); }
+<INITIAL>"]"		{ tokenChar(']'); }
+<INITIAL>"+"		{ tokenChar('+'); }
+<INITIAL>"-"		{ tokenChar('-'); }
+<INITIAL>"*"		{ tokenChar('*'); }
+<INITIAL>"/"		{ tokenChar('/'); }
+<INITIAL>"="		{ tokenChar('='); }
+<INITIAL>">"		{ tokenChar('>'); }
+<INITIAL>"<"		{ tokenChar('<'); }
+
+<INITIAL>"mod"	{token(mod);}
+<INITIAL>":="	{token(:=); }
+<INITIAL>"<="	{token(<=); }
+<INITIAL>">="	{token(>=); }
+<INITIAL>"<>"	{token(<>); }
+<INITIAL>"and"	{token(and);}
+<INITIAL>"or"	{token(or); }
+<INITIAL>"not"	{token(not);}
+
+<INITIAL>"array" 	{ token(KWarray); }
+<INITIAL>"begin" 	{ token(KWbegin); }
+<INITIAL>"boolean" 	{ token(KWboolean); }
+<INITIAL>"def" 		{ token(KWdef); }
+<INITIAL>"do"		{ token(KWdo); }
+<INITIAL>"else" 		{ token(KWelse); }
+<INITIAL>"end" 		{ token(KWend); }
+<INITIAL>"false" 	{ token(KWfalse); }
+<INITIAL>"for" 		{ token(KWfor); }
+<INITIAL>"integer" 	{ token(KWinteger); }
+<INITIAL>"if" 		{ token(KWif); }
+<INITIAL>"of" 		{ token(KWof); }
+<INITIAL>"print" 	{ token(KWprint); }
+<INITIAL>"read" 		{ token(KWread); }
+<INITIAL>"real" 		{ token(KWreal); }
+<INITIAL>"string" 	{ token(KWstring); }
+<INITIAL>"then" 		{ token(KWthen); }
+<INITIAL>"to" 		{ token(KWto); }
+<INITIAL>"true" 		{ token(KWtrue); }
+<INITIAL>"return" 	{ token(KWreturn); }
+<INITIAL>"var" 		{ token(KWvar); }
+<INITIAL>"while" 	{ token(KWwhile); }
 
 
-{scientific} 									{tokenString(scientific,yytext);}
-([+-]?[1-9][0-9]*[E][+-]?(0|[1-9][0-9]*)) 		{tokenString(scientific,yytext);}
-[+-]?(0|[1-9][0-9]*)[.][0]*[1-9][0-9]*			{tokenFloat(float,yytext);}
-[+-]?[0][0][1-9][0-9]*[.][0]*[1-9][0-9]*		{
-													printf("123456");
-													int num_pos = 0;															char oc[256];
-													oc[0] = '\0';
-													char ft[256];
-													ft[0]='\0';
-													int i;
-													for(i=0; i<yyleng; i++){
-														if(yytext[i]=='.'){
-															num_pos = i;
-															break;
-														}
-														oc[i] = yytext[i];
-													}
-													oc[i-1] = '\0';
-													int s=0;
-													for(int j=i-1; j<yyleng; j++){															ft[s++] = yytext[j];
-														ft[s++] = yytext[j];
-													}
-													ft[s]='\0';
-													printf("123456789");
-													tokenOct(oct_integer,atoi(oc));
-													tokenFloat(float,s);
-												}
-{oct_num}											{tokenOct(oct_integer,atoi(yytext));}															 
-[+-]?(0|[1-9][0-9]*)								{tokenInteger(integer,atoi(yytext));}
-{letter}({letter}|{digit})* 						{tokenString(id,yytext);} 
-\"(\\.|[^\\])*\"									{
-														char str[256];
-														str[0] = '\0';
-														int count=0;
-														for(int i=1; i<yyleng-1; i++){
-															if(yytext[i] == '"'){
-																i++;
+
+<INITIAL>{scientific} 									{tokenString(scientific,yytext);}
+<INITIAL>([+-]?[1-9][0-9]*[E][+-]?(0|[1-9][0-9]*)) 		{tokenString(scientific,yytext);}
+<INITIAL>[+-]?(0|[1-9][0-9]*)[.][0]*[1-9][0-9]*			{tokenFloat(float,yytext);}
+<INITIAL>{oct_num}										{tokenOct(oct_integer,atoi(yytext));}															 
+<INITIAL>[+-]?(0|[1-9][0-9]*)							{tokenInteger(integer,atoi(yytext));}
+<INITIAL>{letter}({letter}|{digit})* 					{tokenString(id,yytext);} 
+<INITIAL>\"(\\.|[^\\])*\"								{
+															char str[256];
+															str[0] = '\0';
+															int count=0;
+															for(int i=1; i<yyleng-1; i++){
+																if(yytext[i] == '"'){
+																	i++;
+																}
+																str[count] = yytext[i];
+																count++;
 															}
-															str[count] = yytext[i];
-															count++;
-														}
-														str[count]='\0';
-														tokenString(string,str);}
-[ \t] 												{LIST;}
+															str[count]='\0';
+															tokenString(string,str);}
+[ \t] 											{LIST;}
 
 \n      {
           if (Opt_S)
