@@ -3,10 +3,11 @@
 #define token(t)           		{LIST; if (Opt_T) printf("<%s>\n", #t);}
 #define tokenChar(t)       		{LIST; if (Opt_T) printf("<%c>\n", (t));}
 #define tokenInteger(t, i) 		{LIST; if (Opt_T) printf("<%s: %d>\n", #t, (i));}
-#define tokenOct(t, i) 			{LIST; if (Opt_T) printf("<%s: 00%d>\n", #t, (i));}
+#define tokenOct(t, i) 			{LIST; if (Opt_T) printf("<%s: %s>\n", #t, (i));}
 #define tokenString(t, s)  		{LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
 #define tokenScientific(t, s)   {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
 #define tokenFloat(t,ts)        {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (ts));}
+#define tokenFloat_NL(t,ts)        { if (Opt_T) printf("<%s: %s>\n", #t, (ts));}
 // Define your token macros here
 //  for example :
 //    #define tokenScientific(t, s)   <definition>
@@ -48,7 +49,7 @@ scientific 		([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
 <INITIAL>","		{ tokenChar(','); }
 <INITIAL>"["		{ tokenChar('['); }
 <INITIAL>"]"		{ tokenChar(']'); }
-<INITIAL>"+"		{ tokenChar('+'); }
+<INITIAL>'+'		{ tokenChar('+'); }
 <INITIAL>"-"		{ tokenChar('-'); }
 <INITIAL>"*"		{ tokenChar('*'); }
 <INITIAL>"/"		{ tokenChar('/'); }
@@ -90,10 +91,33 @@ scientific 		([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
 
 
 
-<INITIAL>{scientific} 									      {tokenString(scientific,yytext);}
-<INITIAL>[+-]?[1-9][0-9]*[E]{int} 						{tokenString(scientific,yytext);}
+<INITIAL>{scientific} 									          {tokenString(scientific,yytext);}
+<INITIAL>[+-]?[1-9][0-9]*[E]{int} 						    {tokenString(scientific,yytext);}
+<INITIAL>[+-]?[0]{2}[1-9][0-9]*\.[0-9]*           {
+                                                        int num_pos = 0;
+                                                        char oc[256];
+                                                        char ft[256];
+                                                        oc[0] = '\0';
+                                                        ft[0]='\0';
+                                                        int i,j;
+                                                        int s=0;
+                                                        for(i=0; i<yyleng; i++){
+                                                          if(yytext[i]=='.'){
+                                                            break;
+                                                          }
+                                                          oc[i] = yytext[i];
+                                                        }
+                                                        oc[i-1] = '\0';
+                                                        tokenOct(oct_integer,oc);
+                                                        for(j=i-1; j<yyleng; j++){
+                                                          ft[s] = yytext[j];
+                                                          s++;
+                                                        }
+                                                        ft[s] = '\0';
+                                                        tokenFloat_NL(float,ft);
+                                                      }
 <INITIAL>{int}[.][0]*[1-9][0-9]*						  {tokenFloat(float,yytext);}
-<INITIAL>{oct_num}										        {tokenOct(oct_integer,atoi(yytext));}															 
+<INITIAL>{oct_num}										        {tokenOct(oct_integer,yytext);}															 
 <INITIAL>{int}											          {tokenInteger(integer,atoi(yytext));}
 <INITIAL>{letter}({letter}|{digit})* 					{tokenString(id,yytext);} 
 <INITIAL>\"(\\.|[^\\])*\"								      {
