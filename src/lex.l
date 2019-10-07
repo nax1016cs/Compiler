@@ -12,7 +12,7 @@
 //    #define tokenScientific(t, s)   <definition>
 //    #define tokenFloat(ts)          <definition>
 //    #define <any other macros you needed>
-// ([+-]?[1-9][0-9]*[E][+-]?(0|[1-9][0-9]*)) |
+// 	0.0
 #define MAX_LINE_LENG      256
 
 int Opt_S = 1;
@@ -24,9 +24,9 @@ char buf[MAX_LINE_LENG];
 
 digit 			[0-9]
 letter 			[a-zA-Z]
-oct_num			[+-]?([0][0][1-9][0-9]*)	
+oct_num			[+-]?[0][0]([1-9][0-9]*)?	
 floating		[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*	 | [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*	
-scientific 		 ([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
+scientific 		([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
 %%
 "("     { tokenChar('('); }
 ")"		{ tokenChar(')'); }
@@ -76,11 +76,34 @@ scientific 		 ([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
 "while" 	{ token(KWwhile); }
 
 
-{scientific} 										{tokenString(scientific,yytext);}
-([+-]?[1-9][0-9]*[E][+-]?(0|[1-9][0-9]*)) 			{tokenString(scientific,yytext);}
-[+-]?(0|[1-9][0-9]*)[.][0]*[1-9][0-9]*				{tokenFloat(float,yytext);}	 
-[+-]?[0][0][1-9][0-9]*[.][0]*[1-9][0-9]*			{tokenFloat(float,yytext);}  
-{oct_num}											{tokenOct(oct_integer,atoi(yytext));}
+{scientific} 									{tokenString(scientific,yytext);}
+([+-]?[1-9][0-9]*[E][+-]?(0|[1-9][0-9]*)) 		{tokenString(scientific,yytext);}
+[+-]?(0|[1-9][0-9]*)[.][0]*[1-9][0-9]*			{tokenFloat(float,yytext);}
+[+-]?[0][0][1-9][0-9]*[.][0]*[1-9][0-9]*		{
+													printf("123456");
+													int num_pos = 0;															char oc[256];
+													oc[0] = '\0';
+													char ft[256];
+													ft[0]='\0';
+													int i;
+													for(i=0; i<yyleng; i++){
+														if(yytext[i]=='.'){
+															num_pos = i;
+															break;
+														}
+														oc[i] = yytext[i];
+													}
+													oc[i-1] = '\0';
+													int s=0;
+													for(int j=i-1; j<yyleng; j++){															ft[s++] = yytext[j];
+														ft[s++] = yytext[j];
+													}
+													ft[s]='\0';
+													printf("123456789");
+													tokenOct(oct_integer,atoi(oc));
+													tokenFloat(float,s);
+												}
+{oct_num}											{tokenOct(oct_integer,atoi(yytext));}															 
 [+-]?(0|[1-9][0-9]*)								{tokenInteger(integer,atoi(yytext));}
 {letter}({letter}|{digit})* 						{tokenString(id,yytext);} 
 \"(\\.|[^\\])*\"									{
