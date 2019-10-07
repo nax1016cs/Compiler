@@ -28,7 +28,7 @@ letter 			[a-zA-Z]
 int 			  [+-]?(0|[1-9][0-9]*)
 oct_num			[+-]?[0][0]([1-9][0-9]*)?	
 floating		[+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*	 | [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*	
-scientific 		([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
+scientific 		([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[Ee][+-]?(0|[1-9][0-9]*))
 %Start COMMENT
 
 %%
@@ -92,7 +92,7 @@ scientific 		([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[E][+-]?(0|[1-9][0-9]*))
 
 
 <INITIAL>{scientific} 									          {tokenString(scientific,yytext);}
-<INITIAL>[+-]?[1-9][0-9]*[E]{int} 						    {tokenString(scientific,yytext);}
+<INITIAL>[+-]?[1-9][0-9]*[Ee]{int} 						    {tokenString(scientific,yytext);}
 <INITIAL>[+-]?[0]{2}[1-9][0-9]*\.[0-9]*           {
                                                         int num_pos = 0;
                                                         char oc[256];
