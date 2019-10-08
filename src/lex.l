@@ -25,10 +25,11 @@ char buf[MAX_LINE_LENG];
 
 digit       [0-9]
 letter      [a-zA-Z]
-int         [-]?(0|[1-9][0-9]*)
-oct_num     [+-]?[0][0]([1-9][0-9]*)? 
-floating    [+-]?(0|[1-9][0-9]*)[.][0]*[1-9]+[0-9]*  | [+-]?[0][0][1-9][0-9]*[.][0]*[1-9]+[0-9]*  
-scientific    ([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[Ee][+-]?(0|[1-9][0-9]*))
+int         (0|[1-9][0-9]*)
+oct         [0][0-7]+
+floating    {int}[.][0-9]*
+scientific_float    ([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[Ee][+-]?{int}
+scientific_int       [1-9][0-9]*[Ee][+-]?{int}
 %Start COMMENT
 
 %%
@@ -91,33 +92,10 @@ scientific    ([+-]?([1-9][0-9]*)[.][0]*[1-9]+[0-9]*[Ee][+-]?(0|[1-9][0-9]*))
 
 
 
-<INITIAL>{scientific}                             {tokenString(scientific,yytext);}
-<INITIAL>[+-]?[1-9][0-9]*[Ee][+]?{int}                {tokenString(scientific,yytext);}
-<INITIAL>[+-]?[0]{2}[1-9][0-9]*\.[0-9]*           {
-                                                        int num_pos = 0;
-                                                        char oc[256];
-                                                        char ft[256];
-                                                        oc[0] = '\0';
-                                                        ft[0]='\0';
-                                                        int i,j;
-                                                        int s=0;
-                                                        for(i=0; i<yyleng; i++){
-                                                          if(yytext[i]=='.'){
-                                                            break;
-                                                          }
-                                                          oc[i] = yytext[i];
-                                                        }
-                                                        oc[i-1] = '\0';
-                                                        tokenOct(oct_integer,oc);
-                                                        for(j=i-1; j<yyleng; j++){
-                                                          ft[s] = yytext[j];
-                                                          s++;
-                                                        }
-                                                        ft[s] = '\0';
-                                                        tokenFloat_NL(float,ft);
-                                                      }
+<INITIAL>{scientific_float}                   {tokenString(scientific,yytext);}
+<INITIAL>{scientific_int}                     {tokenString(scientific,yytext);}
 <INITIAL>{int}[.][0]*[1-9][0-9]*              {tokenFloat(float,yytext);}
-<INITIAL>{oct_num}                            {tokenOct(oct_integer,yytext);}                              
+<INITIAL>{oct}                                {tokenOct(oct_integer,yytext);}                              
 <INITIAL>{int}                                {tokenInteger(integer,yytext);}
 <INITIAL>{letter}({letter}|{digit})*          {tokenString(id,yytext);} 
 <INITIAL>\"(\\.|[^\\])*\"                     {
