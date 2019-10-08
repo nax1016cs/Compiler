@@ -27,7 +27,7 @@ digit       [0-9]
 letter      [a-zA-Z]
 int         (0|[1-9][0-9]*)
 oct         [0][0-7]+
-floating    {int}[.][0-9]*
+floating    {int}[.][0-9]*[1-9]
 scientific  ({floating}|{int})[Ee][+-]?{int}
 
 %Start COMMENT
@@ -93,7 +93,7 @@ scientific  ({floating}|{int})[Ee][+-]?{int}
 
 
 <INITIAL>{scientific}                         {tokenString(scientific,yytext);}
-<INITIAL>{floating}                              {tokenFloat(float,yytext);}
+<INITIAL>{floating}                           {tokenFloat(float,yytext);}
 <INITIAL>{oct}                                {tokenOct(oct_integer,yytext);}                              
 <INITIAL>{int}                                {tokenInteger(integer,yytext);}
 <INITIAL>{letter}({letter}|{digit})*          {tokenString(id,yytext);} 
