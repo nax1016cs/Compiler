@@ -3,11 +3,10 @@
 #define token(t)              {LIST; if (Opt_T) printf("<%s>\n", #t);}
 #define tokenChar(t)          {LIST; if (Opt_T) printf("<%c>\n", (t));}
 #define tokenInteger(t, i)    {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (i));}
-#define tokenOct(t, i)      {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (i));}
+#define tokenOct(t, i)        {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (i));}
 #define tokenString(t, s)     {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
 #define tokenScientific(t, s)   {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (s));}
 #define tokenFloat(t,ts)        {LIST; if (Opt_T) printf("<%s: %s>\n", #t, (ts));}
-#define tokenFloat_NL(t,ts)        { if (Opt_T) printf("<%s: %s>\n", #t, (ts));}
 // Define your token macros here
 //  for example :
 //    #define tokenScientific(t, s)   <definition>
@@ -92,12 +91,13 @@ scientific  ({floating}|{int})[Ee][+-]?{int}
 
 
 
+<INITIAL>"0.0"								  {tokenFloat(float,yytext);}
 <INITIAL>{scientific}                         {tokenString(scientific,yytext);}
 <INITIAL>{floating}                           {tokenFloat(float,yytext);}
 <INITIAL>{oct}                                {tokenOct(oct_integer,yytext);}                              
 <INITIAL>{int}                                {tokenInteger(integer,yytext);}
 <INITIAL>{letter}({letter}|{digit})*          {tokenString(id,yytext);} 
-<INITIAL>\"(\\.|[^\\])*\"                     {
+<INITIAL>\".*\"                     {
                                                 char str[256];
                                                 str[0] = '\0';
                                                 int count=0;
