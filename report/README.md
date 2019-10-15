@@ -16,7 +16,7 @@
 
 3.COMMENT:
 	(1) 利用start condition，設定2種TAG。一種是INITIAL，另一種則是 COMMENT。遇到"/*"之後，會跳到COMMENT TAG，直到讀到"*/"才回到INITIAL
-，即可避免在COMMENT中切出不該切的TOKEN。
+	，即可避免在COMMENT中切出不該切的TOKEN。
 	(2)如果遇到"//"開頭的COMMENT，則直接加到LIST裡面即可。
 	(3)遇到pseudo comment則把相對應的OPT設為1或者0。EX: 遇到//&S+則把Opt_S設為1，//T-則把Opt_T設為0，並且LIST。
 
