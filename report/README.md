@@ -1,30 +1,44 @@
-# 作業1 報告
+# 作業1報告
+- 學生 : 蔣傑名 學號 : 0516097
 
-學生 : 蔣傑名
-學號 : 0516097
+## Define Macros
+- token(t) : 負責２個字元以上的`operators` 和 `Keyword`。
+- tokenChar(t) : 負責單字元的　`operator` 和 `delimeters`。
+- tokenInteger(t, i): 負責integers。
+- tokenOct(t, i) : 負責8進位數。
+- tokenString(t, s) :　負責string。
+- tokenScientific(t, s) : 負責科學記號。
+- tokenFloat(t,ts) :　負責浮點數。
 
-1. Define:
-	在開頭宣告了token, tokenChar, tokenInteger, tokenOct, tokenString, tokenScientific, tokenFloat等，來切相對應的token。
+## Regular expression
+-  `digit` : `[0-9]`。
+-  `letter` : `[a-zA-Z]`。
+-  `int` : `(0|[1-9][0-9]*)`。
+-  `oct` : `[0][0-7]+`。
+-  `floating` : `{int}[.][0-9]*[1-9]`。
+-  `scientific` : `({floating}|{int})[Ee][+-]?{int}`。
+-  `identifier` : `{letter}({letter}|{digit})*`。
+-  `string` :　`\".*\"`。
 
-2. Regular expression: 
-	(1) digit : 0-9的數字。
-	(2) letter : 英文字母。
-	(3) int : 只有0或者以非0為開頭的整數。
-	(4) oct : 以0為開頭的 0-7數字。
-	(5) floating : 小數點前和int相同，小數點之後為了處理redundant 0s，規定必須是非0結尾。
-	(6) scientific : 英文字母E or e前，有可能是floating 或者int ；之後可能會有'+' '-'號，最後則是和int相同。
+## Comment 
 
-3. COMMENT:
-	(1) 利用start condition，設定2種TAG。一種是INITIAL，另一種則是 COMMENT。遇到"/*"之後，會跳到COMMENT TAG，直到讀到"*/"才回到INITIAL
-	，即可避免在COMMENT中切出不該切的TOKEN。
-	(2)如果遇到"//"開頭的COMMENT，則直接加到LIST裡面即可。
-	(3)遇到pseudo comment則把相對應的OPT設為1或者0。EX: 遇到//&S+則把Opt_S設為1，//T-則把Opt_T設為0，並且LIST。
+- `" /**/ " `: 利用start condition，設定2種TAG。一種是INITIAL，另一種則是 COMMENT。遇到"/"之後，會跳到COMMENT TAG，直到讀到"/"才回到INITIAL ，即可避免在COMMENT中切出不該切的TOKEN。 
+- `" // "` : 如果遇到 `"//"` 開頭的COMMENT，則直接加到LIST裡面即可。 
+- `pseudo comment` : 把相對應的 `OPT_T` 或 `POT_S` 設為`1`或者`0`。EX: 遇到`//&S+`則把`Opt_S`設為`1`，`//T-`則把`Opt_T`設為`0`，並且LIST。
 
-4. TOKENCHAR , TOKEN:
-	遇到operator(mod, :=等)，Keyword(array等)，直接丟到TOKENCHAR，和TOKEN中處理，就會將切出的token印出，並加到LIST。
+## Scanner 實作
 
-5. 其他TOKEN:
-	(1)科學記號、浮點數、8進位數、10進位數等，經由上述的regular expression(第2點)，即可切出適當的TOKEN。
-	(2)Identifier: 由於ID只能是英文字母開頭，後面能有英文和數字混合，因此寫成{letter}({letter}|{digit})*。
-	(2)0.0: 由於上述的浮點數要處理redundant 0s，規定小數點只能非0數字結尾，因此多加一個token判斷0.0的字串。
-	(3)string: 由'"'開頭，以及由'"'結尾的字串，但是要把中間多餘的'"'過濾掉，因此多開一個陣列來處理並存放正確的字串。
+- `Delimeters` :　利用`token char`切出，並list。
+- `Operator` : 單字元利用`token char`切出，並list；2字元以上利用`token`切出，並list。。
+- `Keyword` : 利用`token`切出，並將`keyword`名稱傳入後list。
+- `Floating-Point Constants` : 利用`tokenFloat(float,yytext)`，但是上頭規定的RE會把0.0去除掉，因此多加上0.0。
+- `Scientific Notations` : 利用`tokenString(scientific,yytext)`切出，並list。
+- `String Constants` :　由`'"'`開頭，以及由`'"'`結尾的字串，但是要把中間多餘的`'"'`過濾掉，因此多開一個陣列來處理並存放正確的字串，再傳入`tokenString(string,str)`。
+- `Whitespace `: 只LIST，不做其他動作。
+- `Comments && Pseudocomments` : 利用`<INITIAL>` 和 `<COMMENT>`tag來達到各自的效果。
+- `Identifier`: 利用`tokenString(id,yytext)`切出，並且list。
+
+
+## 結果
+
+- ![imgur](https://imgur.com/1OqlYEt.png)
