@@ -54,28 +54,28 @@ float {integer}\.(0|[0-9]*[1-9])
 "not" { TOKEN(not); return NOT;}
 
     /* Keyword */
-"array"   { TOKEN(KWarray); return ARRAY}
-"begin"   { TOKEN(KWbegin); return BEGIN}
-"boolean" { TOKEN(KWboolean); return BOOLEAN}
-"def"     { TOKEN(KWdef); return DEF}
-"do"      { TOKEN(KWdo); return DO}
-"else"    { TOKEN(KWelse); return ELSE}
-"end"     { TOKEN(KWend); return END}
-"false"   { TOKEN(KWfalse); return FALSE}
-"for"     { TOKEN(KWfor); return FOR}
-"integer" { TOKEN(KWinteger); return INTEGER}
-"if"      { TOKEN(KWif); return IF}
-"of"      { TOKEN(KWof); return OF}
-"print"   { TOKEN(KWprint); return PRINT}
-"read"    { TOKEN(KWread); return READ}
-"real"    { TOKEN(KWreal); return REAL}
-"string"  { TOKEN(KWstring); return STRING}
-"then"    { TOKEN(KWthen); return THEN}
-"to"      { TOKEN(KWto); return TO}
-"true"    { TOKEN(KWtrue); return TRUE}
-"return"  { TOKEN(KWreturn); return RETURN}
-"var"     { TOKEN(KWvar); return VAR}
-"while"   { TOKEN(KWwhile); return WHILE}
+"array"   { TOKEN(KWarray); return ARRAY;}
+"begin"   { TOKEN(KWbegin); return BGN;}
+"boolean" { TOKEN(KWboolean); return BOOLEAN;}
+"def"     { TOKEN(KWdef); return DEF;}
+"do"      { TOKEN(KWdo); return DO;}
+"else"    { TOKEN(KWelse); return ELSE;}
+"end"     { TOKEN(KWend); return END;}
+"false"   { TOKEN(KWfalse); return FALSE;}
+"for"     { TOKEN(KWfor); return FOR;}
+"integer" { TOKEN(KWinteger); return INTEGER;}
+"if"      { TOKEN(KWif); return IF;}
+"of"      { TOKEN(KWof); return OF;}
+"print"   { TOKEN(KWprint); return PRINT;}
+"read"    { TOKEN(KWread); return READ;}
+"real"    { TOKEN(KWreal); return REAL;}
+"string"  { TOKEN(KWstring); return STRING;}
+"then"    { TOKEN(KWthen); return THEN;}
+"to"      { TOKEN(KWto); return TO;}
+"true"    { TOKEN(KWtrue); return TRUE;}
+"return"  { TOKEN(KWreturn); return RETURN;}
+"var"     { TOKEN(KWvar); return VAR;}
+"while"   { TOKEN(KWwhile); return WHILE;}
 
     /* Identifier */
 [a-zA-Z][a-zA-Z0-9]* { TOKEN_STRING(id, yytext); return ID;}
@@ -109,7 +109,7 @@ float {integer}\.(0|[0-9]*[1-9])
     }
     *StrPtr = '\0';
     TOKEN_STRING(string, StringLiteral);
-    return STRING;
+    return STR;
 }
     /* Whitespace */
 [ \t]+ { LIST; }

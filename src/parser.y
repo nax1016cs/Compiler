@@ -14,11 +14,16 @@ extern int yylex(void);
 static void yyerror(const char *msg);
 %}
 
-%token ID
+%token ARRAY BOOLEAN INTEGER REAL STRING 
+%token ASSIGN ID BGN DEF DO ELSE END FOR IF OF PRINT READ THEN TO RETURN WHILE VAR
+%token TRUE FALSE INT OCT FLOAT SCIENTIFIC STR
+%token AND OR NOT 
 
 %%
 
 program_name: ID
+
+TYPE : 
 
 %%
 
