@@ -82,9 +82,9 @@ non_empty_statements:  non_empty_statements stm
 
 stm:                compound_stat ','
                     |simple_stat ';'
-                    | conditional_stat ';'
-                    | while_stat ';'
-                    | for_stat ';'
+                    | conditional_stat 
+                    | while_stat 
+                    | for_stat 
                     | return_stat ';'
                     | function_invocation_stat ';' ;
 
@@ -92,15 +92,19 @@ stm:                compound_stat ','
 expressions_stat:   expressions_stat AND expressions_stat
                     | expressions_stat OR expressions_stat
                     | NOT expressions_stat
+                    | expressions_stat NE expressions_stat
+                    | expressions_stat GE expressions_stat
+                    | expressions_stat LE expressions_stat
+                    | expressions_stat '=' expressions_stat
+                    | expressions_stat '>' expressions_stat
+                    | expressions_stat '<' expressions_stat
                     | expressions_stat '/' expressions_stat
                     | expressions_stat MOD expressions_stat
                     | expressions_stat '*' expressions_stat
                     | expressions_stat '-' expressions_stat
                     | expressions_stat '+' expressions_stat
-                    | expressions_stat '=' expressions_stat
-                    | expressions_stat NE expressions_stat
-                    | expressions_stat GE expressions_stat
-                    | expressions_stat LE expressions_stat
+
+
                     | '-' expressions_stat
                     | '(' expressions_stat ')'
                     | constant
@@ -111,7 +115,6 @@ expressions_stat:   expressions_stat AND expressions_stat
 
 simple_stat:        variable_reference  ASSIGN expressions_stat 
                     //| PRINT variable_reference 
-                    | PRINT 
                     | PRINT expressions_stat 
                     | READ variable_reference ;
 

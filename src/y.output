@@ -76,7 +76,7 @@
   58                   | variable_reference
 
   59  simple_stat : variable_reference ASSIGN expressions_stat
-  60              | PRINT variable_reference
+  60              | PRINT
   61              | PRINT expressions_stat
   62              | READ variable_reference
 
@@ -594,7 +594,7 @@ state 52
 
 
 state 53
-	simple_stat : PRINT . variable_reference  (60)
+	simple_stat : PRINT .  (60)
 	simple_stat : PRINT . expressions_stat  (61)
 
 	ID  shift 77
@@ -608,21 +608,21 @@ state 53
 	NOT  shift 78
 	'-'  shift 79
 	'('  shift 80
-	.  error
+	';'  reduce 60
 
 	constant  goto 81
 	function_invocation_stat  goto 82
 	expressions_stat  goto 85
-	variable_reference  goto 86
+	variable_reference  goto 84
 
 
 state 54
 	simple_stat : READ . variable_reference  (62)
 
-	ID  shift 87
+	ID  shift 86
 	.  error
 
-	variable_reference  goto 88
+	variable_reference  goto 87
 
 
 state 55
@@ -643,7 +643,7 @@ state 55
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 89
+	expressions_stat  goto 88
 	variable_reference  goto 84
 
 
@@ -665,21 +665,21 @@ state 56
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 90
+	expressions_stat  goto 89
 	variable_reference  goto 84
 
 
 state 57
 	stm : compound_stat . ','  (34)
 
-	','  shift 91
+	','  shift 90
 	.  error
 
 
 state 58
 	compound_stat : BGN var_dec statements . END  (29)
 
-	END  shift 92
+	END  shift 91
 	.  error
 
 
@@ -699,7 +699,7 @@ state 59
 	END  reduce 31
 
 	compound_stat  goto 57
-	stm  goto 93
+	stm  goto 92
 	simple_stat  goto 61
 	conditional_stat  goto 62
 	while_stat  goto 63
@@ -718,56 +718,56 @@ state 60
 state 61
 	stm : simple_stat . ';'  (35)
 
-	';'  shift 94
+	';'  shift 93
 	.  error
 
 
 state 62
 	stm : conditional_stat . ';'  (36)
 
-	';'  shift 95
+	';'  shift 94
 	.  error
 
 
 state 63
 	stm : while_stat . ';'  (37)
 
-	';'  shift 96
+	';'  shift 95
 	.  error
 
 
 state 64
 	stm : for_stat . ';'  (38)
 
-	';'  shift 97
+	';'  shift 96
 	.  error
 
 
 state 65
 	stm : return_stat . ';'  (39)
 
-	';'  shift 98
+	';'  shift 97
 	.  error
 
 
 state 66
 	stm : function_invocation_stat . ';'  (40)
 
-	';'  shift 99
+	';'  shift 98
 	.  error
 
 
 state 67
 	simple_stat : variable_reference . ASSIGN expressions_stat  (59)
 
-	ASSIGN  shift 100
+	ASSIGN  shift 99
 	.  error
 
 
 state 68
 	variable : VAR id_list ':' ARRAY INT TO . INT OF array_type ';'  (8)
 
-	INT  shift 101
+	INT  shift 100
 	.  error
 
 
@@ -783,7 +783,7 @@ state 70
 	BGN  shift 22
 	.  error
 
-	compound_stat  goto 102
+	compound_stat  goto 101
 
 
 state 71
@@ -795,13 +795,13 @@ state 71
 	STRING  shift 29
 	.  error
 
-	TYPE  goto 103
+	TYPE  goto 102
 
 
 state 72
 	non_empty_arg : non_empty_arg ',' id_list . ':' TYPE  (78)
 
-	':'  shift 104
+	':'  shift 103
 	.  error
 
 
@@ -825,9 +825,9 @@ state 73
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 105
+	expressions_stat  goto 104
 	variable_reference  goto 84
-	expression_list  goto 106
+	expression_list  goto 105
 
 
 state 74
@@ -848,7 +848,7 @@ state 74
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 107
+	expressions_stat  goto 106
 	variable_reference  goto 84
 
 
@@ -861,7 +861,7 @@ state 75
 state 76
 	for_stat : FOR ID . ASSIGN INT TO INT DO statements END DO  (70)
 
-	ASSIGN  shift 108
+	ASSIGN  shift 107
 	.  error
 
 
@@ -929,7 +929,7 @@ state 78
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 109
+	expressions_stat  goto 108
 	variable_reference  goto 84
 
 
@@ -951,7 +951,7 @@ state 79
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 110
+	expressions_stat  goto 109
 	variable_reference  goto 84
 
 
@@ -973,7 +973,7 @@ state 80
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 111
+	expressions_stat  goto 110
 	variable_reference  goto 84
 
 
@@ -1003,18 +1003,18 @@ state 83
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	conditional_stat : IF expressions_stat . THEN statements condition_body END IF  (66)
 
-	THEN  shift 112
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
+	THEN  shift 111
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
 	.  error
 
 
@@ -1038,29 +1038,21 @@ state 85
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	simple_stat : PRINT expressions_stat .  (61)
 
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
 	';'  reduce 61
 
 
-86: reduce/reduce conflict (reduce 58, reduce 60) on ';'
 state 86
-	expressions_stat : variable_reference .  (58)
-	simple_stat : PRINT variable_reference .  (60)
-
-	.  reduce 58
-
-
-state 87
 	variable_reference : ID . array_reference  (63)
 	array_reference : .  (64)
 
@@ -1070,10 +1062,38 @@ state 87
 	array_reference  goto 75
 
 
-state 88
+state 87
 	simple_stat : READ variable_reference .  (62)
 
 	.  reduce 62
+
+
+state 88
+	expressions_stat : expressions_stat . AND expressions_stat  (41)
+	expressions_stat : expressions_stat . OR expressions_stat  (42)
+	expressions_stat : expressions_stat . '/' expressions_stat  (44)
+	expressions_stat : expressions_stat . MOD expressions_stat  (45)
+	expressions_stat : expressions_stat . '*' expressions_stat  (46)
+	expressions_stat : expressions_stat . '-' expressions_stat  (47)
+	expressions_stat : expressions_stat . '+' expressions_stat  (48)
+	expressions_stat : expressions_stat . '=' expressions_stat  (49)
+	expressions_stat : expressions_stat . NE expressions_stat  (50)
+	expressions_stat : expressions_stat . GE expressions_stat  (51)
+	expressions_stat : expressions_stat . LE expressions_stat  (52)
+	return_stat : RETURN expressions_stat .  (71)
+
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
+	';'  reduce 71
 
 
 state 89
@@ -1088,106 +1108,78 @@ state 89
 	expressions_stat : expressions_stat . NE expressions_stat  (50)
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
-	return_stat : RETURN expressions_stat .  (71)
-
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
-	';'  reduce 71
-
-
-state 90
-	expressions_stat : expressions_stat . AND expressions_stat  (41)
-	expressions_stat : expressions_stat . OR expressions_stat  (42)
-	expressions_stat : expressions_stat . '/' expressions_stat  (44)
-	expressions_stat : expressions_stat . MOD expressions_stat  (45)
-	expressions_stat : expressions_stat . '*' expressions_stat  (46)
-	expressions_stat : expressions_stat . '-' expressions_stat  (47)
-	expressions_stat : expressions_stat . '+' expressions_stat  (48)
-	expressions_stat : expressions_stat . '=' expressions_stat  (49)
-	expressions_stat : expressions_stat . NE expressions_stat  (50)
-	expressions_stat : expressions_stat . GE expressions_stat  (51)
-	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	while_stat : WHILE expressions_stat . DO statements END DO  (69)
 
-	DO  shift 124
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
+	DO  shift 123
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
 	.  error
 
 
-state 91
+state 90
 	stm : compound_stat ',' .  (34)
 
 	.  reduce 34
 
 
-state 92
+state 91
 	compound_stat : BGN var_dec statements END .  (29)
 
 	.  reduce 29
 
 
-state 93
+state 92
 	non_empty_statements : non_empty_statements stm .  (32)
 
 	.  reduce 32
 
 
-state 94
+state 93
 	stm : simple_stat ';' .  (35)
 
 	.  reduce 35
 
 
-state 95
+state 94
 	stm : conditional_stat ';' .  (36)
 
 	.  reduce 36
 
 
-state 96
+state 95
 	stm : while_stat ';' .  (37)
 
 	.  reduce 37
 
 
-state 97
+state 96
 	stm : for_stat ';' .  (38)
 
 	.  reduce 38
 
 
-state 98
+state 97
 	stm : return_stat ';' .  (39)
 
 	.  reduce 39
 
 
-state 99
+state 98
 	stm : function_invocation_stat ';' .  (40)
 
 	.  reduce 40
 
 
-state 100
+state 99
 	simple_stat : variable_reference ASSIGN . expressions_stat  (59)
 
 	ID  shift 77
@@ -1205,32 +1197,32 @@ state 100
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 125
+	expressions_stat  goto 124
 	variable_reference  goto 84
 
 
-state 101
+state 100
 	variable : VAR id_list ':' ARRAY INT TO INT . OF array_type ';'  (8)
 
-	OF  shift 126
+	OF  shift 125
+	.  error
+
+
+state 101
+	function : ID '(' arguments ')' ';' compound_stat . END ID  (28)
+
+	END  shift 126
 	.  error
 
 
 state 102
-	function : ID '(' arguments ')' ';' compound_stat . END ID  (28)
+	function : ID '(' arguments ')' ':' TYPE . ';' compound_stat END ID  (27)
 
-	END  shift 127
+	';'  shift 127
 	.  error
 
 
 state 103
-	function : ID '(' arguments ')' ':' TYPE . ';' compound_stat END ID  (27)
-
-	';'  shift 128
-	.  error
-
-
-state 104
 	non_empty_arg : non_empty_arg ',' id_list ':' . TYPE  (78)
 
 	BOOLEAN  shift 26
@@ -1239,10 +1231,10 @@ state 104
 	STRING  shift 29
 	.  error
 
-	TYPE  goto 129
+	TYPE  goto 128
 
 
-state 105
+state 104
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1256,31 +1248,31 @@ state 105
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	expression_list : expressions_stat .  (74)
 
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
 	','  reduce 74
 	')'  reduce 74
 
 
-state 106
+state 105
 	function_invocation_stat : ID '(' expression_list . ')'  (72)
 	expression_list : expression_list . ',' expressions_stat  (75)
 
-	','  shift 130
-	')'  shift 131
+	','  shift 129
+	')'  shift 130
 	.  error
 
 
-state 107
+state 106
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1294,29 +1286,29 @@ state 107
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	array_reference : '[' expressions_stat . ']' array_reference  (65)
 
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
-	']'  shift 132
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
+	']'  shift 131
+	.  error
+
+
+state 107
+	for_stat : FOR ID ASSIGN . INT TO INT DO statements END DO  (70)
+
+	INT  shift 132
 	.  error
 
 
 state 108
-	for_stat : FOR ID ASSIGN . INT TO INT DO statements END DO  (70)
-
-	INT  shift 133
-	.  error
-
-
-state 109
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : NOT expressions_stat .  (43)
@@ -1333,7 +1325,7 @@ state 109
 	.  reduce 43
 
 
-state 110
+state 109
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1347,8 +1339,8 @@ state 110
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	expressions_stat : '-' expressions_stat .  (53)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 53
 	THEN  reduce 53
 	'+'  reduce 53
@@ -1366,7 +1358,7 @@ state 110
 	']'  reduce 53
 
 
-state 111
+state 110
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1380,22 +1372,22 @@ state 111
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	expressions_stat : '(' expressions_stat . ')'  (54)
 
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
-	')'  shift 134
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
+	')'  shift 133
 	.  error
 
 
-state 112
+state 111
 	conditional_stat : IF expressions_stat THEN . statements condition_body END IF  (66)
 	statements : .  (30)
 
@@ -1411,7 +1403,7 @@ state 112
 	END  reduce 30
 
 	compound_stat  goto 57
-	statements  goto 135
+	statements  goto 134
 	non_empty_statements  goto 59
 	stm  goto 60
 	simple_stat  goto 61
@@ -1423,8 +1415,30 @@ state 112
 	variable_reference  goto 67
 
 
-state 113
+state 112
 	expressions_stat : expressions_stat AND . expressions_stat  (41)
+
+	ID  shift 77
+	TRUE  shift 30
+	FALSE  shift 31
+	INT  shift 32
+	OCT  shift 33
+	FLOAT  shift 34
+	SCIENTIFIC  shift 35
+	STR  shift 36
+	NOT  shift 78
+	'-'  shift 79
+	'('  shift 80
+	.  error
+
+	constant  goto 81
+	function_invocation_stat  goto 82
+	expressions_stat  goto 135
+	variable_reference  goto 84
+
+
+state 113
+	expressions_stat : expressions_stat OR . expressions_stat  (42)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1446,7 +1460,7 @@ state 113
 
 
 state 114
-	expressions_stat : expressions_stat OR . expressions_stat  (42)
+	expressions_stat : expressions_stat '+' . expressions_stat  (48)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1468,7 +1482,7 @@ state 114
 
 
 state 115
-	expressions_stat : expressions_stat '+' . expressions_stat  (48)
+	expressions_stat : expressions_stat '-' . expressions_stat  (47)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1490,7 +1504,7 @@ state 115
 
 
 state 116
-	expressions_stat : expressions_stat '-' . expressions_stat  (47)
+	expressions_stat : expressions_stat '*' . expressions_stat  (46)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1512,7 +1526,7 @@ state 116
 
 
 state 117
-	expressions_stat : expressions_stat '*' . expressions_stat  (46)
+	expressions_stat : expressions_stat '/' . expressions_stat  (44)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1534,7 +1548,7 @@ state 117
 
 
 state 118
-	expressions_stat : expressions_stat '/' . expressions_stat  (44)
+	expressions_stat : expressions_stat '=' . expressions_stat  (49)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1556,7 +1570,7 @@ state 118
 
 
 state 119
-	expressions_stat : expressions_stat '=' . expressions_stat  (49)
+	expressions_stat : expressions_stat LE . expressions_stat  (52)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1578,7 +1592,7 @@ state 119
 
 
 state 120
-	expressions_stat : expressions_stat LE . expressions_stat  (52)
+	expressions_stat : expressions_stat GE . expressions_stat  (51)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1600,7 +1614,7 @@ state 120
 
 
 state 121
-	expressions_stat : expressions_stat GE . expressions_stat  (51)
+	expressions_stat : expressions_stat NE . expressions_stat  (50)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1622,7 +1636,7 @@ state 121
 
 
 state 122
-	expressions_stat : expressions_stat NE . expressions_stat  (50)
+	expressions_stat : expressions_stat MOD . expressions_stat  (45)
 
 	ID  shift 77
 	TRUE  shift 30
@@ -1644,28 +1658,6 @@ state 122
 
 
 state 123
-	expressions_stat : expressions_stat MOD . expressions_stat  (45)
-
-	ID  shift 77
-	TRUE  shift 30
-	FALSE  shift 31
-	INT  shift 32
-	OCT  shift 33
-	FLOAT  shift 34
-	SCIENTIFIC  shift 35
-	STR  shift 36
-	NOT  shift 78
-	'-'  shift 79
-	'('  shift 80
-	.  error
-
-	constant  goto 81
-	function_invocation_stat  goto 82
-	expressions_stat  goto 146
-	variable_reference  goto 84
-
-
-state 124
 	while_stat : WHILE expressions_stat DO . statements END DO  (69)
 	statements : .  (30)
 
@@ -1680,7 +1672,7 @@ state 124
 	END  reduce 30
 
 	compound_stat  goto 57
-	statements  goto 147
+	statements  goto 146
 	non_empty_statements  goto 59
 	stm  goto 60
 	simple_stat  goto 61
@@ -1692,7 +1684,7 @@ state 124
 	variable_reference  goto 67
 
 
-state 125
+state 124
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1706,57 +1698,57 @@ state 125
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	simple_stat : variable_reference ASSIGN expressions_stat .  (59)
 
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
 	';'  reduce 59
 
 
-state 126
+state 125
 	variable : VAR id_list ':' ARRAY INT TO INT OF . array_type ';'  (8)
 
-	ARRAY  shift 148
+	ARRAY  shift 147
 	BOOLEAN  shift 26
 	INTEGER  shift 27
 	REAL  shift 28
 	STRING  shift 29
 	.  error
 
-	TYPE  goto 149
-	array_type  goto 150
+	TYPE  goto 148
+	array_type  goto 149
 
 
-state 127
+state 126
 	function : ID '(' arguments ')' ';' compound_stat END . ID  (28)
 
-	ID  shift 151
+	ID  shift 150
 	.  error
 
 
-state 128
+state 127
 	function : ID '(' arguments ')' ':' TYPE ';' . compound_stat END ID  (27)
 
 	BGN  shift 22
 	.  error
 
-	compound_stat  goto 152
+	compound_stat  goto 151
 
 
-state 129
+state 128
 	non_empty_arg : non_empty_arg ',' id_list ':' TYPE .  (78)
 
 	.  reduce 78
 
 
-state 130
+state 129
 	expression_list : expression_list ',' . expressions_stat  (75)
 
 	ID  shift 77
@@ -1774,17 +1766,17 @@ state 130
 
 	constant  goto 81
 	function_invocation_stat  goto 82
-	expressions_stat  goto 153
+	expressions_stat  goto 152
 	variable_reference  goto 84
 
 
-state 131
+state 130
 	function_invocation_stat : ID '(' expression_list ')' .  (72)
 
 	.  reduce 72
 
 
-state 132
+state 131
 	array_reference : '[' expressions_stat ']' . array_reference  (65)
 	array_reference : .  (64)
 
@@ -1808,33 +1800,33 @@ state 132
 	')'  reduce 64
 	']'  reduce 64
 
-	array_reference  goto 154
+	array_reference  goto 153
 
 
-state 133
+state 132
 	for_stat : FOR ID ASSIGN INT . TO INT DO statements END DO  (70)
 
-	TO  shift 155
+	TO  shift 154
 	.  error
 
 
-state 134
+state 133
 	expressions_stat : '(' expressions_stat ')' .  (54)
 
 	.  reduce 54
 
 
-state 135
+state 134
 	conditional_stat : IF expressions_stat THEN statements . condition_body END IF  (66)
 	condition_body : .  (67)
 
-	ELSE  shift 156
+	ELSE  shift 155
 	END  reduce 67
 
-	condition_body  goto 157
+	condition_body  goto 156
 
 
-state 136
+state 135
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat AND expressions_stat .  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
@@ -1851,7 +1843,7 @@ state 136
 	.  reduce 41
 
 
-state 137
+state 136
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat OR expressions_stat .  (42)
@@ -1868,7 +1860,7 @@ state 137
 	.  reduce 42
 
 
-state 138
+state 137
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1882,8 +1874,8 @@ state 138
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 48
 	THEN  reduce 48
 	'+'  reduce 48
@@ -1901,7 +1893,7 @@ state 138
 	']'  reduce 48
 
 
-state 139
+state 138
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1915,8 +1907,8 @@ state 139
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 47
 	THEN  reduce 47
 	'+'  reduce 47
@@ -1934,7 +1926,7 @@ state 139
 	']'  reduce 47
 
 
-state 140
+state 139
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1948,8 +1940,8 @@ state 140
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 46
 	THEN  reduce 46
 	'+'  reduce 46
@@ -1967,7 +1959,7 @@ state 140
 	']'  reduce 46
 
 
-state 141
+state 140
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -1981,8 +1973,8 @@ state 141
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 44
 	THEN  reduce 44
 	'+'  reduce 44
@@ -2000,7 +1992,7 @@ state 141
 	']'  reduce 44
 
 
-state 142
+state 141
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -2014,8 +2006,8 @@ state 142
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 49
 	THEN  reduce 49
 	'+'  reduce 49
@@ -2033,7 +2025,7 @@ state 142
 	']'  reduce 49
 
 
-state 143
+state 142
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -2047,8 +2039,8 @@ state 143
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	expressions_stat : expressions_stat LE expressions_stat .  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 52
 	THEN  reduce 52
 	'+'  reduce 52
@@ -2066,7 +2058,7 @@ state 143
 	']'  reduce 52
 
 
-state 144
+state 143
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -2080,8 +2072,8 @@ state 144
 	expressions_stat : expressions_stat GE expressions_stat .  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 51
 	THEN  reduce 51
 	'+'  reduce 51
@@ -2099,7 +2091,7 @@ state 144
 	']'  reduce 51
 
 
-state 145
+state 144
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -2113,8 +2105,8 @@ state 145
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 50
 	THEN  reduce 50
 	'+'  reduce 50
@@ -2132,7 +2124,7 @@ state 145
 	']'  reduce 50
 
 
-state 146
+state 145
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -2146,8 +2138,8 @@ state 146
 	expressions_stat : expressions_stat . GE expressions_stat  (51)
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 
-	AND  shift 113
-	OR  shift 114
+	AND  shift 112
+	OR  shift 113
 	DO  reduce 45
 	THEN  reduce 45
 	'+'  reduce 45
@@ -2165,47 +2157,47 @@ state 146
 	']'  reduce 45
 
 
-state 147
+state 146
 	while_stat : WHILE expressions_stat DO statements . END DO  (69)
 
-	END  shift 158
+	END  shift 157
+	.  error
+
+
+state 147
+	array_type : ARRAY . INT TO INT OF array_type  (21)
+
+	INT  shift 158
 	.  error
 
 
 state 148
-	array_type : ARRAY . INT TO INT OF array_type  (21)
-
-	INT  shift 159
-	.  error
-
-
-state 149
 	array_type : TYPE .  (22)
 
 	.  reduce 22
 
 
-state 150
+state 149
 	variable : VAR id_list ':' ARRAY INT TO INT OF array_type . ';'  (8)
 
-	';'  shift 160
+	';'  shift 159
 	.  error
 
 
-state 151
+state 150
 	function : ID '(' arguments ')' ';' compound_stat END ID .  (28)
 
 	.  reduce 28
 
 
-state 152
+state 151
 	function : ID '(' arguments ')' ':' TYPE ';' compound_stat . END ID  (27)
 
-	END  shift 161
+	END  shift 160
 	.  error
 
 
-state 153
+state 152
 	expressions_stat : expressions_stat . AND expressions_stat  (41)
 	expressions_stat : expressions_stat . OR expressions_stat  (42)
 	expressions_stat : expressions_stat . '/' expressions_stat  (44)
@@ -2219,35 +2211,35 @@ state 153
 	expressions_stat : expressions_stat . LE expressions_stat  (52)
 	expression_list : expression_list ',' expressions_stat .  (75)
 
-	AND  shift 113
-	OR  shift 114
-	'+'  shift 115
-	'-'  shift 116
-	'*'  shift 117
-	'/'  shift 118
-	'='  shift 119
-	LE  shift 120
-	GE  shift 121
-	NE  shift 122
-	MOD  shift 123
+	AND  shift 112
+	OR  shift 113
+	'+'  shift 114
+	'-'  shift 115
+	'*'  shift 116
+	'/'  shift 117
+	'='  shift 118
+	LE  shift 119
+	GE  shift 120
+	NE  shift 121
+	MOD  shift 122
 	','  reduce 75
 	')'  reduce 75
 
 
-state 154
+state 153
 	array_reference : '[' expressions_stat ']' array_reference .  (65)
 
 	.  reduce 65
 
 
-state 155
+state 154
 	for_stat : FOR ID ASSIGN INT TO . INT DO statements END DO  (70)
 
-	INT  shift 162
+	INT  shift 161
 	.  error
 
 
-state 156
+state 155
 	condition_body : ELSE . statements  (68)
 	statements : .  (30)
 
@@ -2262,7 +2254,7 @@ state 156
 	END  reduce 30
 
 	compound_stat  goto 57
-	statements  goto 163
+	statements  goto 162
 	non_empty_statements  goto 59
 	stm  goto 60
 	simple_stat  goto 61
@@ -2274,80 +2266,80 @@ state 156
 	variable_reference  goto 67
 
 
-state 157
+state 156
 	conditional_stat : IF expressions_stat THEN statements condition_body . END IF  (66)
 
-	END  shift 164
+	END  shift 163
+	.  error
+
+
+state 157
+	while_stat : WHILE expressions_stat DO statements END . DO  (69)
+
+	DO  shift 164
 	.  error
 
 
 state 158
-	while_stat : WHILE expressions_stat DO statements END . DO  (69)
+	array_type : ARRAY INT . TO INT OF array_type  (21)
 
-	DO  shift 165
+	TO  shift 165
 	.  error
 
 
 state 159
-	array_type : ARRAY INT . TO INT OF array_type  (21)
-
-	TO  shift 166
-	.  error
-
-
-state 160
 	variable : VAR id_list ':' ARRAY INT TO INT OF array_type ';' .  (8)
 
 	.  reduce 8
 
 
-state 161
+state 160
 	function : ID '(' arguments ')' ':' TYPE ';' compound_stat END . ID  (27)
 
-	ID  shift 167
+	ID  shift 166
+	.  error
+
+
+state 161
+	for_stat : FOR ID ASSIGN INT TO INT . DO statements END DO  (70)
+
+	DO  shift 167
 	.  error
 
 
 state 162
-	for_stat : FOR ID ASSIGN INT TO INT . DO statements END DO  (70)
-
-	DO  shift 168
-	.  error
-
-
-state 163
 	condition_body : ELSE statements .  (68)
 
 	.  reduce 68
 
 
-state 164
+state 163
 	conditional_stat : IF expressions_stat THEN statements condition_body END . IF  (66)
 
-	IF  shift 169
+	IF  shift 168
 	.  error
 
 
-state 165
+state 164
 	while_stat : WHILE expressions_stat DO statements END DO .  (69)
 
 	.  reduce 69
 
 
-state 166
+state 165
 	array_type : ARRAY INT TO . INT OF array_type  (21)
 
-	INT  shift 170
+	INT  shift 169
 	.  error
 
 
-state 167
+state 166
 	function : ID '(' arguments ')' ':' TYPE ';' compound_stat END ID .  (27)
 
 	.  reduce 27
 
 
-state 168
+state 167
 	for_stat : FOR ID ASSIGN INT TO INT DO . statements END DO  (70)
 	statements : .  (30)
 
@@ -2362,7 +2354,7 @@ state 168
 	END  reduce 30
 
 	compound_stat  goto 57
-	statements  goto 171
+	statements  goto 170
 	non_empty_statements  goto 59
 	stm  goto 60
 	simple_stat  goto 61
@@ -2374,66 +2366,61 @@ state 168
 	variable_reference  goto 67
 
 
-state 169
+state 168
 	conditional_stat : IF expressions_stat THEN statements condition_body END IF .  (66)
 
 	.  reduce 66
 
 
-state 170
+state 169
 	array_type : ARRAY INT TO INT . OF array_type  (21)
 
-	OF  shift 172
+	OF  shift 171
+	.  error
+
+
+state 170
+	for_stat : FOR ID ASSIGN INT TO INT DO statements . END DO  (70)
+
+	END  shift 172
 	.  error
 
 
 state 171
-	for_stat : FOR ID ASSIGN INT TO INT DO statements . END DO  (70)
-
-	END  shift 173
-	.  error
-
-
-state 172
 	array_type : ARRAY INT TO INT OF . array_type  (21)
 
-	ARRAY  shift 148
+	ARRAY  shift 147
 	BOOLEAN  shift 26
 	INTEGER  shift 27
 	REAL  shift 28
 	STRING  shift 29
 	.  error
 
-	TYPE  goto 149
-	array_type  goto 174
+	TYPE  goto 148
+	array_type  goto 173
 
 
-state 173
+state 172
 	for_stat : FOR ID ASSIGN INT TO INT DO statements END . DO  (70)
 
-	DO  shift 175
+	DO  shift 174
 	.  error
 
 
-state 174
+state 173
 	array_type : ARRAY INT TO INT OF array_type .  (21)
 
 	.  reduce 21
 
 
-state 175
+state 174
 	for_stat : FOR ID ASSIGN INT TO INT DO statements END DO .  (70)
 
 	.  reduce 70
 
 
-Rules never reduced:
-	simple_stat : PRINT variable_reference  (60)
-
-
 State 77 contains 17 reduce/reduce conflicts.
-State 86 contains 1 reduce/reduce conflict.
 
 
 52 terminals, 31 nonterminals
-84 grammar rules, 176 states
+84 grammar rules, 175 states
