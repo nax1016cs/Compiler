@@ -1,7 +1,5 @@
 temp;
 begin
-
-a := 3
-
+print
 end
 end temp

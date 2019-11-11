@@ -53,8 +53,8 @@ non_empty_id_list   :non_empty_id_list ',' ID
                     |ID;
                     
 
-constant:       TRUE |FALSE |INT |OCT |FLOAT |SCIENTIFIC |STR
-;
+constant:       TRUE |FALSE |INT |OCT |FLOAT |SCIENTIFIC |STR;
+
 
 array_type     :ARRAY INT TO INT OF array_type
                 | TYPE;
@@ -70,11 +70,7 @@ function    : ID  '('  arguments  ')'  ':'  TYPE  ';'  compound_stat  END  ID
          | ID '(' arguments ')' ';' compound_stat END ID ;
          
 
-compound_stat: BGN compound_body END;
-
-compound_body:   
-                    | var_dec
-                    | statements;
+compound_stat: BGN var_dec statements END;
 
 
 statements:         
@@ -93,16 +89,6 @@ stm:                compound_stat ','
                     | function_invocation_stat ';' ;
 
 
-simple_stat:        variable_reference ASSIGN expressions_stat 
-                    | PRINT variable_reference 
-                    | PRINT expressions_stat 
-                    | READ variable_reference ;
-
-variable_reference: ID array_reference;
-
-array_reference:    
-                    |'[' expressions_stat ']' array_reference;
-
 expressions_stat:   expressions_stat AND expressions_stat
                     | expressions_stat OR expressions_stat
                     | NOT expressions_stat
@@ -111,6 +97,7 @@ expressions_stat:   expressions_stat AND expressions_stat
                     | expressions_stat '*' expressions_stat
                     | expressions_stat '-' expressions_stat
                     | expressions_stat '+' expressions_stat
+                    | expressions_stat '=' expressions_stat
                     | expressions_stat NE expressions_stat
                     | expressions_stat GE expressions_stat
                     | expressions_stat LE expressions_stat
@@ -119,7 +106,19 @@ expressions_stat:   expressions_stat AND expressions_stat
                     | constant
                     | ID 
                     | function_invocation_stat
-                    | array_reference;
+                    | variable_reference;
+
+
+simple_stat:        variable_reference  ASSIGN expressions_stat 
+                    //| PRINT variable_reference 
+                    | PRINT 
+                    | PRINT expressions_stat 
+                    | READ variable_reference ;
+
+variable_reference: ID array_reference;
+
+array_reference:    
+                    |'[' expressions_stat ']' array_reference;
 
 
 conditional_stat: IF expressions_stat THEN statements condition_body END IF;
@@ -152,7 +151,6 @@ TYPE : BOOLEAN
        | STRING;
        
 
-BOOLEAN_VALUE : TRUE | FALSE;
 
 
 
