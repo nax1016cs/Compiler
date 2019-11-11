@@ -30,4 +30,7 @@
 #define AND 286
 #define OR 287
 #define NOT 288
-#define mod 292
+#define LE 289
+#define GE 290
+#define NE 291
+#define MOD 292

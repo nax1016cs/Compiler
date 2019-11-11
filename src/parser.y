@@ -19,7 +19,7 @@ static void yyerror(const char *msg);
 %token TRUE FALSE INT OCT FLOAT SCIENTIFIC STR
 %token AND OR NOT 
 
-%left '+' '-' '*' '/' '>' '<' '=' '<=' '>=' '<>' 'mod'
+%left '+' '-' '*' '/' '>' '<' '=' LE GE NE MOD
 %left AND OR NOT
 // %right NOT "=" 
 
@@ -103,13 +103,23 @@ variable_reference: ID array_reference;
 array_reference:    
                     |'[' expressions_stat ']' array_reference;
 
-expressions_stat:   '-' expression_head
-                    |
-
-expression_head:    constant
-                    | ID
+expressions_stat:   expressions_stat AND expressions_stat
+                    | expressions_stat OR expressions_stat
+                    | NOT expressions_stat
+                    | expressions_stat '/' expressions_stat
+                    | expressions_stat MOD expressions_stat
+                    | expressions_stat '*' expressions_stat
+                    | expressions_stat '-' expressions_stat
+                    | expressions_stat '+' expressions_stat
+                    | expressions_stat NE expressions_stat
+                    | expressions_stat GE expressions_stat
+                    | expressions_stat LE expressions_stat
+                    | '-' expressions_stat
+                    | '(' expressions_stat ')'
+                    | constant
+                    | ID 
                     | function_invocation_stat
-                    | ID array_reference;
+                    | array_reference;
 
 
 conditional_stat: IF expressions_stat THEN statements condition_body END IF;
@@ -143,6 +153,7 @@ TYPE : BOOLEAN
        
 
 BOOLEAN_VALUE : TRUE | FALSE;
+
 
 
 %%

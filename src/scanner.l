@@ -28,27 +28,27 @@ float {integer}\.(0|[0-9]*[1-9])
 
 %%
     /* Delimiter */
-"," { TOKEN_CHAR(','); return ",";}
-";" { TOKEN_CHAR(';'); return ";";}
-":" { TOKEN_CHAR(':'); return ":";}
-"(" { TOKEN_CHAR('('); return "(";}
-")" { TOKEN_CHAR(')'); return ")";}
-"[" { TOKEN_CHAR('['); return "[";}
-"]" { TOKEN_CHAR(']'); return "]";}
+"," { TOKEN_CHAR(','); return ',';}
+";" { TOKEN_CHAR(';'); return ';';}
+":" { TOKEN_CHAR(':'); return ':';}
+"(" { TOKEN_CHAR('('); return '(';}
+")" { TOKEN_CHAR(')'); return ')';}
+"[" { TOKEN_CHAR('['); return '[';}
+"]" { TOKEN_CHAR(']'); return ']';}
 
     /* Operator */
-"+"   { TOKEN_CHAR('+'); return "+";}
-"-"   { TOKEN_CHAR('-'); return "-";}
-"*"   { TOKEN_CHAR('*'); return "*";}
-"/"   { TOKEN_CHAR('/'); return "/";}
-"mod" { TOKEN(mod); return "mod";}
+"+"   { TOKEN_CHAR('+'); return '+';}
+"-"   { TOKEN_CHAR('-'); return '-';}
+"*"   { TOKEN_CHAR('*'); return '*';}
+"/"   { TOKEN_CHAR('/'); return '/';}
+"mod" { TOKEN(mod); return MOD;}
 ":="  { TOKEN(:=); return ASSIGN;}
-"<"   { TOKEN_CHAR('<'); return "<";}
-"<="  { TOKEN(<=); return "<=";}
-"<>"  { TOKEN(<>); return "<>";}
-">="  { TOKEN(>=); return ">=";}
-">"   { TOKEN_CHAR('>'); return ">";}
-"="   { TOKEN_CHAR('='); return "=";}
+"<"   { TOKEN_CHAR('<'); return '<';}
+"<="  { TOKEN(<=); return LE;}
+"<>"  { TOKEN(<>); return NE;}
+">="  { TOKEN(>=); return GE;}
+">"   { TOKEN_CHAR('>'); return '>';}
+"="   { TOKEN_CHAR('='); return '=';}
 "and" { TOKEN(and); return AND;}
 "or"  { TOKEN(or);return OR; }
 "not" { TOKEN(not); return NOT;}

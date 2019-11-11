@@ -841,63 +841,63 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 YY_RULE_SETUP
 #line 31 "scanner.l"
-{ TOKEN_CHAR(','); return ",";}
+{ TOKEN_CHAR(','); return ',';}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
 #line 32 "scanner.l"
-{ TOKEN_CHAR(';'); return ";";}
+{ TOKEN_CHAR(';'); return ';';}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
 #line 33 "scanner.l"
-{ TOKEN_CHAR(':'); return ":";}
+{ TOKEN_CHAR(':'); return ':';}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
 #line 34 "scanner.l"
-{ TOKEN_CHAR('('); return "(";}
+{ TOKEN_CHAR('('); return '(';}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
 #line 35 "scanner.l"
-{ TOKEN_CHAR(')'); return ")";}
+{ TOKEN_CHAR(')'); return ')';}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
 #line 36 "scanner.l"
-{ TOKEN_CHAR('['); return "[";}
+{ TOKEN_CHAR('['); return '[';}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
 #line 37 "scanner.l"
-{ TOKEN_CHAR(']'); return "]";}
+{ TOKEN_CHAR(']'); return ']';}
 	YY_BREAK
 /* Operator */
 case 8:
 YY_RULE_SETUP
 #line 40 "scanner.l"
-{ TOKEN_CHAR('+'); return "+";}
+{ TOKEN_CHAR('+'); return '+';}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
 #line 41 "scanner.l"
-{ TOKEN_CHAR('-'); return "-";}
+{ TOKEN_CHAR('-'); return '-';}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
 #line 42 "scanner.l"
-{ TOKEN_CHAR('*'); return "*";}
+{ TOKEN_CHAR('*'); return '*';}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
 #line 43 "scanner.l"
-{ TOKEN_CHAR('/'); return "/";}
+{ TOKEN_CHAR('/'); return '/';}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
 #line 44 "scanner.l"
-{ TOKEN(mod); return "mod";}
+{ TOKEN(mod); return MOD;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
@@ -907,32 +907,32 @@ YY_RULE_SETUP
 case 14:
 YY_RULE_SETUP
 #line 46 "scanner.l"
-{ TOKEN_CHAR('<'); return "<";}
+{ TOKEN_CHAR('<'); return '<';}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
 #line 47 "scanner.l"
-{ TOKEN(<=); return "<=";}
+{ TOKEN(<=); return LE;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
 #line 48 "scanner.l"
-{ TOKEN(<>); return "<>";}
+{ TOKEN(<>); return NE;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
 #line 49 "scanner.l"
-{ TOKEN(>=); return ">=";}
+{ TOKEN(>=); return GE;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
 #line 50 "scanner.l"
-{ TOKEN_CHAR('>'); return ">";}
+{ TOKEN_CHAR('>'); return '>';}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
 #line 51 "scanner.l"
-{ TOKEN_CHAR('='); return "=";}
+{ TOKEN_CHAR('='); return '=';}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
