@@ -2191,4 +2191,3 @@ static void strCat(const char *Text) {
     }
     *BufferPtr = '\0';
 }
-

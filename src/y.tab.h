@@ -30,3 +30,4 @@
 #define AND 286
 #define OR 287
 #define NOT 288
+#define mod 292
