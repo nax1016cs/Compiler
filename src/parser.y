@@ -80,7 +80,7 @@ non_empty_statements:  non_empty_statements stm
                         | stm;
 
 
-stm:                compound_stat ','
+stm:                compound_stat 
                     |simple_stat ';'
                     | conditional_stat 
                     | while_stat 
@@ -103,8 +103,6 @@ expressions_stat:   expressions_stat AND expressions_stat
                     | expressions_stat '*' expressions_stat
                     | expressions_stat '-' expressions_stat
                     | expressions_stat '+' expressions_stat
-
-
                     | '-' expressions_stat
                     | '(' expressions_stat ')'
                     | constant
