@@ -9,19 +9,19 @@ DeclarationNode::DeclarationNode(uint32_t line, uint32_t col,std::vector<Variabl
 }
 
 void DeclarationNode::printNode(){
-	std::vector<VariableNode*> ::iterator it;
+    cout<<"  ";
     cout << "declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
-    for(it = t.begin(); it !=t.end(); it++){
+    for(auto it: t){
     	if(cons!=NULL){
     		cout << "    ";
-    		(*it)->type = cons->type;
-    		(*it)->printNode();
+    		it->type = cons->type;
+    		it->printNode();
     		cout << "        ";
     		cons->printNode();
     	}
     	else{
     		cout << "    ";
-    		(*it)->printNode();
+    		it->printNode();
     	}
     	//cout << "    "<< "<line:" << (*it)->location.line<<", col:"<< (*it)->location.col << "> "<<(*it)->name <<" " <<(*it)->type <<endl;
     }

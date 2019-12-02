@@ -254,9 +254,9 @@ ReturnType:
 
 Declaration:
     VAR IdList COLON Type SEMICOLON{
-    	for(it = vector_of_var.begin(); it!=vector_of_var.end(); it++){
+    	for(auto it: vector_of_var){
             // std::cout<<(*it)->name<<'\n';
-            (*it)->type = $4;
+            it->type = $4;
         }
         s = $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
 		vector_of_var.clear();
