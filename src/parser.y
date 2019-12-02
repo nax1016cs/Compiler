@@ -32,7 +32,8 @@ extern int32_t LineNum;
 extern char Buffer[512];
 /*create a vector for idlist*/
 std::vector<VariableNode*> vector_of_var;
-std::vector<VariableNode*> ::iterator it;
+std::vector<DeclarationNode*> vector_of_dec;
+
 
 /* Declared by lex */
 extern FILE *yyin;
@@ -154,7 +155,7 @@ static DeclarationNode *s;
 
 Program:
     ProgramName SEMICOLON ProgramBody END ProgramName {
-        $$ = root = new ProgramNode(@1.first_line, @1.first_column);
+        $$ = root = new ProgramNode(@1.first_line, @1.first_column,vector_of_dec);
         $$->name.assign($1);
     }
 ;
@@ -174,9 +175,9 @@ DeclarationList:
 ;
 
 Declarations:
-    Declaration
+    Declaration {vector_of_dec.emplace_back($1);}
     |
-    Declarations Declaration
+    Declarations Declaration {vector_of_dec.emplace_back($2);}
 ;
 
 FunctionList:
