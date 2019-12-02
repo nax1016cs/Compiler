@@ -1,10 +1,22 @@
 %{
-#include "include/AST/program.h"
+
+#include "include/AST/ast.hpp"
+#include "include/AST/program.hpp"
+#include "include/AST/declaration.hpp"
+#include "include/AST/constant_value.hpp"
+#include "include/AST/binary_operator.hpp"
+#include "include/AST/expression.hpp"
+
+
 #include "include/core/error.h"
+#include "include/visitor/dumpvisitor.hpp"
+
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <iostream>
+#include <vector>
 
 #define YYLTYPE yyltype
 
@@ -18,18 +30,32 @@ typedef struct YYLTYPE {
 /* Declared by scanner.l */
 extern int32_t LineNum;
 extern char Buffer[512];
+/*create a vector for idlist*/
+std::vector<VariableNode*> vector_of_var;
+std::vector<VariableNode*> ::iterator it;
 
 /* Declared by lex */
 extern FILE *yyin;
 extern char *yytext;
 
-extern int yylex(void);
+extern "C" int yylex(void);
+extern "C" int yyparse();
 static void yyerror(const char *msg);
 
-static AstNode *root;
+static ProgramNode *root;
+static DeclarationNode *s;
+
 %}
 
 %locations
+%code requires{ #include "AST/program.hpp" }
+%code requires{ #include "AST/declaration.hpp"}
+%code requires{ #include "AST/constant_value.hpp"}
+%code requires{ #include "AST/variable.hpp"}
+%code requires{ #include "AST/binary_operator.hpp"}
+%code requires{ #include "AST/expression.hpp"}
+
+
 
     /* Delimiter */
 %token COMMA SEMICOLON COLON
@@ -62,6 +88,65 @@ static AstNode *root;
 %token REAL_LITERAL
 %token STRING_LITERAL
 
+%union {
+    char *str;
+    //int  *num; 
+    ProgramNode*            program_type;
+    DeclarationNode*        declaration_type;
+    ConstantValueNode*      constant_type;
+    VariableNode*           variable_type;
+    BinaryOperatorNode*     bop_type;
+    ExpressionNode* 		exp_type;
+    /*FunctionNode*           function_type;
+    CompoundStatementNode*  compound_type;
+    AssignmentNode*         assign_type;
+    PrintNode*              print_type;
+    ReadNode*               read_type;
+    VariableReferenceNode*  var_ref_type;
+    UnaryOperatorNode*      uop_type;
+    IfNode*                 if_type;
+    WhileNode*              while_type;
+    ForNode*                for_type;
+    ReturnNode*             return_type;
+    FunctionCallNode*       function_call_type;*/
+
+}
+%type<program_type>         Program
+%type<declaration_type>     Declaration
+%type<constant_type>        LiteralConstant
+%type<variable_type>        IdList
+%type<ExpressionNode>		Expression
+/*%type<function_type>
+%type<compound_type>        CompoundStatement
+%type<assign_type>
+%type<print_type>
+%type<read_type>
+%type<var_ref_type>
+%type<uop_type>
+%type<if_type>              Condition
+%type<while_type>           While
+%type<for_type>             For
+%type<return_type>          Return
+%type<function_call_type>   FunctionCall*/
+
+
+
+%type<str> ProgramName
+%type<str> INT_LITERAL
+%type<str> REAL_LITERAL
+%type<str> STRING_LITERAL
+%type<str> TRUE
+%type<str> FALSE
+%type<str> ID
+%type<str> Type
+%type<str> ScalarType
+%type<str> INTEGER
+%type<str> REAL
+%type<str> STRING
+%type<str> BOOLEAN
+
+
+
 %%
     /*
        Program Units
@@ -69,7 +154,8 @@ static AstNode *root;
 
 Program:
     ProgramName SEMICOLON ProgramBody END ProgramName {
-        root = newProgramNode();
+        $$ = root = new ProgramNode(@1.first_line, @1.first_column);
+        $$->name.assign($1);
     }
 ;
 
@@ -132,9 +218,17 @@ FormalArg:
 ;
 
 IdList:
-    ID
+    ID {
+        $$ = new VariableNode(@1.first_line, @1.first_column,"");
+        $$->name.assign($1);
+        vector_of_var.emplace_back($$);
+    }
     |
-    IdList COMMA ID
+    IdList COMMA ID {
+        $$ = new VariableNode(@3.first_line, @3.first_column,"");
+        $$->name.assign($3);
+        vector_of_var.emplace_back($$);
+    }
 ;
 
 ReturnType:
@@ -147,30 +241,54 @@ ReturnType:
        Data Types and Declarations
                                    */
 
+// Declaration:
+//     VAR IdList COLON TypeOrConstant SEMICOLON{
+//         for(it = vector_of_var.begin(); it!=vector_of_var.end(); it++){
+//             // std::cout<<(*it)->name<<'\n';
+//             (*it)->type = "integer";
+//         }
+//         s = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var);
+// 		vector_of_var.clear();
+//     }
+// ;
+
 Declaration:
-    VAR IdList COLON TypeOrConstant SEMICOLON
+    VAR IdList COLON Type SEMICOLON{
+    	for(it = vector_of_var.begin(); it!=vector_of_var.end(); it++){
+            // std::cout<<(*it)->name<<'\n';
+            (*it)->type = $4;
+        }
+        s = $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
+		vector_of_var.clear();
+	}
+    |
+    VAR IdList COLON LiteralConstant SEMICOLON{
+        s = $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,$4);
+		vector_of_var.clear();
+	}
+
 ;
 
-TypeOrConstant:
-    Type
-    |
-    LiteralConstant
-;
+// TypeOrConstant:
+//     Type 
+//     |
+//     LiteralConstant
+// ;
 
 Type:
-    ScalarType
+    ScalarType {$$ = $1;}
     |
     ArrType
 ;
 
 ScalarType:
-    INTEGER
+    INTEGER  {$$ = $1;}
     |
-    REAL
+    REAL  	 {$$ = $1;}
     |
-    STRING
+    STRING   {$$ = $1;}
     |
-    BOOLEAN
+    BOOLEAN  {$$ = $1;}
 ;
 
 ArrType:
@@ -184,15 +302,15 @@ ArrDecl:
 ;
 
 LiteralConstant:
-    INT_LITERAL
+    INT_LITERAL{$$ =  new ConstantValueNode(@1.first_line, @1.first_column, "integer");  $$->name.assign($1); }
     |
-    REAL_LITERAL
+    REAL_LITERAL{ $$ =new ConstantValueNode(@1.first_line, @1.first_column, "real");  $$->name.assign($1); }
     |
-    STRING_LITERAL
+    STRING_LITERAL{$$ = new ConstantValueNode(@1.first_line, @1.first_column, "string");  $$->name.assign($1); }
     |
-    TRUE
+    TRUE{ $$ =new ConstantValueNode(@1.first_line, @1.first_column,"boolean");  $$->name.assign($1); }
     |
-    FALSE
+    FALSE{ $$ =new ConstantValueNode(@1.first_line, @1.first_column,"boolean");  $$->name.assign($1); }
 ;
 
     /*
@@ -307,9 +425,9 @@ Statements:
 Expression:
     L_PARENTHESIS Expression R_PARENTHESIS
     |
-    MINUS Expression %prec UNARY_MINUS
+    MINUS Expression %prec UNARY_MINUS 
     |
-    Expression MULTIPLY Expression
+    Expression MULTIPLY Expression 
     |
     Expression DIVIDE Expression
     |
@@ -337,7 +455,7 @@ Expression:
     |
     Expression OR Expression
     |
-    LiteralConstant
+    LiteralConstant					
     |
     VariableReference
     |
@@ -374,8 +492,10 @@ int main(int argc, const char *argv[]) {
     yyin = fp;
     yyparse();
 
-    freeProgramNode(root);
-
+    //freeProgramNode(root); 
+    DumpVisitor dvisitor;
+    root->accept(dvisitor);
+    s->accept(dvisitor);
     printf("\n"
            "|--------------------------------|\n"
            "|  There is no syntactic error!  |\n"
