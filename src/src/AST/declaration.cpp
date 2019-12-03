@@ -1,6 +1,8 @@
 #include <iostream>
 #include "AST/declaration.hpp"
 #include "visitor/visitor.hpp"
+#include "visitor/dumpvisitor.hpp"
+
 
 using namespace std;
 DeclarationNode::DeclarationNode(uint32_t line, uint32_t col,std::vector<VariableNode*> temp, ConstantValueNode* cons_temp): ASTNodeBase(line,col){
@@ -9,13 +11,16 @@ DeclarationNode::DeclarationNode(uint32_t line, uint32_t col,std::vector<Variabl
 }
 
 void DeclarationNode::printNode(){
+    DumpVisitor dvisitor;
     cout<<"  ";
     cout << "declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
     for(auto it: t){
     	if(cons!=NULL){
+
     		cout << "    ";
     		it->type = cons->type;
-    		it->printNode();
+    		// it->printNode();
+            it->accept(dvisitor);
     		cout << "        ";
     		cons->printNode();
     	}

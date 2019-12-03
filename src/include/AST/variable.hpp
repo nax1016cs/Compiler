@@ -2,6 +2,7 @@
 #include <string>
 #include "AST/ast.hpp"
 
+
 class ASTNodeVisitorBase;
 
 class VariableNode : public ASTNodeBase
