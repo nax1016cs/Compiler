@@ -2,11 +2,13 @@
 #include <string>
 #include "AST/ast.hpp"
 #include "AST/expression.hpp"
+#include "AST/statement.hpp"
+
 
 
 class ASTNodeVisitorBase;
 
-class ReturnNode : public ASTNodeBase
+class ReturnNode : public StatementNode
 {
 public:
   ExpressionNode* e;

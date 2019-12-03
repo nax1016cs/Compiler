@@ -12,6 +12,8 @@
 #include "include/AST/print.hpp"
 #include "include/AST/assignment.hpp"
 #include "include/AST/return.hpp"
+#include "include/AST/statement.hpp"
+
 
 
 
@@ -87,6 +89,8 @@ static ReturnNode* s ;
 %code requires{ #include "AST/print.hpp"}
 %code requires{ #include "AST/assignment.hpp"}
 %code requires{ #include "AST/return.hpp"}
+%code requires{ #include "AST/statement.hpp"}
+
 
 
 
@@ -139,6 +143,7 @@ static ReturnNode* s ;
     FunctionCallNode*       function_call_type;
     VariableReferenceNode*  var_ref_type;
     ReturnNode*             return_type;
+    StatementNode*          statement_type;
 
 
     /*FunctionNode*           function_type;
@@ -159,6 +164,9 @@ static ReturnNode* s ;
 %type<var_ref_type>         VariableReference
 %type<exp_type>             ArrForm
 %type<return_type>          Return
+%type<statement_type>       FunctionInvokation
+
+
 
 
 
@@ -440,11 +448,11 @@ For:
 ;
 
 Return:
-    RETURN Expression SEMICOLON   {s = $$ = new ReturnNode(@1.first_line, @1.first_column,$2);}
+    RETURN Expression SEMICOLON   {$$ = new ReturnNode(@1.first_line, @1.first_column,$2);}
 ;
 
 FunctionInvokation:
-    FunctionCall SEMICOLON
+    FunctionCall SEMICOLON        {}
 ;
 
 FunctionCall:
@@ -551,7 +559,10 @@ int main(int argc, const char *argv[]) {
     //freeProgramNode(root); 
     DumpVisitor dvisitor;
     root->accept(dvisitor);
-    s->accept(dvisitor);
+    // s->accept(dvisitor);
+    read->accept(dvisitor);
+    print->accept(dvisitor);
+
 
     printf("\n"
            "|--------------------------------|\n"

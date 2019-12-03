@@ -1,11 +1,13 @@
 #pragma once
 #include <string>
 #include "AST/ast.hpp"
+#include "AST/statement.hpp"
+
 
 
 class ASTNodeVisitorBase;
 
-class PrintNode : public ASTNodeBase
+class PrintNode : public StatementNode
 {
 public:
   ExpressionNode*e ;

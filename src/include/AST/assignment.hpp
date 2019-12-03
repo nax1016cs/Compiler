@@ -1,10 +1,12 @@
 #pragma once
 #include <string>
 #include "AST/ast.hpp"
+#include "AST/statement.hpp"
+
 
 class ASTNodeVisitorBase;
 
-class AssignmentNode : public ASTNodeBase
+class AssignmentNode : public StatementNode
 {
 public:
 	VariableReferenceNode * v;

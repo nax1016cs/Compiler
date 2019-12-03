@@ -13,6 +13,8 @@
 #include "AST/read.hpp"
 #include "AST/assignment.hpp"
 #include "AST/return.hpp"
+#include "AST/statement.hpp"
+
 
 
 
@@ -37,6 +39,8 @@ public:
 	virtual void visit(ReadNode *e) =0;
 	virtual void visit(AssignmentNode *e) =0;
 	virtual void visit(ReturnNode *e) =0;
+	virtual void visit(StatementNode *e) =0;
+	
 
 
 

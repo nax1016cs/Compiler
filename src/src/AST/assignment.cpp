@@ -5,7 +5,7 @@
 
 
 using namespace std;
-AssignmentNode::AssignmentNode(uint32_t line, uint32_t col, VariableReferenceNode * v_t ,ExpressionNode * e_t): ASTNodeBase(line,col){
+AssignmentNode::AssignmentNode(uint32_t line, uint32_t col, VariableReferenceNode * v_t ,ExpressionNode * e_t): StatementNode(line,col){
 	v = v_t;
 	e = e_t;
 }

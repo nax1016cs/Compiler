@@ -65,3 +65,7 @@ void DumpVisitor::visit(ReturnNode *e)
     e->printNode();
 }
 
+void DumpVisitor::visit(StatementNode *e)
+{
+    e->printNode();
+}

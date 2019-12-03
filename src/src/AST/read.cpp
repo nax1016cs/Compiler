@@ -5,7 +5,7 @@
 
 
 using namespace std;
-ReadNode::ReadNode(uint32_t line, uint32_t col , VariableReferenceNode* e_t): ASTNodeBase(line,col){
+ReadNode::ReadNode(uint32_t line, uint32_t col , VariableReferenceNode* e_t): StatementNode(line,col){
 	e = e_t;
 }
 

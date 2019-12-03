@@ -5,7 +5,7 @@
 
 
 using namespace std;
-PrintNode::PrintNode(uint32_t line, uint32_t col , ExpressionNode* e_t): ASTNodeBase(line,col){
+PrintNode::PrintNode(uint32_t line, uint32_t col , ExpressionNode* e_t): StatementNode(line,col){
 	e = e_t;
 }
 

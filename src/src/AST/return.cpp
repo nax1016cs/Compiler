@@ -5,7 +5,7 @@
 
 
 using namespace std;
-ReturnNode::ReturnNode(uint32_t line, uint32_t col, ExpressionNode* e_t): ASTNodeBase(line,col){
+ReturnNode::ReturnNode(uint32_t line, uint32_t col, ExpressionNode* e_t): StatementNode(line,col){
 	e = e_t;
 }
 

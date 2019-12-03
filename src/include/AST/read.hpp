@@ -2,12 +2,13 @@
 #include <string>
 #include "AST/ast.hpp"
 #include "AST/variable_reference.hpp"
+#include "AST/statement.hpp"
 
 
 
 class ASTNodeVisitorBase;
 
-class ReadNode : public ASTNodeBase
+class ReadNode : public StatementNode
 {
 public:
   VariableReferenceNode *e ;
