@@ -9,7 +9,9 @@
 #include "include/AST/function_call.hpp"
 #include "include/AST/variable_reference.hpp"
 #include "include/AST/unary_operator.hpp"
-
+#include "include/AST/print.hpp"
+#include "include/AST/assignment.hpp"
+#include "include/AST/return.hpp"
 
 
 
@@ -41,6 +43,8 @@ int count_bracket = 0;
 std::vector<VariableNode*> vector_of_var;
 std::vector<DeclarationNode*> vector_of_dec;
 std::vector<ExpressionNode*> vector_of_exp; // for function
+std::vector<ExpressionNode*> vector_of_exp_arr; // for arr
+
 
 
 
@@ -54,12 +58,19 @@ static void yyerror(const char *msg);
 
 UnaryOperatorNode* unary ;
 BinaryOperatorNode* binary ;
+PrintNode* print ;
+ReadNode* read ;
+AssignmentNode* assign ;
+
+
+
+
 
 
 
 static ProgramNode *root;
 // static VariableReferenceNode *s;
-static ExpressionNode* s ;
+static ReturnNode* s ;
 
 %}
 
@@ -73,6 +84,12 @@ static ExpressionNode* s ;
 %code requires{ #include "AST/function_call.hpp"}
 %code requires{ #include "AST/variable_reference.hpp"}
 %code requires{ #include "AST/unary_operator.hpp"}
+%code requires{ #include "AST/print.hpp"}
+%code requires{ #include "AST/assignment.hpp"}
+%code requires{ #include "AST/return.hpp"}
+
+
+
 
 
 
@@ -121,17 +138,15 @@ static ExpressionNode* s ;
     ExpressionNode* 		exp_type;
     FunctionCallNode*       function_call_type;
     VariableReferenceNode*  var_ref_type;
+    ReturnNode*             return_type;
+
 
     /*FunctionNode*           function_type;
     CompoundStatementNode*  compound_type;
     AssignmentNode*         assign_type;
-    PrintNode*              print_type;
-    ReadNode*               read_type;
-    UnaryOperatorNode*      uop_type;
     IfNode*                 if_type;
     WhileNode*              while_type;
     ForNode*                for_type;
-    ReturnNode*             return_type;
     */
 
 }
@@ -143,6 +158,8 @@ static ExpressionNode* s ;
 %type<function_call_type>   FunctionCall
 %type<var_ref_type>         VariableReference
 %type<exp_type>             ArrForm
+%type<return_type>          Return
+
 
 
 /*%type<function_type>
@@ -373,25 +390,27 @@ CompoundStatement:
 ;
 
 Simple:
-    VariableReference ASSIGN Expression SEMICOLON
+    VariableReference ASSIGN Expression SEMICOLON   {assign = new AssignmentNode(@1.first_line, @1.first_column, $1, $3);}
     |
-    PRINT Expression SEMICOLON
+    PRINT Expression SEMICOLON                      {print = new PrintNode(@1.first_line, @1.first_column, $2);}
     |
-    READ VariableReference SEMICOLON
+    READ VariableReference SEMICOLON                {read = new ReadNode(@1.first_line, @1.first_column, $2);}
 ;
 
 VariableReference:
-    ID          { $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, NULL);
-                count_bracket = 0;}
+    ID          { $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, vector_of_exp_arr);
+                  vector_of_exp_arr.clear();
+                  count_bracket = 0;}
     |
-    ID ArrForm {  $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, $2 );
-                count_bracket = 0;}
+    ID ArrForm {  $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, vector_of_exp_arr );
+                  vector_of_exp_arr.clear();
+                  count_bracket = 0;}
 ;
 
 ArrForm:
-    L_BRACKET Expression R_BRACKET { $$ = $2 ; count_bracket += 1;}
+    L_BRACKET Expression R_BRACKET { vector_of_exp_arr.emplace_back($2) ; count_bracket += 1;}
     |
-    ArrForm L_BRACKET Expression R_BRACKET { $$ = $3; count_bracket += 1;}
+    ArrForm L_BRACKET Expression R_BRACKET { vector_of_exp_arr.emplace_back($3) ; count_bracket += 1;}
 ;
 
 Condition:
@@ -421,7 +440,7 @@ For:
 ;
 
 Return:
-    RETURN Expression SEMICOLON
+    RETURN Expression SEMICOLON   {s = $$ = new ReturnNode(@1.first_line, @1.first_column,$2);}
 ;
 
 FunctionInvokation:
@@ -533,6 +552,7 @@ int main(int argc, const char *argv[]) {
     DumpVisitor dvisitor;
     root->accept(dvisitor);
     s->accept(dvisitor);
+
     printf("\n"
            "|--------------------------------|\n"
            "|  There is no syntactic error!  |\n"

@@ -45,5 +45,23 @@ void DumpVisitor::visit(UnaryOperatorNode *e)
     e->printNode();
 }
 
+void DumpVisitor::visit(PrintNode *e)
+{
+    e->printNode();
+}
 
+void DumpVisitor::visit(ReadNode *e)
+{
+    e->printNode();
+}
+
+void DumpVisitor::visit(AssignmentNode *e)
+{
+    e->printNode();
+}
+
+void DumpVisitor::visit(ReturnNode *e)
+{
+    e->printNode();
+}
 

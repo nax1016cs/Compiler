@@ -13,5 +13,11 @@ public:
     void visit(FunctionCallNode *e) override;
     void visit(VariableReferenceNode *e) override;
     void visit(UnaryOperatorNode *e) override;
+    void visit(PrintNode *e) override;
+    void visit(ReadNode *e) override;
+    void visit(AssignmentNode *e) override;
+    void visit(ReturnNode *e) override;
+    
+
 
 };
