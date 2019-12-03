@@ -7,6 +7,8 @@
 #include "include/AST/binary_operator.hpp"
 #include "include/AST/expression.hpp"
 #include "include/AST/function_call.hpp"
+#include "include/AST/variable_reference.hpp"
+
 
 
 #include "include/core/error.h"
@@ -32,8 +34,11 @@ typedef struct YYLTYPE {
 extern int32_t LineNum;
 extern char Buffer[512];
 /*create a vector for idlist*/
+int count_bracket = 0;
 std::vector<VariableNode*> vector_of_var;
 std::vector<DeclarationNode*> vector_of_dec;
+std::vector<ExpressionNode*> vector_of_exp; // for function
+
 
 
 /* Declared by lex */
@@ -45,7 +50,7 @@ extern "C" int yyparse();
 static void yyerror(const char *msg);
 
 static ProgramNode *root;
-static ExpressionNode *s;
+static VariableReferenceNode *s;
 
 %}
 
@@ -57,6 +62,8 @@ static ExpressionNode *s;
 %code requires{ #include "AST/binary_operator.hpp"}
 %code requires{ #include "AST/expression.hpp"}
 %code requires{ #include "AST/function_call.hpp"}
+%code requires{ #include "AST/variable_reference.hpp"}
+
 
 
 
@@ -94,7 +101,7 @@ static ExpressionNode *s;
 
 %union {
     char *str;
-    //int  *num; 
+    // int  *num; 
     ProgramNode*            program_type;
     DeclarationNode*        declaration_type;
     ConstantValueNode*      constant_type;
@@ -102,12 +109,13 @@ static ExpressionNode *s;
     BinaryOperatorNode*     bop_type;
     ExpressionNode* 		exp_type;
     FunctionCallNode*       function_call_type;
+    VariableReferenceNode*  var_ref_type;
+
     /*FunctionNode*           function_type;
     CompoundStatementNode*  compound_type;
     AssignmentNode*         assign_type;
     PrintNode*              print_type;
     ReadNode*               read_type;
-    VariableReferenceNode*  var_ref_type;
     UnaryOperatorNode*      uop_type;
     IfNode*                 if_type;
     WhileNode*              while_type;
@@ -122,6 +130,9 @@ static ExpressionNode *s;
 %type<variable_type>        IdList
 %type<exp_type>		        Expression
 %type<function_call_type>   FunctionCall
+%type<var_ref_type>         VariableReference
+%type<exp_type>             ArrForm
+
 
 /*%type<function_type>
 %type<compound_type>        CompoundStatement
@@ -154,6 +165,8 @@ static ExpressionNode *s;
 
 
 
+
+
 %%
     /*
        Program Units
@@ -162,6 +175,7 @@ static ExpressionNode *s;
 Program:
     ProgramName SEMICOLON ProgramBody END ProgramName {
         $$ = root = new ProgramNode(@1.first_line, @1.first_column,vector_of_dec);
+        vector_of_dec.clear();
         $$->name.assign($1);
     }
 ;
@@ -356,15 +370,17 @@ Simple:
 ;
 
 VariableReference:
-    ID
+    ID          { s = $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, NULL);
+                count_bracket = 0;}
     |
-    ID ArrForm
+    ID ArrForm { s = $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, $2 );
+                count_bracket = 0;}
 ;
 
 ArrForm:
-    L_BRACKET Expression R_BRACKET
+    L_BRACKET Expression R_BRACKET { $$ = $2 ; count_bracket += 1;}
     |
-    ArrForm L_BRACKET Expression R_BRACKET
+    ArrForm L_BRACKET Expression R_BRACKET { $$ = $3; count_bracket += 1;}
 ;
 
 Condition:
@@ -402,9 +418,12 @@ FunctionInvokation:
 ;
 
 FunctionCall:
-    ID L_PARENTHESIS ExpressionList R_PARENTHESIS
-;
+    ID L_PARENTHESIS ExpressionList R_PARENTHESIS { $$ = new FunctionCallNode(@1.first_line, @1.first_column,vector_of_exp);
+                                                    vector_of_exp.clear();
+                                                    $$->name.assign($1);
+                                                  }
 
+;
 ExpressionList:
     Epsilon
     |
@@ -412,9 +431,9 @@ ExpressionList:
 ;
 
 Expressions:
-    Expression
+    Expression                      {vector_of_exp.emplace_back($1);}
     |
-    Expressions COMMA Expression
+    Expressions COMMA Expression    {vector_of_exp.emplace_back($3);}
 ;
 
 StatementList:
@@ -464,9 +483,9 @@ Expression:
     |
     LiteralConstant					{$$ = $1; }
     |
-    VariableReference
+    VariableReference               
     |
-    FunctionCall
+    FunctionCall                    {$$ = $1; }
 ;
 
     /*
@@ -502,7 +521,7 @@ int main(int argc, const char *argv[]) {
     //freeProgramNode(root); 
     DumpVisitor dvisitor;
     root->accept(dvisitor);
-    // s->accept(dvisitor);
+    s->accept(dvisitor);
     printf("\n"
            "|--------------------------------|\n"
            "|  There is no syntactic error!  |\n"
