@@ -13,7 +13,5 @@ expr;
 
 
 begin
-var a: array 515 to 3500 of integer;
-read a;
 end
 end expr

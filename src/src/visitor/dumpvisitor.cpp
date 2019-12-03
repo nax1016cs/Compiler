@@ -34,7 +34,13 @@ void DumpVisitor::visit(FunctionCallNode *e)
 {
     e->printNode();
 }
+
 void DumpVisitor::visit(VariableReferenceNode *e)
+{
+    e->printNode();
+}
+
+void DumpVisitor::visit(UnaryOperatorNode *e)
 {
     e->printNode();
 }

@@ -12,6 +12,6 @@ public:
     void visit(ExpressionNode *e) override;
     void visit(FunctionCallNode *e) override;
     void visit(VariableReferenceNode *e) override;
-    
+    void visit(UnaryOperatorNode *e) override;
 
 };

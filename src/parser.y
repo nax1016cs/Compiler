@@ -8,6 +8,8 @@
 #include "include/AST/expression.hpp"
 #include "include/AST/function_call.hpp"
 #include "include/AST/variable_reference.hpp"
+#include "include/AST/unary_operator.hpp"
+
 
 
 
@@ -35,6 +37,7 @@ extern int32_t LineNum;
 extern char Buffer[512];
 /*create a vector for idlist*/
 int count_bracket = 0;
+
 std::vector<VariableNode*> vector_of_var;
 std::vector<DeclarationNode*> vector_of_dec;
 std::vector<ExpressionNode*> vector_of_exp; // for function
@@ -49,8 +52,14 @@ extern "C" int yylex(void);
 extern "C" int yyparse();
 static void yyerror(const char *msg);
 
+UnaryOperatorNode* unary ;
+BinaryOperatorNode* binary ;
+
+
+
 static ProgramNode *root;
-static VariableReferenceNode *s;
+// static VariableReferenceNode *s;
+static ExpressionNode* s ;
 
 %}
 
@@ -63,6 +72,8 @@ static VariableReferenceNode *s;
 %code requires{ #include "AST/expression.hpp"}
 %code requires{ #include "AST/function_call.hpp"}
 %code requires{ #include "AST/variable_reference.hpp"}
+%code requires{ #include "AST/unary_operator.hpp"}
+
 
 
 
@@ -370,10 +381,10 @@ Simple:
 ;
 
 VariableReference:
-    ID          { s = $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, NULL);
+    ID          { $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, NULL);
                 count_bracket = 0;}
     |
-    ID ArrForm { s = $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, $2 );
+    ID ArrForm {  $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, $2 );
                 count_bracket = 0;}
 ;
 
@@ -449,41 +460,41 @@ Statements:
 ;
 
 Expression:
-    L_PARENTHESIS Expression R_PARENTHESIS
+    L_PARENTHESIS Expression R_PARENTHESIS { $$ = $2;}
     |
-    MINUS Expression %prec UNARY_MINUS 
+    MINUS Expression %prec UNARY_MINUS  {unary = new UnaryOperatorNode(@1.first_line, @1.first_column, "neg", $2); $$ = unary; }
     |
-    Expression MULTIPLY Expression 
+    Expression MULTIPLY Expression      {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "*", $1, $3); $$ = binary; }
     |
-    Expression DIVIDE Expression
+    Expression DIVIDE Expression        {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "/", $1, $3); $$ = binary; }
     |
-    Expression MOD Expression
+    Expression MOD Expression           {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "mod", $1, $3); $$ = binary; }
     |
-    Expression PLUS Expression
+    Expression PLUS Expression          {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "+", $1, $3); $$ = binary; }
     |
-    Expression MINUS Expression
+    Expression MINUS Expression         {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "-", $1, $3); $$ = binary; }
     |
-    Expression LESS Expression
+    Expression LESS Expression          {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "<", $1, $3); $$ = binary; }
     |
-    Expression LESS_OR_EQUAL Expression
+    Expression LESS_OR_EQUAL Expression {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "<=", $1, $3); $$ = binary; }
     |
-    Expression GREATER Expression
+    Expression GREATER Expression       {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, ">", $1, $3); $$ = binary; }
     |
-    Expression GREATER_OR_EQUAL Expression
+    Expression GREATER_OR_EQUAL Expression  {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, ">=", $1, $3); $$ = binary; }
     |
-    Expression EQUAL Expression
+    Expression EQUAL Expression         {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "=", $1, $3); $$ = binary;}
     |
-    Expression NOT_EQUAL Expression
+    Expression NOT_EQUAL Expression     {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "<>", $1, $3); $$ = binary; }
     |
-    NOT Expression
+    NOT Expression                  {unary = new UnaryOperatorNode(@1.first_line, @1.first_column, "not", $2); $$ = unary; }
     |
-    Expression AND Expression
+    Expression AND Expression       {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "and", $1, $3); $$ = binary; }
     |
-    Expression OR Expression
+    Expression OR Expression        {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "or", $1, $3); $$ = binary; }
     |
     LiteralConstant					{$$ = $1; }
     |
-    VariableReference               
+    VariableReference               {$$ = $1; }
     |
     FunctionCall                    {$$ = $1; }
 ;

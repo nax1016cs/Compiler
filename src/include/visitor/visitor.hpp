@@ -8,6 +8,8 @@
 #include "AST/expression.hpp"
 #include "AST/function_call.hpp"
 #include "AST/variable_reference.hpp"
+#include "AST/unary_operator.hpp"
+
 
 
 
@@ -23,6 +25,7 @@ public:
 	virtual void visit(ExpressionNode *e) =0;
 	virtual void visit(FunctionCallNode *e) =0;
 	virtual void visit(VariableReferenceNode *e) =0;
+	virtual void visit(UnaryOperatorNode *e) =0;
 
 
 	
