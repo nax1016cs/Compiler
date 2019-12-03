@@ -24,9 +24,16 @@ void DumpVisitor::visit(BinaryOperatorNode *e)
 {
     e->printNode();
 }
+
 void DumpVisitor::visit(ExpressionNode *e)
 {
     e->printNode();
 }
+
+void DumpVisitor::visit(FunctionCallNode *e)
+{
+    e->printNode();
+}
+
 
 

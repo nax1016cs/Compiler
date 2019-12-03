@@ -3,7 +3,7 @@
 #include "visitor/visitor.hpp"
 
 using namespace std;
-ConstantValueNode::ConstantValueNode(uint32_t line, uint32_t col,std::string type_temp): ASTNodeBase(line,col){
+ConstantValueNode::ConstantValueNode(uint32_t line, uint32_t col,std::string type_temp): ExpressionNode(line,col){
 	type = type_temp;
 }
 

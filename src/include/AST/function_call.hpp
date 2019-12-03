@@ -1,15 +1,16 @@
 #pragma once
 #include <string>
 #include "AST/ast.hpp"
+#include "AST/expression.hpp"
 
 
 class ASTNodeVisitorBase;
 
-class ExpressionNode : public ASTNodeBase
+class FunctionCallNode : public ExpressionNode
 {
 public:
-  ExpressionNode(uint32_t line, uint32_t col);
+  FunctionCallNode(uint32_t line, uint32_t col);
   void printNode();
-  ~ExpressionNode();
+  ~FunctionCallNode();
   void accept(ASTNodeVisitorBase &v);
 };

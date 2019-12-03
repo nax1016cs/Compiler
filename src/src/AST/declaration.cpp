@@ -16,12 +16,11 @@ void DeclarationNode::printNode(){
     cout << "declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
     for(auto it: t){
     	if(cons!=NULL){
-
     		cout << "    ";
     		it->type = cons->type;
     		// it->printNode();
             it->accept(dvisitor);
-    		cout << "        ";
+    		cout << "      ";
     		cons->printNode();
     	}
     	else{

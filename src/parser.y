@@ -6,6 +6,7 @@
 #include "include/AST/constant_value.hpp"
 #include "include/AST/binary_operator.hpp"
 #include "include/AST/expression.hpp"
+#include "include/AST/function_call.hpp"
 
 
 #include "include/core/error.h"
@@ -44,7 +45,7 @@ extern "C" int yyparse();
 static void yyerror(const char *msg);
 
 static ProgramNode *root;
-static DeclarationNode *s;
+static ExpressionNode *s;
 
 %}
 
@@ -55,6 +56,8 @@ static DeclarationNode *s;
 %code requires{ #include "AST/variable.hpp"}
 %code requires{ #include "AST/binary_operator.hpp"}
 %code requires{ #include "AST/expression.hpp"}
+%code requires{ #include "AST/function_call.hpp"}
+
 
 
 
@@ -98,6 +101,7 @@ static DeclarationNode *s;
     VariableNode*           variable_type;
     BinaryOperatorNode*     bop_type;
     ExpressionNode* 		exp_type;
+    FunctionCallNode*       function_call_type;
     /*FunctionNode*           function_type;
     CompoundStatementNode*  compound_type;
     AssignmentNode*         assign_type;
@@ -109,14 +113,16 @@ static DeclarationNode *s;
     WhileNode*              while_type;
     ForNode*                for_type;
     ReturnNode*             return_type;
-    FunctionCallNode*       function_call_type;*/
+    */
 
 }
 %type<program_type>         Program
 %type<declaration_type>     Declaration
 %type<constant_type>        LiteralConstant
 %type<variable_type>        IdList
-%type<ExpressionNode>		Expression
+%type<exp_type>		        Expression
+%type<function_call_type>   FunctionCall
+
 /*%type<function_type>
 %type<compound_type>        CompoundStatement
 %type<assign_type>
@@ -259,12 +265,12 @@ Declaration:
             // std::cout<<(*it)->name<<'\n';
             it->type = $4;
         }
-        s = $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
+        $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
 		vector_of_var.clear();
 	}
     |
     VAR IdList COLON LiteralConstant SEMICOLON{
-        s = $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,$4);
+        $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,$4);
 		vector_of_var.clear();
 	}
 
@@ -456,7 +462,7 @@ Expression:
     |
     Expression OR Expression
     |
-    LiteralConstant					
+    LiteralConstant					{$$ = $1; }
     |
     VariableReference
     |
@@ -496,7 +502,7 @@ int main(int argc, const char *argv[]) {
     //freeProgramNode(root); 
     DumpVisitor dvisitor;
     root->accept(dvisitor);
-    s->accept(dvisitor);
+    // s->accept(dvisitor);
     printf("\n"
            "|--------------------------------|\n"
            "|  There is no syntactic error!  |\n"

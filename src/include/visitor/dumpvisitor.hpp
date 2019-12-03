@@ -10,4 +10,6 @@ public:
     void visit(VariableNode *e) override;
     void visit(BinaryOperatorNode *e) override;
     void visit(ExpressionNode *e) override;
+    void visit(FunctionCallNode *e) override;
+    
 };

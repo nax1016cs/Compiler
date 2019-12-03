@@ -1,10 +1,11 @@
 #pragma once
 #include <string>
 #include "AST/ast.hpp"
+#include "AST/expression.hpp"
 
 class ASTNodeVisitorBase;
 
-class ConstantValueNode : public ASTNodeBase
+class ConstantValueNode : public ExpressionNode
 {
 public:
 	std::string name;

@@ -6,6 +6,7 @@
 #include "AST/variable.hpp"
 #include "AST/binary_operator.hpp"
 #include "AST/expression.hpp"
+#include "AST/function_call.hpp"
 
 
 
@@ -18,5 +19,7 @@ public:
 	virtual void visit(VariableNode *e) =0;
 	virtual void visit(BinaryOperatorNode *e) =0;
 	virtual void visit(ExpressionNode *e) =0;
+	virtual void visit(FunctionCallNode *e) =0;
+	
 	
 };
