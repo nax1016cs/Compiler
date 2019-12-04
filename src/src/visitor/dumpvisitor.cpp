@@ -89,3 +89,13 @@ void DumpVisitor::visit(CompoundStatementNode *e)
 {
     e->printNode();
 }
+
+void DumpVisitor::visit(ElseNode *e)
+{
+    e->printNode();
+}
+
+void DumpVisitor::visit(IfNode *e)
+{
+    e->printNode();
+}

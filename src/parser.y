@@ -16,11 +16,8 @@
 #include "include/AST/while.hpp"
 #include "include/AST/for.hpp"
 #include "include/AST/compound_statement.hpp"
-
-
-
-
-
+#include "include/AST/if.hpp"
+#include "include/AST/else.hpp"
 
 
 #include "include/core/error.h"
@@ -58,6 +55,9 @@ std::vector<StatementNode*> vector_of_stat_pro; // for program statementlist
 std::vector<StatementNode*> vector_of_stat_cmp; // for program statementlist
 std::vector<DeclarationNode*> vector_of_dec_cmp;
 
+std::vector<StatementNode*> vector_of_stat_t ;
+
+
 
 
 
@@ -90,17 +90,9 @@ ConstantValueNode*      con_temp ;
 
 
 
-
-
-
-
-
-
-
-
 static ProgramNode *root;
 // static VariableReferenceNode *s;
-static ForNode* s ;
+static IfNode* s ;
 
 %}
 
@@ -122,11 +114,8 @@ static ForNode* s ;
 %code requires{ #include "AST/while.hpp"}
 %code requires{ #include "AST/for.hpp"}
 %code requires{ #include "AST/compound_statement.hpp"}
-
-
-
-
-
+%code requires{ #include "AST/if.hpp"}
+%code requires{ #include "AST/else.hpp"}
 
 
 
@@ -183,6 +172,9 @@ static ForNode* s ;
     WhileNode*              while_type;
     ForNode*                for_type;
     CompoundStatementNode*  cmp_type;
+    IfNode*                 if_type;
+    ElseNode*               else_type;
+
 
 
 
@@ -209,6 +201,10 @@ static ForNode* s ;
 %type<statement_type>       Statement
 %type<for_type>             For
 %type<cmp_type>             CompoundStatement
+%type<if_type>              Condition
+%type<else_type>            ElseOrNot
+
+
 
 
 
@@ -424,11 +420,11 @@ LiteralConstant:
                   */
 
 Statement:
-    CompoundStatement 
+    CompoundStatement   {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
     Simple              {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
-    Condition           
+    Condition           {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
     While               {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
@@ -471,17 +467,17 @@ ArrForm:
 ;
 
 Condition:
-    IF Expression THEN
-    StatementList
+    IF Expression THEN 
+    StatementList    
     ElseOrNot
-    END IF
+    END IF           { s = $$ = new IfNode(@1.first_line, @1.first_column, $2,  vector_of_stat, $5); vector_of_stat.clear();}  
 ;
 
 ElseOrNot:
     ELSE
-    StatementList
+    StatementList           { $$ = new ElseNode(@1.first_line, @1.first_column,  vector_of_stat); }
     |
-    Epsilon
+    Epsilon                 { $$ = NULL;}
 ;
 
 While:
@@ -509,7 +505,7 @@ For:
                                 con_temp->name = $6;
                                 $$ = new ForNode(@1.first_line, @1.first_column, dec_temp ,ass_temp  ,con_temp  , vector_of_stat);
                                 vector_of_stat.clear();
-                                s = $$;
+                                
                             }
 ;
 
@@ -547,7 +543,7 @@ Expressions:
 StatementList:
     Epsilon
     |
-    Statements
+    Statements                  
 ;
 
 Statements:

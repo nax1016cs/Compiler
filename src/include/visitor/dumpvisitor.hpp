@@ -22,7 +22,11 @@ public:
     void visit(WhileNode *e) override;
     void visit(ForNode *e) override;
     void visit(CompoundStatementNode *e) override;
+    void visit(ElseNode *e) override;
+    void visit(IfNode *e) override;
     
+
+
 
     
 
