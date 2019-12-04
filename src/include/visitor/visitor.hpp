@@ -16,6 +16,10 @@
 #include "AST/statement.hpp"
 #include "AST/function_call_stat.hpp"
 #include "AST/while.hpp"
+#include "AST/for.hpp"
+#include "AST/compound_statement.hpp"
+
+
 
 
 
@@ -46,6 +50,10 @@ public:
 	virtual void visit(StatementNode *e) =0;
 	virtual void visit(FunctionCallStatNode *e) =0;
 	virtual void visit(WhileNode *e) =0;
+	virtual void visit(ForNode *e) =0;
+	virtual void visit(CompoundStatementNode *e) =0;
+
+
 
 
 	

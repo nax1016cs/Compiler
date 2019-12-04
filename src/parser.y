@@ -14,6 +14,10 @@
 #include "include/AST/return.hpp"
 #include "include/AST/statement.hpp"
 #include "include/AST/while.hpp"
+#include "include/AST/for.hpp"
+#include "include/AST/compound_statement.hpp"
+
+
 
 
 
@@ -51,6 +55,11 @@ std::vector<ExpressionNode*> vector_of_exp_arr; // for arr
 std::vector<StatementNode*> vector_of_stat; // for stat
 std::vector<StatementNode*> vector_of_stat_pro; // for program statementlist
 
+std::vector<StatementNode*> vector_of_stat_cmp; // for program statementlist
+std::vector<DeclarationNode*> vector_of_dec_cmp;
+
+
+
 
 
 
@@ -71,6 +80,15 @@ ReadNode* read ;
 AssignmentNode* assign ;
 FunctionCallStatNode* fun_stat ;
 
+DeclarationNode*        dec_temp ;
+AssignmentNode*         ass_temp ;
+VariableNode*           var_temp ;
+VariableReferenceNode*  varf_temp ;
+ExpressionNode*         exp_temp ;
+ConstantValueNode*      con_temp ;
+
+
+
 
 
 
@@ -82,7 +100,7 @@ FunctionCallStatNode* fun_stat ;
 
 static ProgramNode *root;
 // static VariableReferenceNode *s;
-static WhileNode* s ;
+static ForNode* s ;
 
 %}
 
@@ -102,6 +120,10 @@ static WhileNode* s ;
 %code requires{ #include "AST/statement.hpp"}
 %code requires{ #include "AST/function_call_stat.hpp"}
 %code requires{ #include "AST/while.hpp"}
+%code requires{ #include "AST/for.hpp"}
+%code requires{ #include "AST/compound_statement.hpp"}
+
+
 
 
 
@@ -159,15 +181,16 @@ static WhileNode* s ;
     ReturnNode*             return_type;
     StatementNode*          statement_type;
     WhileNode*              while_type;
+    ForNode*                for_type;
+    CompoundStatementNode*  cmp_type;
+
+
 
 
 
     /*FunctionNode*           function_type;
     CompoundStatementNode*  compound_type;
-    AssignmentNode*         assign_type;
     IfNode*                 if_type;
-    WhileNode*              while_type;
-    ForNode*                for_type;
     */
 
 }
@@ -184,6 +207,10 @@ static WhileNode* s ;
 %type<statement_type>       Simple
 %type<while_type>           While
 %type<statement_type>       Statement
+%type<for_type>             For
+%type<cmp_type>             CompoundStatement
+
+
 
 
 
@@ -253,9 +280,9 @@ DeclarationList:
 ;
 
 Declarations:
-    Declaration {vector_of_dec.emplace_back($1);}
+    Declaration              {vector_of_dec.emplace_back($1); vector_of_dec_cmp.emplace_back($1);}
     |
-    Declarations Declaration {vector_of_dec.emplace_back($2);}
+    Declarations Declaration {vector_of_dec.emplace_back($2); vector_of_dec_cmp.emplace_back($2);}
 ;
 
 FunctionList:
@@ -405,7 +432,7 @@ Statement:
     |
     While               {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
-    For
+    For                 {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
     Return              {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
@@ -414,9 +441,9 @@ Statement:
 
 CompoundStatement:
     BEGIN_
-    DeclarationList
-    StatementList
-    END
+    DeclarationList     
+    StatementList      
+    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, vector_of_dec, vector_of_stat); vector_of_dec.clear(); vector_of_stat.clear();}
 ;
 
 Simple:
@@ -460,13 +487,30 @@ ElseOrNot:
 While:
     WHILE Expression DO
     StatementList
-    END DO                  {s = $$ = new WhileNode(@1.first_line, @1.first_column, $2 , vector_of_stat); }
+    END DO                  {$$ = new WhileNode(@1.first_line, @1.first_column, $2 , vector_of_stat); vector_of_stat.clear(); }
 ;
 
 For:
     FOR ID ASSIGN INT_LITERAL TO INT_LITERAL DO
     StatementList
-    END DO
+    END DO                  {   var_temp = new VariableNode(@2.first_line, @2.first_column, "integer");
+                                var_temp->name = $2;
+                                vector_of_var.emplace_back(var_temp);
+                                dec_temp = new DeclarationNode(@2.first_line, @2.first_column,vector_of_var, NULL );//dec ok
+                                vector_of_var.clear();
+                                
+                                con_temp = new ConstantValueNode(@4.first_line, @4.first_column, "");
+                                con_temp->name = $4;
+                                // may have problem
+                                varf_temp = new VariableReferenceNode(@2.first_line, @2.first_column, $2, vector_of_exp_arr);
+                                ass_temp = new AssignmentNode(@3.first_line, @3.first_column,varf_temp, con_temp);//assignment
+
+                                con_temp = new ConstantValueNode(@6.first_line, @6.first_column, $6); //expression
+                                con_temp->name = $6;
+                                $$ = new ForNode(@1.first_line, @1.first_column, dec_temp ,ass_temp  ,con_temp  , vector_of_stat);
+                                vector_of_stat.clear();
+                                s = $$;
+                            }
 ;
 
 Return:

@@ -79,3 +79,13 @@ void DumpVisitor::visit(WhileNode *e)
 {
     e->printNode();
 }
+
+void DumpVisitor::visit(ForNode *e)
+{
+    e->printNode();
+}
+
+void DumpVisitor::visit(CompoundStatementNode *e)
+{
+    e->printNode();
+}

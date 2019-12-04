@@ -20,6 +20,10 @@ public:
     void visit(StatementNode *e) override;
     void visit(FunctionCallStatNode *e) override;
     void visit(WhileNode *e) override;
+    void visit(ForNode *e) override;
+    void visit(CompoundStatementNode *e) override;
+    
+
     
 
 

@@ -7,6 +7,7 @@
 
 
 
+
 class ASTNodeVisitorBase;
 
 class WhileNode : public StatementNode
