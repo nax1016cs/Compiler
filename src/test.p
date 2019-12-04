@@ -19,6 +19,10 @@ begin
     print a[30];
     return a[30];
     read a;
+    fuck(20,30);
+     while counter < 10 do
+    print "Taiwan No.1\n";
+  end do
 
 end
 end expr

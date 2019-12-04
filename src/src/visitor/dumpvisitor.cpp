@@ -69,3 +69,13 @@ void DumpVisitor::visit(StatementNode *e)
 {
     e->printNode();
 }
+
+void DumpVisitor::visit(FunctionCallStatNode *e)
+{
+    e->printNode();
+}
+
+void DumpVisitor::visit(WhileNode *e)
+{
+    e->printNode();
+}

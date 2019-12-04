@@ -14,6 +14,10 @@
 #include "AST/assignment.hpp"
 #include "AST/return.hpp"
 #include "AST/statement.hpp"
+#include "AST/function_call_stat.hpp"
+#include "AST/while.hpp"
+
+
 
 
 
@@ -40,6 +44,10 @@ public:
 	virtual void visit(AssignmentNode *e) =0;
 	virtual void visit(ReturnNode *e) =0;
 	virtual void visit(StatementNode *e) =0;
+	virtual void visit(FunctionCallStatNode *e) =0;
+	virtual void visit(WhileNode *e) =0;
+
+
 	
 
 

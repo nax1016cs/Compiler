@@ -18,6 +18,8 @@ public:
     void visit(AssignmentNode *e) override;
     void visit(ReturnNode *e) override;
     void visit(StatementNode *e) override;
+    void visit(FunctionCallStatNode *e) override;
+    void visit(WhileNode *e) override;
     
 
 

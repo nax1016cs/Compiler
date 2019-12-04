@@ -13,6 +13,8 @@
 #include "include/AST/assignment.hpp"
 #include "include/AST/return.hpp"
 #include "include/AST/statement.hpp"
+#include "include/AST/while.hpp"
+
 
 
 
@@ -46,6 +48,10 @@ std::vector<VariableNode*> vector_of_var;
 std::vector<DeclarationNode*> vector_of_dec;
 std::vector<ExpressionNode*> vector_of_exp; // for function
 std::vector<ExpressionNode*> vector_of_exp_arr; // for arr
+std::vector<StatementNode*> vector_of_stat; // for stat
+std::vector<StatementNode*> vector_of_stat_pro; // for program statementlist
+
+
 
 
 
@@ -63,6 +69,10 @@ BinaryOperatorNode* binary ;
 PrintNode* print ;
 ReadNode* read ;
 AssignmentNode* assign ;
+FunctionCallStatNode* fun_stat ;
+
+
+
 
 
 
@@ -72,7 +82,7 @@ AssignmentNode* assign ;
 
 static ProgramNode *root;
 // static VariableReferenceNode *s;
-static ReturnNode* s ;
+static WhileNode* s ;
 
 %}
 
@@ -90,6 +100,10 @@ static ReturnNode* s ;
 %code requires{ #include "AST/assignment.hpp"}
 %code requires{ #include "AST/return.hpp"}
 %code requires{ #include "AST/statement.hpp"}
+%code requires{ #include "AST/function_call_stat.hpp"}
+%code requires{ #include "AST/while.hpp"}
+
+
 
 
 
@@ -144,6 +158,8 @@ static ReturnNode* s ;
     VariableReferenceNode*  var_ref_type;
     ReturnNode*             return_type;
     StatementNode*          statement_type;
+    WhileNode*              while_type;
+
 
 
     /*FunctionNode*           function_type;
@@ -165,6 +181,12 @@ static ReturnNode* s ;
 %type<exp_type>             ArrForm
 %type<return_type>          Return
 %type<statement_type>       FunctionInvokation
+%type<statement_type>       Simple
+%type<while_type>           While
+%type<statement_type>       Statement
+
+
+
 
 
 
@@ -375,19 +397,19 @@ LiteralConstant:
                   */
 
 Statement:
-    CompoundStatement
+    CompoundStatement 
     |
-    Simple
+    Simple              {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
-    Condition
+    Condition           
     |
-    While
+    While               {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
     For
     |
-    Return
+    Return              {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
     |
-    FunctionInvokation
+    FunctionInvokation  {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
 ;
 
 CompoundStatement:
@@ -398,11 +420,11 @@ CompoundStatement:
 ;
 
 Simple:
-    VariableReference ASSIGN Expression SEMICOLON   {assign = new AssignmentNode(@1.first_line, @1.first_column, $1, $3);}
+    VariableReference ASSIGN Expression SEMICOLON   {$$ = new AssignmentNode(@1.first_line, @1.first_column, $1, $3);}
     |
-    PRINT Expression SEMICOLON                      {print = new PrintNode(@1.first_line, @1.first_column, $2);}
+    PRINT Expression SEMICOLON                      {$$ = new PrintNode(@1.first_line, @1.first_column, $2);}
     |
-    READ VariableReference SEMICOLON                {read = new ReadNode(@1.first_line, @1.first_column, $2);}
+    READ VariableReference SEMICOLON                {$$ = new ReadNode(@1.first_line, @1.first_column, $2);}
 ;
 
 VariableReference:
@@ -438,7 +460,7 @@ ElseOrNot:
 While:
     WHILE Expression DO
     StatementList
-    END DO
+    END DO                  {s = $$ = new WhileNode(@1.first_line, @1.first_column, $2 , vector_of_stat); }
 ;
 
 For:
@@ -452,13 +474,17 @@ Return:
 ;
 
 FunctionInvokation:
-    FunctionCall SEMICOLON        {}
+    FunctionCall SEMICOLON        {$$ = fun_stat; }
 ;
 
 FunctionCall:
     ID L_PARENTHESIS ExpressionList R_PARENTHESIS { $$ = new FunctionCallNode(@1.first_line, @1.first_column,vector_of_exp);
+                                                    fun_stat =  new FunctionCallStatNode(@1.first_line, @1.first_column,vector_of_exp);
+
                                                     vector_of_exp.clear();
                                                     $$->name.assign($1);
+                                                    fun_stat->name.assign($1);
+
                                                   }
 
 ;
@@ -481,9 +507,9 @@ StatementList:
 ;
 
 Statements:
-    Statement
+    Statement                   {vector_of_stat.emplace_back($1);}
     |
-    Statements Statement
+    Statements Statement        {vector_of_stat.emplace_back($2);}
 ;
 
 Expression:
@@ -559,9 +585,9 @@ int main(int argc, const char *argv[]) {
     //freeProgramNode(root); 
     DumpVisitor dvisitor;
     root->accept(dvisitor);
-    // s->accept(dvisitor);
-    read->accept(dvisitor);
-    print->accept(dvisitor);
+    s->accept(dvisitor);
+    // read->accept(dvisitor);
+    // print->accept(dvisitor);
 
 
     printf("\n"
