@@ -13,10 +13,10 @@ class ASTNodeVisitorBase;
 class IfNode : public StatementNode
 {
 public:
-  std::vector<StatementNode*> vector_of_stat;
+  std::vector<StatementNode*>* vector_of_stat;
   ExpressionNode* e;
   ElseNode* els;
-  IfNode(uint32_t line, uint32_t col, ExpressionNode* e, std::vector<StatementNode*> vector_of_stat, ElseNode* els);
+  IfNode(uint32_t line, uint32_t col, ExpressionNode* e, std::vector<StatementNode*>* vector_of_stat, ElseNode* els);
   void printNode();
   ~IfNode();
   void accept(ASTNodeVisitorBase &v);

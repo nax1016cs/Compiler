@@ -86,13 +86,13 @@ VariableNode*           var_temp ;
 VariableReferenceNode*  varf_temp ;
 ExpressionNode*         exp_temp ;
 ConstantValueNode*      con_temp ;
-
+std::vector<StatementNode*>* s ;
 
 
 
 static ProgramNode *root;
 // static VariableReferenceNode *s;
-static IfNode* s ;
+// static IfNode* s ;
 
 %}
 
@@ -174,11 +174,7 @@ static IfNode* s ;
     CompoundStatementNode*  cmp_type;
     IfNode*                 if_type;
     ElseNode*               else_type;
-
-
-
-
-
+    std::vector<StatementNode*>* vector_stat_type; // for stat
 
     /*FunctionNode*           function_type;
     CompoundStatementNode*  compound_type;
@@ -203,6 +199,8 @@ static IfNode* s ;
 %type<cmp_type>             CompoundStatement
 %type<if_type>              Condition
 %type<else_type>            ElseOrNot
+%type<vector_stat_type>     StatementList
+
 
 
 
@@ -420,19 +418,19 @@ LiteralConstant:
                   */
 
 Statement:
-    CompoundStatement   {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
+    CompoundStatement   {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    Simple              {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
+    Simple              {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    Condition           {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
+    Condition           {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    While               {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
+    While               {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    For                 {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
+    For                 {/*vector_of_stat.clear();*/vector_of_stat_pro.emplace_back($1);}
     |
-    Return              {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
+    Return              {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    FunctionInvokation  {vector_of_stat.clear(); vector_of_stat_pro.emplace_back($1);}
+    FunctionInvokation  {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
 ;
 
 CompoundStatement:
@@ -470,12 +468,12 @@ Condition:
     IF Expression THEN 
     StatementList    
     ElseOrNot
-    END IF           { s = $$ = new IfNode(@1.first_line, @1.first_column, $2,  vector_of_stat, $5); vector_of_stat.clear();}  
+    END IF           { $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5); /*vector_of_stat.clear();*/}  
 ;
 
 ElseOrNot:
     ELSE
-    StatementList           { $$ = new ElseNode(@1.first_line, @1.first_column,  vector_of_stat); }
+    StatementList           { $$ = new ElseNode(@1.first_line, @1.first_column,  $2); }
     |
     Epsilon                 { $$ = NULL;}
 ;
@@ -483,7 +481,7 @@ ElseOrNot:
 While:
     WHILE Expression DO
     StatementList
-    END DO                  {$$ = new WhileNode(@1.first_line, @1.first_column, $2 , vector_of_stat); vector_of_stat.clear(); }
+    END DO                  {$$ = new WhileNode(@1.first_line, @1.first_column, $2 , vector_of_stat); /*vector_of_stat.clear();*/ }
 ;
 
 For:
@@ -504,7 +502,7 @@ For:
                                 con_temp = new ConstantValueNode(@6.first_line, @6.first_column, $6); //expression
                                 con_temp->name = $6;
                                 $$ = new ForNode(@1.first_line, @1.first_column, dec_temp ,ass_temp  ,con_temp  , vector_of_stat);
-                                vector_of_stat.clear();
+                                // vector_of_stat.clear();
                                 
                             }
 ;
@@ -543,7 +541,7 @@ Expressions:
 StatementList:
     Epsilon
     |
-    Statements                  
+    Statements   {$$ = new std::vector<StatementNode* >; for(auto it: vector_of_stat) $$->emplace_back(it); s= $$; vector_of_stat.clear();}               
 ;
 
 Statements:
@@ -625,7 +623,9 @@ int main(int argc, const char *argv[]) {
     //freeProgramNode(root); 
     DumpVisitor dvisitor;
     root->accept(dvisitor);
-    s->accept(dvisitor);
+    for(auto it:*s){
+        it->accept(dvisitor);
+    }
     // read->accept(dvisitor);
     // print->accept(dvisitor);
 
