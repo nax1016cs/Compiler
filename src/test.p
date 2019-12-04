@@ -19,12 +19,10 @@ end
 end assign
 
 begin
-    var a: array 515 to 3500 of integer;
-    print a[30];
-    print "dagakotowaru";
-    print 100E-2;
+    if (1 > 0) then
     print true;
-    read a[35];
-    return a;
+  else
+    print false;
+  end if
 end
 end simple

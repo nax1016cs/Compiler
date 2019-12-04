@@ -86,7 +86,7 @@ VariableNode*           var_temp ;
 VariableReferenceNode*  varf_temp ;
 ExpressionNode*         exp_temp ;
 ConstantValueNode*      con_temp ;
-std::vector<StatementNode*>* s ;
+IfNode*                  s ;
 
 
 
@@ -468,7 +468,7 @@ Condition:
     IF Expression THEN 
     StatementList    
     ElseOrNot
-    END IF           { $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5); /*vector_of_stat.clear();*/}  
+    END IF           { s = $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5); /*vector_of_stat.clear();*/}  
 ;
 
 ElseOrNot:
@@ -541,7 +541,7 @@ Expressions:
 StatementList:
     Epsilon
     |
-    Statements   {$$ = new std::vector<StatementNode* >; for(auto it: vector_of_stat) $$->emplace_back(it); s= $$; vector_of_stat.clear();}               
+    Statements   {$$ = new std::vector<StatementNode* >; for(auto it: vector_of_stat) $$->emplace_back(it); vector_of_stat.clear();}               
 ;
 
 Statements:
@@ -623,9 +623,7 @@ int main(int argc, const char *argv[]) {
     //freeProgramNode(root); 
     DumpVisitor dvisitor;
     root->accept(dvisitor);
-    for(auto it:*s){
-        it->accept(dvisitor);
-    }
+    s->accept(dvisitor);
     // read->accept(dvisitor);
     // print->accept(dvisitor);
 
