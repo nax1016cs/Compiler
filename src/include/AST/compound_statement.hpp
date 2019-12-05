@@ -10,9 +10,9 @@ class ASTNodeVisitorBase;
 class CompoundStatementNode : public StatementNode
 {
 public:
-  std::vector<StatementNode*> vector_of_stat;
+  std::vector<StatementNode*>* vector_of_stat;
   std::vector<DeclarationNode*> vector_of_dec;
-  CompoundStatementNode(uint32_t line, uint32_t col, std::vector<DeclarationNode*> vector_of_dec, std::vector<StatementNode*> vector_of_stat);
+  CompoundStatementNode(uint32_t line, uint32_t col, std::vector<DeclarationNode*> vector_of_dec, std::vector<StatementNode*>* vector_of_stat);
   void printNode();
   ~CompoundStatementNode();
   void accept(ASTNodeVisitorBase &v);

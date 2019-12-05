@@ -13,9 +13,9 @@ class ASTNodeVisitorBase;
 class WhileNode : public StatementNode
 {
 public:
-  std::vector<StatementNode*> vector_of_stat;
+  std::vector<StatementNode*>* vector_of_stat;
   ExpressionNode* e;
-  WhileNode(uint32_t line, uint32_t col, ExpressionNode* e , std::vector<StatementNode*> vector_of_stat);
+  WhileNode(uint32_t line, uint32_t col, ExpressionNode* e , std::vector<StatementNode*>* vector_of_stat);
   void printNode();
   ~WhileNode();
   void accept(ASTNodeVisitorBase &v);

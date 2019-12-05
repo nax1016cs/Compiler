@@ -16,11 +16,11 @@ class ASTNodeVisitorBase;
 class ForNode : public StatementNode
 {
 public:
-  std::vector<StatementNode*> vector_of_stat;
+  std::vector<StatementNode*>* vector_of_stat;
   ExpressionNode* e;
   DeclarationNode* d;
   AssignmentNode* a;
-  ForNode(uint32_t line, uint32_t col,DeclarationNode* d, AssignmentNode* a, ExpressionNode* e , std::vector<StatementNode*> vector_of_stat);
+  ForNode(uint32_t line, uint32_t col,DeclarationNode* d, AssignmentNode* a, ExpressionNode* e , std::vector<StatementNode*>* vector_of_stat);
   void printNode();
   ~ForNode();
   void accept(ASTNodeVisitorBase &v);

@@ -5,7 +5,7 @@
 
 
 using namespace std;
-WhileNode::WhileNode(uint32_t line, uint32_t col,ExpressionNode* e_t ,  std::vector<StatementNode*> vector_of_stat_t): StatementNode(line,col){
+WhileNode::WhileNode(uint32_t line, uint32_t col,ExpressionNode* e_t ,  std::vector<StatementNode*>* vector_of_stat_t): StatementNode(line,col){
 	vector_of_stat = vector_of_stat_t;
 	e = e_t;
 }
@@ -15,9 +15,11 @@ void WhileNode::printNode(){
 	cout << "  ";
     cout << "while statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
     e->accept(dvisitor);
-    for(auto it:vector_of_stat){
-    	cout << "    ";
-    	it->accept(dvisitor);
+    if(vector_of_stat!=NULL){
+        for(auto it:*vector_of_stat){
+            cout << "    ";
+            it->accept(dvisitor);
+        }        
     }
 }
 

@@ -5,7 +5,7 @@
 
 
 using namespace std;
-ForNode::ForNode(uint32_t line, uint32_t col,DeclarationNode* d_t, AssignmentNode* a_t,ExpressionNode* e_t ,  std::vector<StatementNode*> vector_of_stat_t): StatementNode(line,col){
+ForNode::ForNode(uint32_t line, uint32_t col,DeclarationNode* d_t, AssignmentNode* a_t,ExpressionNode* e_t ,  std::vector<StatementNode*>* vector_of_stat_t): StatementNode(line,col){
 	vector_of_stat = vector_of_stat_t;
 	e = e_t;
 	d = d_t;
@@ -22,10 +22,13 @@ void ForNode::printNode(){
     a->accept(dvisitor);
     cout << "  ";
     e->accept(dvisitor);
-    for(auto it:vector_of_stat){
-    	cout << "    ";
-    	it->accept(dvisitor);
+    if(vector_of_stat!=NULL){
+        for(auto it:*vector_of_stat){
+            cout << "    ";
+            it->accept(dvisitor);
+        }        
     }
+
 }
 
 ForNode::~ForNode(){

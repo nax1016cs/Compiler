@@ -86,7 +86,7 @@ VariableNode*           var_temp ;
 VariableReferenceNode*  varf_temp ;
 ExpressionNode*         exp_temp ;
 ConstantValueNode*      con_temp ;
-FunctionCallNode*                  s ;
+WhileNode*                  s ;
 
 
 
@@ -278,9 +278,9 @@ DeclarationList:
 ;
 
 Declarations:
-    Declaration              {vector_of_dec.emplace_back($1); vector_of_dec_cmp.emplace_back($1);}
+    Declaration              {vector_of_dec.emplace_back($1); }
     |
-    Declarations Declaration {vector_of_dec.emplace_back($2); vector_of_dec_cmp.emplace_back($2);}
+    Declarations Declaration {vector_of_dec.emplace_back($2); }
 ;
 
 FunctionList:
@@ -441,7 +441,7 @@ CompoundStatement:
     BEGIN_
     DeclarationList     
     StatementList      
-    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, vector_of_dec, vector_of_stat); vector_of_dec.clear(); vector_of_stat.clear();}
+    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, vector_of_dec, $3); vector_of_dec.clear(); vector_of_stat.clear();}
 ;
 
 Simple:
@@ -485,7 +485,9 @@ ElseOrNot:
 While:
     WHILE Expression DO
     StatementList
-    END DO                  {$$ = new WhileNode(@1.first_line, @1.first_column, $2 , vector_of_stat); /*vector_of_stat.clear();*/ }
+    END DO                  {$$ = new WhileNode(@1.first_line, @1.first_column, $2 , $4);
+                                s = $$;
+     /*vector_of_stat.clear();*/ }
 ;
 
 For:
@@ -505,8 +507,9 @@ For:
 
                                 con_temp = new ConstantValueNode(@6.first_line, @6.first_column, $6); //expression
                                 con_temp->name = $6;
-                                $$ = new ForNode(@1.first_line, @1.first_column, dec_temp ,ass_temp  ,con_temp  , vector_of_stat);
-                                // vector_of_stat.clear();
+                                $$ = new ForNode(@1.first_line, @1.first_column, dec_temp ,ass_temp  ,con_temp  , $8);
+
+                                vector_of_stat.clear();
                                 
                             }
 ;
@@ -526,7 +529,7 @@ FunctionCall:
                                                     vector_of_exp.clear();
                                                     $$->name.assign($1);
                                                     fun_stat->name.assign($1);
-                                                    s = $$;
+                                                    
 
                                                   }
 
@@ -534,7 +537,7 @@ FunctionCall:
 ExpressionList:
     Epsilon       {$$ = NULL;}
     |
-    Expressions   {$$ = new std::vector<ExpressionNode* >; for(auto it: vector_of_exp) $$->emplace_back(it); vector_of_exp.clear();}
+    Expressions   {$$ = new std::vector<ExpressionNode* >;  vector_of_exp.clear();for(auto it: vector_of_exp) $$->emplace_back(it);}
 ;
 
 Expressions:
@@ -544,9 +547,9 @@ Expressions:
 ;
 
 StatementList:
-    Epsilon
+    Epsilon      {$$ = NULL;}
     |
-    Statements   {$$ = new std::vector<StatementNode* >; for(auto it: vector_of_stat) $$->emplace_back(it); vector_of_stat.clear();}               
+    Statements   {$$ = new std::vector<StatementNode* >; vector_of_stat.clear(); for(auto it: vector_of_stat) $$->emplace_back(it); }               
 ;
 
 Statements:

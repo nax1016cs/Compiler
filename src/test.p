@@ -14,7 +14,14 @@ end
 end call
 
 begin
-  call(20, 30);
-  call();
+for idx := 0 to 10 do
+    begin
+      var idx: 10;
+      print "ISA (Ideology State Automaton)\n";
+    end
+  end do
+    while counter < 10 do
+    print "Taiwan No.1\n";
+  end do
 end
 end invocation
