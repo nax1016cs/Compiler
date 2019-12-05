@@ -205,6 +205,8 @@ static ProgramNode *root;
 %type<vector_stat_type>     StatementList
 %type<vector_exp_type>      ExpressionList
 %type<vector_of_dec_type>   DeclarationList
+%type<vector_stat_type>     Statements
+
 
 
 
@@ -281,7 +283,7 @@ DeclarationList:
 ;
 
 Declarations:
-    Declaration              {vector_of_dec.emplace_back($1); }
+    Declaration              { vector_of_dec.clear();   vector_of_dec.emplace_back($1); }
     |
     Declarations Declaration {vector_of_dec.emplace_back($2); }
 ;
@@ -425,30 +427,30 @@ LiteralConstant:
                   */
 
 Statement:
-    CompoundStatement   {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    CompoundStatement   { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    Simple              {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    Simple              { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    Condition           {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    Condition           { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    While               {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    While               { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    For                 {/*vector_of_stat.clear();*/vector_of_stat_pro.emplace_back($1);}
+    For                 { $$ = $1;/*vector_of_stat.clear();*/vector_of_stat_pro.emplace_back($1);}
     |
-    Return              {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    Return              { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
     |
-    FunctionInvokation  {/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    FunctionInvokation  { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
 ;
 
 CompoundStatement:
     BEGIN_
     DeclarationList     
     StatementList      
-    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, $2, $3); vector_of_dec.clear(); vector_of_stat.clear(); s = $$;}
+    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, $2, $3); vector_of_dec.clear(); vector_of_stat.clear(); s = $$; }
 ;
 
 Simple:
-    VariableReference ASSIGN Expression SEMICOLON   {$$ = new AssignmentNode(@1.first_line, @1.first_column, $1, $3);}
+    VariableReference ASSIGN Expression SEMICOLON   {$$ = new AssignmentNode(@2.first_line, @2.first_column, $1, $3);}
     |
     PRINT Expression SEMICOLON                      {$$ = new PrintNode(@1.first_line, @1.first_column, $2);}
     |
@@ -475,7 +477,7 @@ Condition:
     IF Expression THEN 
     StatementList    
     ElseOrNot
-    END IF           {  $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5); /*vector_of_stat.clear();*/}  
+    END IF           {  $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5 ); /*vector_of_stat.clear();*/}  
 ;
 
 ElseOrNot:
@@ -511,7 +513,7 @@ For:
                                 con_temp = new ConstantValueNode(@6.first_line, @6.first_column, $6); //expression
                                 con_temp->name = $6;
                                 $$ = new ForNode(@1.first_line, @1.first_column, dec_temp ,ass_temp  ,con_temp  , $8);
-
+                                // s = $$;
                                 // vector_of_stat.clear();
                                 
                             }
@@ -552,13 +554,13 @@ Expressions:
 StatementList:
     Epsilon      {$$ = NULL; }
     |
-    Statements   {$$ = new std::vector<StatementNode* >;  for(auto it: vector_of_stat) $$->emplace_back(it); vector_of_stat.clear();}               
+    Statements   {$$ = $1;}               
 ;
 
 Statements:
-    Statement                   {vector_of_stat.emplace_back($1);}
+    Statement                   {$$ = new std::vector<StatementNode* > ; $$->emplace_back($1); /*vector_of_stat.emplace_back($1);*/}
     |
-    Statements Statement        {vector_of_stat.emplace_back($2);}
+    Statements Statement        {$1->emplace_back($2); $$ = $1; /*vector_of_stat.emplace_back($2);*/}
 ;
 
 Expression:
@@ -566,33 +568,33 @@ Expression:
     |
     MINUS Expression %prec UNARY_MINUS  {unary = new UnaryOperatorNode(@1.first_line, @1.first_column, "neg", $2); $$ = unary; }
     |
-    Expression MULTIPLY Expression      {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "*", $1, $3); $$ = binary; }
+    Expression MULTIPLY Expression      {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "*", $1, $3); $$ = binary; }
     |
-    Expression DIVIDE Expression        {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "/", $1, $3); $$ = binary; }
+    Expression DIVIDE Expression        {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "/", $1, $3); $$ = binary; }
     |
-    Expression MOD Expression           {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "mod", $1, $3); $$ = binary; }
+    Expression MOD Expression           {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "mod", $1, $3); $$ = binary; }
     |
-    Expression PLUS Expression          {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "+", $1, $3); $$ = binary; }
+    Expression PLUS Expression          {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "+", $1, $3); $$ = binary; }
     |
-    Expression MINUS Expression         {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "-", $1, $3); $$ = binary; }
+    Expression MINUS Expression         {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "-", $1, $3); $$ = binary; }
     |
-    Expression LESS Expression          {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "<", $1, $3); $$ = binary; }
+    Expression LESS Expression          {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "<", $1, $3); $$ = binary; }
     |
-    Expression LESS_OR_EQUAL Expression {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "<=", $1, $3); $$ = binary; }
+    Expression LESS_OR_EQUAL Expression {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "<=", $1, $3); $$ = binary; }
     |
-    Expression GREATER Expression       {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, ">", $1, $3); $$ = binary; }
+    Expression GREATER Expression       {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, ">", $1, $3); $$ = binary; }
     |
-    Expression GREATER_OR_EQUAL Expression  {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, ">=", $1, $3); $$ = binary; }
+    Expression GREATER_OR_EQUAL Expression  {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, ">=", $1, $3); $$ = binary; }
     |
-    Expression EQUAL Expression         {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "=", $1, $3); $$ = binary;}
+    Expression EQUAL Expression         {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "=", $1, $3); $$ = binary;}
     |
-    Expression NOT_EQUAL Expression     {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "<>", $1, $3); $$ = binary; }
+    Expression NOT_EQUAL Expression     {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "<>", $1, $3); $$ = binary; }
     |
     NOT Expression                  {unary = new UnaryOperatorNode(@1.first_line, @1.first_column, "not", $2); $$ = unary; }
     |
-    Expression AND Expression       {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "and", $1, $3); $$ = binary; }
+    Expression AND Expression       {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "and", $1, $3); $$ = binary; }
     |
-    Expression OR Expression        {binary = new BinaryOperatorNode(@1.first_line, @1.first_column, "or", $1, $3); $$ = binary; }
+    Expression OR Expression        {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "or", $1, $3); $$ = binary; }
     |
     LiteralConstant					{$$ = $1; }
     |

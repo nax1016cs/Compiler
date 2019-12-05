@@ -13,7 +13,7 @@ ElseNode::ElseNode(uint32_t line, uint32_t col, std::vector<StatementNode*>* vec
 void ElseNode::printNode(){
     DumpVisitor dvisitor;
 	cout << "  ";
-    cout << "else "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "else\n "
     for(auto it:*vector_of_stat){
     	cout << "    ";
     	it->accept(dvisitor);
