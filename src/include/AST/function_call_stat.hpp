@@ -12,8 +12,8 @@ class FunctionCallStatNode : public StatementNode
 {
 public:
   std::string name;
-  std::vector<ExpressionNode*> vector_of_exp;
-  FunctionCallStatNode(uint32_t line, uint32_t col,std::vector<ExpressionNode*> vector_of_exp);
+  std::vector<ExpressionNode*>* vector_of_exp;
+  FunctionCallStatNode(uint32_t line, uint32_t col,std::vector<ExpressionNode*>* vector_of_exp);
   void printNode();
   ~FunctionCallStatNode();
   void accept(ASTNodeVisitorBase &v);

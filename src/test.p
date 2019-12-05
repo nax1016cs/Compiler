@@ -1,28 +1,20 @@
 //&S-
 //&T-
 
-simple;
+invocation;
 
-// includes statement assignment, print, read and variable reference
-
-assign();
+call(a, b: integer): integer;
 begin
-    var a: integer;
-    var b: boolean;
-    var c: string;
-    var d: array 1 to 2 of array 1 to 10 of real;
-    a := 10;
-    b := false;
-    c := "Compiler Design";
-    d[1][5] := 10.09;
-end
-end assign
-
-begin
-    if (1 > 0) then
-    print true;
+  if a < b then
+    return 55146;
   else
-    print false;
+    return 22146;
   end if
 end
-end simple
+end call
+
+begin
+  call(20, 30);
+  call();
+end
+end invocation

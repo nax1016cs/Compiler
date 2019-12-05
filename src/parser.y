@@ -86,7 +86,7 @@ VariableNode*           var_temp ;
 VariableReferenceNode*  varf_temp ;
 ExpressionNode*         exp_temp ;
 ConstantValueNode*      con_temp ;
-IfNode*                  s ;
+FunctionCallNode*                  s ;
 
 
 
@@ -175,6 +175,8 @@ static ProgramNode *root;
     IfNode*                 if_type;
     ElseNode*               else_type;
     std::vector<StatementNode*>* vector_stat_type; // for stat
+    std::vector<ExpressionNode*>* vector_exp_type; // for stat
+
 
     /*FunctionNode*           function_type;
     CompoundStatementNode*  compound_type;
@@ -200,6 +202,8 @@ static ProgramNode *root;
 %type<if_type>              Condition
 %type<else_type>            ElseOrNot
 %type<vector_stat_type>     StatementList
+%type<vector_exp_type>      ExpressionList
+
 
 
 
@@ -468,7 +472,7 @@ Condition:
     IF Expression THEN 
     StatementList    
     ElseOrNot
-    END IF           { s = $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5); /*vector_of_stat.clear();*/}  
+    END IF           {  $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5); /*vector_of_stat.clear();*/}  
 ;
 
 ElseOrNot:
@@ -516,20 +520,21 @@ FunctionInvokation:
 ;
 
 FunctionCall:
-    ID L_PARENTHESIS ExpressionList R_PARENTHESIS { $$ = new FunctionCallNode(@1.first_line, @1.first_column,vector_of_exp);
-                                                    fun_stat =  new FunctionCallStatNode(@1.first_line, @1.first_column,vector_of_exp);
+    ID L_PARENTHESIS ExpressionList R_PARENTHESIS { $$ = new FunctionCallNode(@1.first_line, @1.first_column,$3);
+                                                    fun_stat =  new FunctionCallStatNode(@1.first_line, @1.first_column,$3);
 
                                                     vector_of_exp.clear();
                                                     $$->name.assign($1);
                                                     fun_stat->name.assign($1);
+                                                    s = $$;
 
                                                   }
 
 ;
 ExpressionList:
-    Epsilon
+    Epsilon       {$$ = NULL;}
     |
-    Expressions
+    Expressions   {$$ = new std::vector<ExpressionNode* >; for(auto it: vector_of_exp) $$->emplace_back(it); vector_of_exp.clear();}
 ;
 
 Expressions:

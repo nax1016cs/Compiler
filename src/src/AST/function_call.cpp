@@ -5,7 +5,7 @@
 
 
 using namespace std;
-FunctionCallNode::FunctionCallNode(uint32_t line, uint32_t col, std::vector<ExpressionNode*> vector_of_exp_t): ExpressionNode(line,col){
+FunctionCallNode::FunctionCallNode(uint32_t line, uint32_t col, std::vector<ExpressionNode*>* vector_of_exp_t): ExpressionNode(line,col){
 	vector_of_exp = vector_of_exp_t;
 }
 
@@ -13,10 +13,13 @@ void FunctionCallNode::printNode(){
     DumpVisitor dvisitor;
 	cout << "  ";
     cout << "function call statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
-    for(auto it:vector_of_exp){
-    	cout << "    ";
-    	it->accept(dvisitor);
+    if(vector_of_exp !=NULL){
+        for(auto it:*vector_of_exp){
+            cout << "    ";
+            it->accept(dvisitor);
+        }
     }
+
 }
 
 FunctionCallNode::~FunctionCallNode(){
