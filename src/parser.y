@@ -206,8 +206,8 @@ static ProgramNode *root;
 %type<vector_exp_type>      ExpressionList
 %type<vector_of_dec_type>   DeclarationList
 %type<vector_stat_type>     Statements
-
-
+%type<vector_exp_type>      Expressions
+%type<vector_of_dec_type>   Declarations
 
 
 
@@ -279,13 +279,13 @@ ProgramBody:
 DeclarationList:
     Epsilon 		{$$ = NULL;}
     |
-    Declarations    {$$ = new std::vector<DeclarationNode* >;  for(auto it: vector_of_dec) $$->emplace_back(it); vector_of_dec.clear();}
+    Declarations    {  $$ = $1;}
 ;
 
 Declarations:
-    Declaration              { vector_of_dec.clear();   vector_of_dec.emplace_back($1); }
+    Declaration              { $$ = new std::vector<DeclarationNode* >;$$->emplace_back($1); }
     |
-    Declarations Declaration {vector_of_dec.emplace_back($2); }
+    Declarations Declaration { $1->emplace_back($2); $$ = $1; }
 ;
 
 FunctionList:
@@ -542,13 +542,13 @@ FunctionCall:
 ExpressionList:
     Epsilon       {$$ = NULL;}
     |
-    Expressions   {$$ = new std::vector<ExpressionNode* >;  for(auto it: vector_of_exp) $$->emplace_back(it); vector_of_exp.clear();}
+    Expressions   {$$ = $1;}
 ;
 
 Expressions:
-    Expression                      {vector_of_exp.emplace_back($1);}
+    Expression                      {$$ = new std::vector<ExpressionNode* >; $$->emplace_back($1);}
     |
-    Expressions COMMA Expression    {vector_of_exp.emplace_back($3);}
+    Expressions COMMA Expression    {$1->emplace_back($3); $$ = $1;}
 ;
 
 StatementList:
