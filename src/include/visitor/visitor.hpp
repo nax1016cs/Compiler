@@ -20,6 +20,8 @@
 #include "AST/compound_statement.hpp"
 #include "AST/else.hpp"
 #include "AST/if.hpp"
+#include "AST/function.hpp"
+
 
 
 
@@ -47,6 +49,8 @@ public:
 	virtual void visit(CompoundStatementNode *e) =0;
 	virtual void visit(ElseNode *e) =0;
 	virtual void visit(IfNode *e) =0;
+	virtual void visit(FunctionNode *e) =0;
+	
 
 
 

@@ -99,3 +99,8 @@ void DumpVisitor::visit(IfNode *e)
 {
     e->printNode();
 }
+
+void DumpVisitor::visit(FunctionNode *e)
+{
+    e->printNode();
+}

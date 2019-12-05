@@ -18,6 +18,8 @@
 #include "include/AST/compound_statement.hpp"
 #include "include/AST/if.hpp"
 #include "include/AST/else.hpp"
+#include "include/AST/function.hpp"
+
 
 
 #include "include/core/error.h"
@@ -26,6 +28,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdint.h>
 #include <iostream>
 #include <vector>
@@ -44,7 +47,7 @@ extern int32_t LineNum;
 extern char Buffer[512];
 /*create a vector for idlist*/
 int count_bracket = 0;
-
+int current_idx = 0;
 std::vector<VariableNode*> vector_of_var;
 std::vector<DeclarationNode*> vector_of_dec;
 std::vector<ExpressionNode*> vector_of_exp; // for function
@@ -56,6 +59,8 @@ std::vector<StatementNode*> vector_of_stat_cmp; // for program statementlist
 std::vector<DeclarationNode*> vector_of_dec_cmp;
 
 std::vector<StatementNode*> vector_of_stat_t ;
+std::vector<std::string> vector_of_string ;
+
 
 
 
@@ -86,7 +91,7 @@ VariableNode*           var_temp ;
 VariableReferenceNode*  varf_temp ;
 ExpressionNode*         exp_temp ;
 ConstantValueNode*      con_temp ;
-CompoundStatementNode*                  s ;
+FunctionNode*                  s ;
 
 
 
@@ -116,6 +121,7 @@ static ProgramNode *root;
 %code requires{ #include "AST/compound_statement.hpp"}
 %code requires{ #include "AST/if.hpp"}
 %code requires{ #include "AST/else.hpp"}
+%code requires{ #include "AST/function.hpp"}
 
 
 
@@ -177,9 +183,9 @@ static ProgramNode *root;
     std::vector<StatementNode*>* vector_stat_type; // for stat
     std::vector<ExpressionNode*>* vector_exp_type; // for stat
 	std::vector<DeclarationNode*>* vector_of_dec_type;
+	FunctionNode*           function_type;
 
-
-    /*FunctionNode*           function_type;
+    /*
     CompoundStatementNode*  compound_type;
     IfNode*                 if_type;
     */
@@ -208,17 +214,7 @@ static ProgramNode *root;
 %type<vector_stat_type>     Statements
 %type<vector_exp_type>      Expressions
 %type<vector_of_dec_type>   Declarations
-
-
-
-
-
-
-
-
-
-
-
+%type<function_type>   		FunctionDeclaration
 
 
 
@@ -250,6 +246,14 @@ static ProgramNode *root;
 %type<str> REAL
 %type<str> STRING
 %type<str> BOOLEAN
+%type<str> ArrType
+%type<str> ArrDecl
+%type<str> ReturnType
+%type<str> FormalArgList
+%type<str> FunctionName
+
+
+
 
 
 
@@ -279,7 +283,7 @@ ProgramBody:
 DeclarationList:
     Epsilon 		{$$ = NULL;}
     |
-    Declarations    {  $$ = $1;}
+    Declarations    {$$ = $1;}
 ;
 
 Declarations:
@@ -303,7 +307,15 @@ Functions:
 FunctionDeclaration:
     FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON
     CompoundStatement
-    END FunctionName
+    END FunctionName    {
+    					 dec_temp = new DeclarationNode(@3.first_line, @3.first_column,vector_of_var,NULL);
+    					 $$ = new FunctionNode(@1.first_line, @1.first_column,$7,dec_temp);
+    					 $$->name.assign($1);
+    					 $$->type.assign($5); 
+    					 $$->v_string =vector_of_string;
+    					 s =$$;
+    					 vector_of_var.clear();
+    					 vector_of_string.clear();}
 ;
 
 FunctionName:
@@ -311,7 +323,7 @@ FunctionName:
 ;
 
 FormalArgList:
-    Epsilon
+    Epsilon 			{vector_of_string.clear();}
     |
     FormalArgs
 ;
@@ -323,7 +335,11 @@ FormalArgs:
 ;
 
 FormalArg:
-    IdList COLON Type
+    IdList COLON Type { for(auto it: vector_of_var){
+            			it->type = $3 ;
+        				vector_of_string.push_back($3);
+        				}
+   					 }
 ;
 
 IdList:
@@ -341,9 +357,9 @@ IdList:
 ;
 
 ReturnType:
-    COLON ScalarType
+    COLON ScalarType { $$ = $2;}
     |
-    Epsilon
+    Epsilon           {$$ = "";}
 ;
 
     /*
@@ -365,7 +381,7 @@ Declaration:
     VAR IdList COLON Type SEMICOLON{
     	for(auto it: vector_of_var){
             // std::cout<<(*it)->name<<'\n';
-            it->type = $4;
+            it->type = $4 ;
         }
         $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
 		vector_of_var.clear();
@@ -404,10 +420,42 @@ ArrType:
     ArrDecl ScalarType
 ;
 
-ArrDecl:
-    ARRAY INT_LITERAL TO INT_LITERAL OF
+ArrDecl: 
+    ARRAY INT_LITERAL TO INT_LITERAL OF {   
+    										$$ = new char [100];
+    										std::string temp1, temp2, result;
+    										result.clear();
+    										temp1.clear();
+    										temp2.clear();
+    										temp1.assign($2);
+    										temp2.assign($4);
+    										result += "[" + temp1 + "..." + temp2 + "]";
+    										for(int i=0; i<result.size(); i++){
+    											$$[i] = result[i];
+    										}
+    										current_idx = result.size();
+    										// for(int i=0; i<result.size(); i++){
+    										// 	std::cout<<$$[i]<<"";
+    										// }
+    										// std::cout<<'\n';
+    									}
     |
-    ArrDecl ARRAY INT_LITERAL TO INT_LITERAL OF
+    ArrDecl ARRAY INT_LITERAL TO INT_LITERAL OF { 
+    												$$ = new char [100];
+    												std::string temp1, temp2,temp3, result;
+    												result.clear();
+    												temp1.clear();
+    												temp2.clear();
+    												temp3.clear();
+
+    												temp1.assign($1);
+    												temp2.assign($3);
+    												temp3.assign($5);
+    												result += temp1 +"[" + temp2 + "..." + temp3 + "]";
+    												for(int i=0; i<result.size(); i++){
+    													$$[i] = result[i];
+    												}                                       
+    }
 ;
 
 LiteralConstant:
@@ -446,7 +494,7 @@ CompoundStatement:
     BEGIN_
     DeclarationList     
     StatementList      
-    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, $2, $3); vector_of_dec.clear(); vector_of_stat.clear(); s = $$; }
+    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, $2, $3); vector_of_dec.clear(); vector_of_stat.clear(); }
 ;
 
 Simple:
