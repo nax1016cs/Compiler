@@ -21,6 +21,8 @@
 #include "AST/else.hpp"
 #include "AST/if.hpp"
 #include "AST/function.hpp"
+#include "AST/program_body.hpp"
+
 
 
 
@@ -50,6 +52,8 @@ public:
 	virtual void visit(ElseNode *e) =0;
 	virtual void visit(IfNode *e) =0;
 	virtual void visit(FunctionNode *e) =0;
+	virtual void visit(ProgramBodyNode *e) =0;
+	
 	
 
 

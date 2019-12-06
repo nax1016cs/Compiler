@@ -19,6 +19,8 @@
 #include "include/AST/if.hpp"
 #include "include/AST/else.hpp"
 #include "include/AST/function.hpp"
+#include "include/AST/program_body.hpp"
+
 
 
 
@@ -91,13 +93,11 @@ VariableNode*           var_temp ;
 VariableReferenceNode*  varf_temp ;
 ExpressionNode*         exp_temp ;
 ConstantValueNode*      con_temp ;
-FunctionNode*                  s ;
 
 
 
 static ProgramNode *root;
-// static VariableReferenceNode *s;
-// static IfNode* s ;
+
 
 %}
 
@@ -122,6 +122,8 @@ static ProgramNode *root;
 %code requires{ #include "AST/if.hpp"}
 %code requires{ #include "AST/else.hpp"}
 %code requires{ #include "AST/function.hpp"}
+%code requires{ #include "AST/program_body.hpp"}
+
 
 
 
@@ -184,11 +186,9 @@ static ProgramNode *root;
     std::vector<ExpressionNode*>* vector_exp_type; // for stat
 	std::vector<DeclarationNode*>* vector_of_dec_type;
 	FunctionNode*           function_type;
+    std::vector<FunctionNode*>* vector_of_fun_type;
+    ProgramBodyNode*        program_body_type;
 
-    /*
-    CompoundStatementNode*  compound_type;
-    IfNode*                 if_type;
-    */
 
 }
 %type<program_type>         Program
@@ -218,22 +218,11 @@ static ProgramNode *root;
 %type<vector_of_dec_type>   FormalArgs
 %type<vector_of_dec_type>   FormalArgList
 %type<declaration_type>     FormalArg
+%type<vector_of_fun_type>   Functions
+%type<vector_of_fun_type>   FunctionList
+%type<program_body_type>    ProgramBody
 
 
-
-
-/*%type<function_type>
-%type<compound_type>        CompoundStatement
-%type<assign_type>
-%type<print_type>
-%type<read_type>
-%type<var_ref_type>
-%type<uop_type>
-%type<if_type>              Condition
-%type<while_type>           While
-%type<for_type>             For
-%type<return_type>          Return
-%type<function_call_type>   FunctionCall*/
 
 
 
@@ -269,8 +258,8 @@ static ProgramNode *root;
 
 Program:
     ProgramName SEMICOLON ProgramBody END ProgramName {
-        $$ = root = new ProgramNode(@1.first_line, @1.first_column,vector_of_dec);
-        vector_of_dec.clear();
+        $$ = root = new ProgramNode(@1.first_line, @1.first_column);
+        $$->p = $3;
         $$->name.assign($1);
     }
 ;
@@ -280,7 +269,11 @@ ProgramName:
 ;
 
 ProgramBody:
-    DeclarationList FunctionList CompoundStatement
+    DeclarationList FunctionList CompoundStatement {$$ = new ProgramBodyNode(0,0);
+                                                    $$->d = $1;
+                                                    $$->f = $2;
+                                                    $$->c = $3;
+                                                        }
 ;
 
 DeclarationList:
@@ -296,15 +289,15 @@ Declarations:
 ;
 
 FunctionList:
-    Epsilon
+    Epsilon     {$$ = NULL;}
     |
-    Functions
+    Functions   {$$ = $1;}
 ;
 
 Functions:
-    FunctionDeclaration
+    FunctionDeclaration           { $$ = new std::vector<FunctionNode* >;$$->emplace_back($1); }
     |
-    Functions FunctionDeclaration
+    Functions FunctionDeclaration { $1->emplace_back($2); $$ = $1; }
 ;
 
 FunctionDeclaration:
@@ -315,7 +308,6 @@ FunctionDeclaration:
     					 $$->name.assign($1);
     					 $$->type.assign($5); 
     					 $$->v_string =vector_of_string;
-    					 s =$$;
     					 vector_of_string.clear();}
 ;
 
@@ -722,9 +714,6 @@ int main(int argc, const char *argv[]) {
     //freeProgramNode(root); 
     DumpVisitor dvisitor;
     root->accept(dvisitor);
-    s->accept(dvisitor);
-    // read->accept(dvisitor);
-    // print->accept(dvisitor);
 
 
     printf("\n"

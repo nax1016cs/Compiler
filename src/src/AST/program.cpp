@@ -7,16 +7,13 @@
 
 
 using namespace std;
-ProgramNode::ProgramNode(uint32_t line, uint32_t col,std::vector<DeclarationNode*> vector_of_dec_t): ASTNodeBase(line,col){
-	vector_of_dec = vector_of_dec_t;
+ProgramNode::ProgramNode(uint32_t line, uint32_t col): ASTNodeBase(line,col){
 }
 
 void ProgramNode::printNode(){
     DumpVisitor dvisitor;
     cout << "program "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name  << " void"<<endl;
-    for (auto it:vector_of_dec){
-    	it->accept(dvisitor);
-    }
+    p->accept(dvisitor);
 }
 
 ProgramNode::~ProgramNode(){

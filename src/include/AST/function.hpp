@@ -1,6 +1,10 @@
 #pragma once
 #include <string>
 #include "AST/ast.hpp"
+#include "AST/declaration.hpp"
+#include "AST/compound_statement.hpp"
+
+
 
 class ASTNodeVisitorBase;
 
