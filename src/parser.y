@@ -215,6 +215,10 @@ static ProgramNode *root;
 %type<vector_exp_type>      Expressions
 %type<vector_of_dec_type>   Declarations
 %type<function_type>   		FunctionDeclaration
+%type<vector_of_dec_type>   FormalArgs
+%type<vector_of_dec_type>   FormalArgList
+%type<declaration_type>     FormalArg
+
 
 
 
@@ -249,7 +253,6 @@ static ProgramNode *root;
 %type<str> ArrType
 %type<str> ArrDecl
 %type<str> ReturnType
-%type<str> FormalArgList
 %type<str> FunctionName
 
 
@@ -308,13 +311,11 @@ FunctionDeclaration:
     FunctionName L_PARENTHESIS FormalArgList R_PARENTHESIS ReturnType SEMICOLON
     CompoundStatement
     END FunctionName    {
-    					 dec_temp = new DeclarationNode(@3.first_line, @3.first_column,vector_of_var,NULL);
-    					 $$ = new FunctionNode(@1.first_line, @1.first_column,$7,dec_temp);
+    					 $$ = new FunctionNode(@1.first_line, @1.first_column,$7,$3);
     					 $$->name.assign($1);
     					 $$->type.assign($5); 
     					 $$->v_string =vector_of_string;
     					 s =$$;
-    					 vector_of_var.clear();
     					 vector_of_string.clear();}
 ;
 
@@ -323,22 +324,48 @@ FunctionName:
 ;
 
 FormalArgList:
-    Epsilon 			{vector_of_string.clear();}
+    Epsilon 			{vector_of_string.clear(); $$ = NULL; }
     |
-    FormalArgs
+    FormalArgs          {$$ = $1;}
 ;
 
 FormalArgs:
-    FormalArg
+    FormalArg                       {$$ = new std::vector<DeclarationNode* > ; $$->emplace_back($1);vector_of_var.clear();}
     |
-    FormalArgs SEMICOLON FormalArg
+    FormalArgs SEMICOLON FormalArg  {$1->emplace_back($3); $$ = $1;vector_of_var.clear();}
 ;
 
 FormalArg:
     IdList COLON Type { for(auto it: vector_of_var){
-            			it->type = $3 ;
-        				vector_of_string.push_back($3);
+            			    it->type = $3 ;
+                            std::string temp,result;
+                            result.clear();
+                            temp.clear();
+                            temp.assign($3);
+                            int ct = 0;
+                            int get = 1;
+                            for(unsigned int i=0; i<temp.size(); i++){
+                                if(get){
+                                    result += temp[i];
+                                }
+                                if(i>0 &&  temp[i-1]=='['){
+                                    get = 0;
+                                }
+                                if(temp[i+1]==']'){
+                                    get = 1;
+                                }
+
+                            }
+                            // for(unsigned int i =0; i<result.size(); i++){
+                            //     std::cout<<result[i];
+                            // }
+        				    vector_of_string.push_back(result);
+                            $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
+                            
+
+
         				}
+
    					 }
 ;
 
@@ -403,7 +430,7 @@ Declaration:
 Type:
     ScalarType {$$ = $1;}
     |
-    ArrType
+    ArrType     { $$ = $1;}
 ;
 
 ScalarType:
@@ -417,7 +444,18 @@ ScalarType:
 ;
 
 ArrType:
-    ArrDecl ScalarType
+    ArrDecl ScalarType   {  $$ = new char [100];
+                            std::string temp1, temp2, result;
+                            result.clear();
+                            temp1.clear();
+                            temp2.clear();
+                            temp1.assign($2);
+                            temp2.assign($1);
+                            result +=   temp1 + temp2;
+                            for(int i=0; i<result.size(); i++){
+                                $$[i] = result[i];
+                            }
+                         }
 ;
 
 ArrDecl: 

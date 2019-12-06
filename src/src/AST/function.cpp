@@ -5,7 +5,7 @@
 
 
 using namespace std;
-FunctionNode::FunctionNode(uint32_t line, uint32_t col,CompoundStatementNode* c_t,DeclarationNode* d_t): ASTNodeBase(line,col){
+FunctionNode::FunctionNode(uint32_t line, uint32_t col,CompoundStatementNode* c_t,std::vector<DeclarationNode*>* d_t): ASTNodeBase(line,col){
 	c = c_t;
 	d = d_t;
 }
@@ -17,9 +17,8 @@ void FunctionNode::printNode(){
         type = "void";
     }
 	int ct =0;
-    cout << "function declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name  <<" "<< type ;
+    cout << "function declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name  <<" "<< type <<" (";
     if(v_string.size()!=0){
-    	cout<<"(";
    		for(it = v_string.begin(); it!=v_string.end(); it++){
 	    	cout<<*it;
 	    	ct++;
@@ -27,10 +26,13 @@ void FunctionNode::printNode(){
 	    		cout<<", ";
 	    	}
     	} 	
-    	cout<<")"<<endl;
     }
-    if(v_string.size()!=0){
-    	d->accept(dvisitor);
+    cout<<")";
+    cout<<endl;
+    if(d!=NULL){
+    	for(auto it :*d){
+            it->accept(dvisitor);
+        }
     }
     c->accept(dvisitor);
 

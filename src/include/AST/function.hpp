@@ -10,9 +10,9 @@ public:
   std::string name;
   std::string type = "void";
   CompoundStatementNode* c;
-  DeclarationNode* d;
   std::vector<std::string> v_string ;
-  FunctionNode(uint32_t line, uint32_t col, CompoundStatementNode* c,DeclarationNode* d);
+  std::vector<DeclarationNode*>* d;
+  FunctionNode(uint32_t line, uint32_t col, CompoundStatementNode* c,std::vector<DeclarationNode*>* d);
   void printNode();
   ~FunctionNode();
   void accept(ASTNodeVisitorBase &v);
