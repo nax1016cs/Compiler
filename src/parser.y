@@ -23,7 +23,6 @@
 
 
 
-
 #include "include/core/error.h"
 #include "include/visitor/dumpvisitor.hpp"
 
@@ -70,11 +69,6 @@ void print_tab(int tab){
         std::cout<<" ";
     }
 }
-
-
-
-
-
 
 /* Declared by lex */
 extern FILE *yyin;
@@ -127,14 +121,6 @@ static ProgramNode *root;
 %code requires{ #include "AST/else.hpp"}
 %code requires{ #include "AST/function.hpp"}
 %code requires{ #include "AST/program_body.hpp"}
-
-
-
-
-
-
-
-
 
 
     /* Delimiter */
@@ -227,9 +213,6 @@ static ProgramNode *root;
 %type<program_body_type>    ProgramBody
 
 
-
-
-
 %type<str> ProgramName
 %type<str> INT_LITERAL
 %type<str> REAL_LITERAL
@@ -247,11 +230,6 @@ static ProgramNode *root;
 %type<str> ArrDecl
 %type<str> ReturnType
 %type<str> FunctionName
-
-
-
-
-
 
 
 
@@ -493,9 +471,15 @@ ArrDecl:
 ;
 
 LiteralConstant:
-    INT_LITERAL{$$ =  new ConstantValueNode(@1.first_line, @1.first_column, "integer");  $$->name.assign($1); }
+    INT_LITERAL{$$ =  new ConstantValueNode(@1.first_line, @1.first_column, "integer"); 
+                                            if($1[0]!='0')$$->name.assign($1);
+                                            else{
+                                                int number = std::stoi($1, 0, 8);
+                                                $$->name = std::to_string(number);
+                                            } 
+                                        }
     |
-    REAL_LITERAL{ $$ =new ConstantValueNode(@1.first_line, @1.first_column, "real");  $$->name.assign($1); }
+    REAL_LITERAL{ $$ =new ConstantValueNode(@1.first_line, @1.first_column, "real"); double z =atof($1);  $$->name = std::to_string(z); }
     |
     STRING_LITERAL{$$ = new ConstantValueNode(@1.first_line, @1.first_column, "string");  $$->name.assign($1); }
     |
