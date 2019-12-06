@@ -19,7 +19,7 @@ void FunctionNode::printNode(){
     }
 	int ct =0;
     print_tab(tab);
-    cout << "function declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name  <<" "<< type <<" (";
+    cout << "function declaration "<< "<line: " << location.line<<", col: "<< location.col << "> "<< name  <<" "<< type <<" (";
     if(v_string.size()!=0){
    		for(it = v_string.begin(); it!=v_string.end(); it++){
 	    	cout<<*it;

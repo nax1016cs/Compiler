@@ -709,7 +709,7 @@ void yyerror(const char *msg) {
 int main(int argc, const char *argv[]) {
     DumpVisitor dvisitor;
 
-    CHECK(argc == 2, "Usage: ./parser <filename>\n");
+    CHECK(argc >= 2, "Usage: ./parser <filename>\n");
 
     FILE *fp = fopen(argv[1], "r");
 

@@ -16,7 +16,7 @@ IfNode:: IfNode(uint32_t line, uint32_t col, ExpressionNode* e_t, std::vector<St
 void IfNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "if statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "if statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     tab++;
     e->accept(dvisitor);
     for(auto it:*vector_of_stat){

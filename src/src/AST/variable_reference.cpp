@@ -14,7 +14,7 @@ VariableReferenceNode::VariableReferenceNode(uint32_t line, uint32_t col , std::
 void VariableReferenceNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "variable reference "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
+    cout << "variable reference "<< "<line: " << location.line<<", col: "<< location.col << "> "<< name <<endl;
     for(int i =0; i<vector_of_exp_arr.size(); i++){
         print_tab(tab);
         cout<<"[\n";

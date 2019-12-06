@@ -14,7 +14,7 @@ DeclarationNode::DeclarationNode(uint32_t line, uint32_t col,std::vector<Variabl
 void DeclarationNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "declaration "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     tab++;
     for(auto it: t){
     	if(cons!=NULL){

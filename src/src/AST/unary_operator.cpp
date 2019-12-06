@@ -14,7 +14,7 @@ UnaryOperatorNode::UnaryOperatorNode(uint32_t line, uint32_t col , std::string n
 void UnaryOperatorNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "unary operator "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
+    cout << "unary operator "<< "<line: " << location.line<<", col: "<< location.col << "> "<< name <<endl;
     tab++;
     e->accept(dvisitor);
     tab--;

@@ -13,7 +13,7 @@ ProgramNode::ProgramNode(uint32_t line, uint32_t col): ASTNodeBase(line,col){
 
 void ProgramNode::printNode(){
     DumpVisitor dvisitor;
-    cout << "program "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name  << " void"<<endl;
+    cout << "program "<< "<line: " << location.line<<", col: "<< location.col << "> "<< name  << " void"<<endl;
     tab++;
     p->accept(dvisitor);
     tab--;

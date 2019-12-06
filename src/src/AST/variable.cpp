@@ -8,7 +8,7 @@ VariableNode::VariableNode(uint32_t line, uint32_t col, string type_t): ASTNodeB
 }
 
 void VariableNode::printNode(){
-    cout << "variable "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name  << " "<<type<<endl;
+    cout << "variable "<< "<line: " << location.line<<", col: "<< location.col << "> "<< name  << " "<<type<<endl;
 }
 
 VariableNode::~VariableNode(){

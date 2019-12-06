@@ -15,7 +15,7 @@ CompoundStatementNode::CompoundStatementNode(uint32_t line, uint32_t col, std::v
 void CompoundStatementNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "compound statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "compound statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     if(vector_of_dec!= NULL){
         tab++;
         for(auto it:*vector_of_dec){

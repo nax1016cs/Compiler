@@ -14,7 +14,7 @@ AssignmentNode::AssignmentNode(uint32_t line, uint32_t col, VariableReferenceNod
 void AssignmentNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "assignment statement "<< "<line:" << location.line<<", col:"<< location.col << "> " <<endl;
+    cout << "assignment statement "<< "<line: " << location.line<<", col: "<< location.col << "> " <<endl;
     tab++;
     v->accept(dvisitor);
     e->accept(dvisitor);

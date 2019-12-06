@@ -16,7 +16,7 @@ ForNode::ForNode(uint32_t line, uint32_t col,DeclarationNode* d_t, AssignmentNod
 void ForNode::printNode(){
     DumpVisitor dvisitor;
     print_tab( tab);
-    cout << "for statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "for statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     tab++;
     d->accept(dvisitor);
     a->accept(dvisitor);

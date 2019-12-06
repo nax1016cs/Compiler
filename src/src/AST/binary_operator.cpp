@@ -16,7 +16,7 @@ BinaryOperatorNode::BinaryOperatorNode(uint32_t line, uint32_t col , std::string
 void BinaryOperatorNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "binary operator "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
+    cout << "binary operator "<< "<line: " << location.line<<", col: "<< location.col << "> "<< name <<endl;
     tab++;
     e1->accept(dvisitor);
     e2->accept(dvisitor);

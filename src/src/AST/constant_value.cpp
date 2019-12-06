@@ -10,7 +10,7 @@ ConstantValueNode::ConstantValueNode(uint32_t line, uint32_t col,std::string typ
 
 void ConstantValueNode::printNode(){
 	print_tab(tab);
-    cout << "constant "<< "<line:" << location.line<<", col:"<< location.col << "> "<<name <<endl;
+    cout << "constant "<< "<line: " << location.line<<", col: "<< location.col << "> "<<name <<endl;
 }
 
 ConstantValueNode::~ConstantValueNode(){

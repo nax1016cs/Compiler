@@ -13,7 +13,7 @@ PrintNode::PrintNode(uint32_t line, uint32_t col , ExpressionNode* e_t): Stateme
 void PrintNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "print statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "print statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     tab++;
     e->accept(dvisitor);
     tab--;

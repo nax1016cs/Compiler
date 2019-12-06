@@ -13,7 +13,7 @@ FunctionCallStatNode::FunctionCallStatNode(uint32_t line, uint32_t col, std::vec
 void FunctionCallStatNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "function call statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
+    cout << "function call statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<< name <<endl;
     tab++;
     if(vector_of_exp !=NULL){
         for(auto it:*vector_of_exp){

@@ -13,7 +13,7 @@ ReadNode::ReadNode(uint32_t line, uint32_t col , VariableReferenceNode* e_t): St
 void ReadNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "read statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "read statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     tab++;
     e->accept(dvisitor);
     tab--;

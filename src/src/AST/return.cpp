@@ -13,7 +13,7 @@ ReturnNode::ReturnNode(uint32_t line, uint32_t col, ExpressionNode* e_t): Statem
 void ReturnNode::printNode(){
 	DumpVisitor dvisitor;
 	print_tab(tab);
-    cout <<"return statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout <<"return statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     tab++;
     e->accept(dvisitor);
     tab--;

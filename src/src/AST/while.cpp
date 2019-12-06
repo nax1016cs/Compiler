@@ -14,7 +14,7 @@ WhileNode::WhileNode(uint32_t line, uint32_t col,ExpressionNode* e_t ,  std::vec
 void WhileNode::printNode(){
     DumpVisitor dvisitor;
     print_tab(tab);
-    cout << "while statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    cout << "while statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
     tab++;
     e->accept(dvisitor);
     if(vector_of_stat!=NULL){
