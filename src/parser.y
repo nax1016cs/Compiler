@@ -47,19 +47,10 @@ typedef struct YYLTYPE {
 extern int32_t LineNum;
 extern char Buffer[512];
 /*create a vector for idlist*/
-int count_bracket = 0;
-int current_idx = 0;
+
 std::vector<VariableNode*> vector_of_var;
-std::vector<DeclarationNode*> vector_of_dec;
 std::vector<ExpressionNode*> vector_of_exp; // for function
 std::vector<ExpressionNode*> vector_of_exp_arr; // for arr
-std::vector<StatementNode*> vector_of_stat; // for stat
-std::vector<StatementNode*> vector_of_stat_pro; // for program statementlist
-
-std::vector<StatementNode*> vector_of_stat_cmp; // for program statementlist
-std::vector<DeclarationNode*> vector_of_dec_cmp;
-
-std::vector<StatementNode*> vector_of_stat_t ;
 std::vector<std::string> vector_of_string ;
 
 
@@ -156,7 +147,6 @@ static ProgramNode *root;
 
 %union {
     char *str;
-    // int  *num; 
     ProgramNode*            program_type;
     DeclarationNode*        declaration_type;
     ConstantValueNode*      constant_type;
@@ -310,34 +300,27 @@ FormalArgs:
 ;
 
 FormalArg:
-    IdList COLON Type { for(auto it: vector_of_var){
-            			    it->type = $3 ;
-                            std::string temp,result;
-                            result.clear();
-                            temp.clear();
-                            temp.assign($3);
-                            int ct = 0;
-                            int get = 1;
-                            for(unsigned int i=0; i<temp.size(); i++){
-                                if(get){
-                                    result += temp[i];
-                                }
-                                if(i>0 &&  temp[i-1]=='['){
-                                    get = 0;
-                                }
-                                if(temp[i+1]==']'){
-                                    get = 1;
-                                }
+    IdList COLON Type     { for(auto it: vector_of_var){
+                			    it->type = $3 ;
+                                std::string temp,result;
+                                result.clear();
+                                temp.clear();
+                                temp.assign($3);
+                                int get = 1;
+                                for(unsigned int i=0; i<temp.size(); i++){
+                                    if(get){
+                                        result += temp[i];
+                                    }
+                                    if(i>0 &&  temp[i-1]=='['){
+                                        get = 0;
+                                    }
+                                    if(temp[i+1]==']'){
+                                        get = 1;
+                                    }
 
-                            }
-                            // for(unsigned int i =0; i<result.size(); i++){
-                            //     std::cout<<result[i];
-                            // }
-        				    vector_of_string.push_back(result);
-                            $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
-                            
-
-
+                                }
+            				    vector_of_string.push_back(result);
+                                $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
         				}
 
    					 }
@@ -363,25 +346,10 @@ ReturnType:
     Epsilon           {$$ = "";}
 ;
 
-    /*
-       Data Types and Declarations
-                                   */
-
-// Declaration:
-//     VAR IdList COLON TypeOrConstant SEMICOLON{
-//         for(it = vector_of_var.begin(); it!=vector_of_var.end(); it++){
-//             // std::cout<<(*it)->name<<'\n';
-//             (*it)->type = "integer";
-//         }
-//         s = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var);
-// 		vector_of_var.clear();
-//     }
-// ;
 
 Declaration:
     VAR IdList COLON Type SEMICOLON{
     	for(auto it: vector_of_var){
-            // std::cout<<(*it)->name<<'\n';
             it->type = $4 ;
         }
         $$ = new DeclarationNode(@1.first_line, @1.first_column,vector_of_var,NULL);
@@ -395,11 +363,6 @@ Declaration:
 
 ;
 
-// TypeOrConstant:
-//     Type 
-//     |
-//     LiteralConstant
-// ;
 
 Type:
     ScalarType {$$ = $1;}
@@ -426,7 +389,7 @@ ArrType:
                             temp1.assign($2);
                             temp2.assign($1);
                             result +=   temp1 + temp2;
-                            for(int i=0; i<result.size(); i++){
+                            for(unsigned int i=0; i<result.size(); i++){
                                 $$[i] = result[i];
                             }
                          }
@@ -442,14 +405,9 @@ ArrDecl:
     										temp1.assign($2);
     										temp2.assign($4);
     										result += "[" + temp1 + "..." + temp2 + "]";
-    										for(int i=0; i<result.size(); i++){
+    										for( unsigned int i=0; i<result.size(); i++){
     											$$[i] = result[i];
     										}
-    										current_idx = result.size();
-    										// for(int i=0; i<result.size(); i++){
-    										// 	std::cout<<$$[i]<<"";
-    										// }
-    										// std::cout<<'\n';
     									}
     |
     ArrDecl ARRAY INT_LITERAL TO INT_LITERAL OF { 
@@ -464,20 +422,20 @@ ArrDecl:
     												temp2.assign($3);
     												temp3.assign($5);
     												result += temp1 +"[" + temp2 + "..." + temp3 + "]";
-    												for(int i=0; i<result.size(); i++){
+    												for(unsigned int i=0; i<result.size(); i++){
     													$$[i] = result[i];
     												}                                       
-    }
+                                                }
 ;
 
 LiteralConstant:
-    INT_LITERAL{$$ =  new ConstantValueNode(@1.first_line, @1.first_column, "integer"); 
-                                            if($1[0]!='0')$$->name.assign($1);
-                                            else{
-                                                int number = std::stoi($1, 0, 8);
-                                                $$->name = std::to_string(number);
-                                            } 
-                                        }
+    INT_LITERAL         {$$ =  new ConstantValueNode(@1.first_line, @1.first_column, "integer"); 
+                         if($1[0]!='0')$$->name.assign($1);
+                         else{
+                              int number = std::stoi($1, 0, 8);
+                              $$->name = std::to_string(number);
+                            } 
+                        }
     |
     REAL_LITERAL{ $$ =new ConstantValueNode(@1.first_line, @1.first_column, "real"); double z =atof($1);  $$->name = std::to_string(z); }
     |
@@ -493,26 +451,26 @@ LiteralConstant:
                   */
 
 Statement:
-    CompoundStatement   { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    CompoundStatement   { $$ = $1;}
     |
-    Simple              { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    Simple              { $$ = $1;}
     |
-    Condition           { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    Condition           { $$ = $1;}
     |
-    While               { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    While               { $$ = $1;}
     |
-    For                 { $$ = $1;/*vector_of_stat.clear();*/vector_of_stat_pro.emplace_back($1);}
+    For                 { $$ = $1;}
     |
-    Return              { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    Return              { $$ = $1;}
     |
-    FunctionInvokation  { $$ = $1;/*vector_of_stat.clear();*/ vector_of_stat_pro.emplace_back($1);}
+    FunctionInvokation  { $$ = $1;}
 ;
 
 CompoundStatement:
     BEGIN_
     DeclarationList     
     StatementList      
-    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, $2, $3); vector_of_dec.clear(); vector_of_stat.clear(); }
+    END                 { $$ = new CompoundStatementNode(@1.first_line, @1.first_column, $2, $3);}
 ;
 
 Simple:
@@ -524,31 +482,29 @@ Simple:
 ;
 
 VariableReference:
-    ID          { $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, vector_of_exp_arr);
-                  vector_of_exp_arr.clear();
-                  count_bracket = 0;}
+    ID            { $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, vector_of_exp_arr);
+                    vector_of_exp_arr.clear();}
     |
-    ID ArrForm {  $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, vector_of_exp_arr );
-                  vector_of_exp_arr.clear();
-                  count_bracket = 0;}
+    ID ArrForm    {  $$ = new VariableReferenceNode(@1.first_line, @1.first_column, $1, vector_of_exp_arr );
+                  vector_of_exp_arr.clear();}
 ;
 
 ArrForm:
-    L_BRACKET Expression R_BRACKET { vector_of_exp_arr.emplace_back($2) ; count_bracket += 1;}
+    L_BRACKET Expression R_BRACKET          { vector_of_exp_arr.emplace_back($2) ; }
     |
-    ArrForm L_BRACKET Expression R_BRACKET { vector_of_exp_arr.emplace_back($3) ; count_bracket += 1;}
+    ArrForm L_BRACKET Expression R_BRACKET  { vector_of_exp_arr.emplace_back($3) ; }
 ;
 
 Condition:
     IF Expression THEN 
     StatementList    
     ElseOrNot
-    END IF           {  $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5 ); /*vector_of_stat.clear();*/}  
+    END IF                  { $$ = new IfNode(@1.first_line, @1.first_column, $2,  $4, $5 );}  
 ;
 
 ElseOrNot:
     ELSE
-    StatementList           { $$ = new ElseNode(@1.first_line, @1.first_column,  $2); }
+    StatementList           { $$ = new ElseNode(@1.first_line, @1.first_column, $2); }
     |
     Epsilon                 { $$ = NULL;}
 ;
@@ -556,9 +512,7 @@ ElseOrNot:
 While:
     WHILE Expression DO
     StatementList
-    END DO                  {$$ = new WhileNode(@1.first_line, @1.first_column, $2 , $4);
-                        
-     /*vector_of_stat.clear();*/ }
+    END DO                  {$$ = new WhileNode(@1.first_line, @1.first_column, $2 , $4);}
 ;
 
 For:
@@ -572,16 +526,13 @@ For:
                                 
                                 con_temp = new ConstantValueNode(@4.first_line, @4.first_column, "");
                                 con_temp->name = $4;
-                                // may have problem
+
                                 varf_temp = new VariableReferenceNode(@2.first_line, @2.first_column, $2, vector_of_exp_arr);
                                 ass_temp = new AssignmentNode(@3.first_line, @3.first_column,varf_temp, con_temp);//assignment
 
                                 con_temp = new ConstantValueNode(@6.first_line, @6.first_column, $6); //expression
                                 con_temp->name = $6;
                                 $$ = new ForNode(@1.first_line, @1.first_column, dec_temp ,ass_temp  ,con_temp  , $8);
-                                // s = $$;
-                                // vector_of_stat.clear();
-                                
                             }
 ;
 
@@ -596,12 +547,9 @@ FunctionInvokation:
 FunctionCall:
     ID L_PARENTHESIS ExpressionList R_PARENTHESIS { $$ = new FunctionCallNode(@1.first_line, @1.first_column,$3);
                                                     fun_stat =  new FunctionCallStatNode(@1.first_line, @1.first_column,$3);
-
                                                     vector_of_exp.clear();
                                                     $$->name.assign($1);
                                                     fun_stat->name.assign($1);
-                                                    
-
                                                   }
 
 ;
@@ -624,43 +572,43 @@ StatementList:
 ;
 
 Statements:
-    Statement                   {$$ = new std::vector<StatementNode* > ; $$->emplace_back($1); /*vector_of_stat.emplace_back($1);*/}
+    Statement                   {$$ = new std::vector<StatementNode* > ; $$->emplace_back($1); }
     |
-    Statements Statement        {$1->emplace_back($2); $$ = $1; /*vector_of_stat.emplace_back($2);*/}
+    Statements Statement        {$1->emplace_back($2); $$ = $1; }
 ;
 
 Expression:
     L_PARENTHESIS Expression R_PARENTHESIS { $$ = $2;}
     |
-    MINUS Expression %prec UNARY_MINUS  {unary = new UnaryOperatorNode(@1.first_line, @1.first_column, "neg", $2); $$ = unary; }
+    MINUS Expression %prec UNARY_MINUS  {$$ = new UnaryOperatorNode(@1.first_line, @1.first_column, "neg", $2);  }
     |
-    Expression MULTIPLY Expression      {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "*", $1, $3); $$ = binary; }
+    Expression MULTIPLY Expression      {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "*", $1, $3);  }
     |
-    Expression DIVIDE Expression        {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "/", $1, $3); $$ = binary; }
+    Expression DIVIDE Expression        {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "/", $1, $3);  }
     |
-    Expression MOD Expression           {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "mod", $1, $3); $$ = binary; }
+    Expression MOD Expression           {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "mod", $1, $3);  }
     |
-    Expression PLUS Expression          {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "+", $1, $3); $$ = binary; }
+    Expression PLUS Expression          {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "+", $1, $3);  }
     |
-    Expression MINUS Expression         {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "-", $1, $3); $$ = binary; }
+    Expression MINUS Expression         {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "-", $1, $3); }
     |
-    Expression LESS Expression          {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "<", $1, $3); $$ = binary; }
+    Expression LESS Expression          {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "<", $1, $3);  }
     |
-    Expression LESS_OR_EQUAL Expression {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "<=", $1, $3); $$ = binary; }
+    Expression LESS_OR_EQUAL Expression {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "<=", $1, $3);  }
     |
-    Expression GREATER Expression       {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, ">", $1, $3); $$ = binary; }
+    Expression GREATER Expression       {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, ">", $1, $3);  }
     |
-    Expression GREATER_OR_EQUAL Expression  {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, ">=", $1, $3); $$ = binary; }
+    Expression GREATER_OR_EQUAL Expression  {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, ">=", $1, $3); }
     |
-    Expression EQUAL Expression         {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "=", $1, $3); $$ = binary;}
+    Expression EQUAL Expression         {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "=", $1, $3); }
     |
-    Expression NOT_EQUAL Expression     {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "<>", $1, $3); $$ = binary; }
+    Expression NOT_EQUAL Expression     {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "<>", $1, $3);  }
     |
-    NOT Expression                  {unary = new UnaryOperatorNode(@1.first_line, @1.first_column, "not", $2); $$ = unary; }
+    NOT Expression                  {$$ = new UnaryOperatorNode(@1.first_line, @1.first_column, "not", $2);  }
     |
-    Expression AND Expression       {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "and", $1, $3); $$ = binary; }
+    Expression AND Expression       {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "and", $1, $3);  }
     |
-    Expression OR Expression        {binary = new BinaryOperatorNode(@2.first_line, @2.first_column, "or", $1, $3); $$ = binary; }
+    Expression OR Expression        {$$ = new BinaryOperatorNode(@2.first_line, @2.first_column, "or", $1, $3);  }
     |
     LiteralConstant					{$$ = $1; }
     |
