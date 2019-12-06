@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 UnaryOperatorNode::UnaryOperatorNode(uint32_t line, uint32_t col , std::string name_t , ExpressionNode* e_t): ExpressionNode(line,col){
@@ -12,10 +13,11 @@ UnaryOperatorNode::UnaryOperatorNode(uint32_t line, uint32_t col , std::string n
 
 void UnaryOperatorNode::printNode(){
     DumpVisitor dvisitor;
-	cout << "  ";
+    print_tab(tab);
     cout << "unary operator "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
-    cout << "    ";
+    tab++;
     e->accept(dvisitor);
+    tab--;
     
 }
 

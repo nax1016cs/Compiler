@@ -64,8 +64,12 @@ std::vector<StatementNode*> vector_of_stat_t ;
 std::vector<std::string> vector_of_string ;
 
 
-
-
+int tab = 0;
+void print_tab(int tab){
+    for(int i=0; i<tab*2; i++){
+        std::cout<<" ";
+    }
+}
 
 
 
@@ -703,6 +707,8 @@ void yyerror(const char *msg) {
 }
 
 int main(int argc, const char *argv[]) {
+    DumpVisitor dvisitor;
+
     CHECK(argc == 2, "Usage: ./parser <filename>\n");
 
     FILE *fp = fopen(argv[1], "r");
@@ -712,7 +718,6 @@ int main(int argc, const char *argv[]) {
     yyparse();
 
     //freeProgramNode(root); 
-    DumpVisitor dvisitor;
     root->accept(dvisitor);
 
 

@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 BinaryOperatorNode::BinaryOperatorNode(uint32_t line, uint32_t col , std::string name_t , ExpressionNode* e1_t,ExpressionNode* e2_t): ExpressionNode(line,col){
@@ -14,12 +15,12 @@ BinaryOperatorNode::BinaryOperatorNode(uint32_t line, uint32_t col , std::string
 
 void BinaryOperatorNode::printNode(){
     DumpVisitor dvisitor;
-	cout << "  ";
+    print_tab(tab);
     cout << "binary operator "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
-    cout << "    ";
+    tab++;
     e1->accept(dvisitor);
-    cout << "    ";
     e2->accept(dvisitor);
+    tab--;
 
     
 }

@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 
 using namespace std;
@@ -14,15 +15,17 @@ IfNode:: IfNode(uint32_t line, uint32_t col, ExpressionNode* e_t, std::vector<St
 
 void IfNode::printNode(){
     DumpVisitor dvisitor;
-	cout << "  ";
+    print_tab(tab);
     cout << "if statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
-    cout<<"  ";
+    tab++;
     e->accept(dvisitor);
     for(auto it:*vector_of_stat){
-    	cout << "    ";
     	it->accept(dvisitor);
     }
-    if(els !=NULL) els->accept(dvisitor);
+    tab--;
+    if(els !=NULL) {
+        els->accept(dvisitor);
+    }
 }
 
 IfNode::~IfNode(){

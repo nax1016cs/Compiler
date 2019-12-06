@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 
 using namespace std;
@@ -13,20 +14,22 @@ CompoundStatementNode::CompoundStatementNode(uint32_t line, uint32_t col, std::v
 
 void CompoundStatementNode::printNode(){
     DumpVisitor dvisitor;
-	cout << "  ";
+    print_tab(tab);
     cout << "compound statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
     if(vector_of_dec!= NULL){
+        tab++;
         for(auto it:*vector_of_dec){
-            cout << "    ";
             it->accept(dvisitor);
-        }        
+        }  
+        tab--;      
     }
 
     if(vector_of_stat!=NULL){
+        tab++;
         for(auto it:*vector_of_stat){
-            cout << "    ";
             it->accept(dvisitor);
         }        
+        tab--;
     }
 
 }

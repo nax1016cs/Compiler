@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 
 using namespace std;
@@ -12,12 +13,13 @@ ElseNode::ElseNode(uint32_t line, uint32_t col, std::vector<StatementNode*>* vec
 
 void ElseNode::printNode(){
     DumpVisitor dvisitor;
-	cout << "  ";
-    cout << "else\n ";
+    print_tab(tab);
+    cout << "else\n";
+    tab++;
     for(auto it:*vector_of_stat){
-    	cout << "    ";
     	it->accept(dvisitor);
     }
+    tab--;
 }
 
 ElseNode::~ElseNode(){

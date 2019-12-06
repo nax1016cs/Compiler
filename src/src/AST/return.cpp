@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 ReturnNode::ReturnNode(uint32_t line, uint32_t col, ExpressionNode* e_t): StatementNode(line,col){
@@ -11,10 +12,11 @@ ReturnNode::ReturnNode(uint32_t line, uint32_t col, ExpressionNode* e_t): Statem
 
 void ReturnNode::printNode(){
 	DumpVisitor dvisitor;
-	cout<<"  ";
-    cout << "return statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
-    cout<<"    ";
+	print_tab(tab);
+    cout <<"return statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    tab++;
     e->accept(dvisitor);
+    tab--;
 }
 
 ReturnNode::~ReturnNode(){

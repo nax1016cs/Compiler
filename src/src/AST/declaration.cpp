@@ -2,7 +2,8 @@
 #include "AST/declaration.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 DeclarationNode::DeclarationNode(uint32_t line, uint32_t col,std::vector<VariableNode*> temp, ConstantValueNode* cons_temp): ASTNodeBase(line,col){
@@ -12,23 +13,24 @@ DeclarationNode::DeclarationNode(uint32_t line, uint32_t col,std::vector<Variabl
 
 void DeclarationNode::printNode(){
     DumpVisitor dvisitor;
-    cout<<"  ";
+    print_tab(tab);
     cout << "declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
+    tab++;
     for(auto it: t){
     	if(cons!=NULL){
-    		cout << "    ";
+            print_tab( tab);
     		it->type = cons->type;
-    		// it->printNode();
             it->accept(dvisitor);
-    		cout << "      ";
+            tab++;
     		cons->printNode();
+            tab--;
     	}
     	else{
-    		cout << "    ";
+            print_tab( tab);
     		it->printNode();
     	}
-    	//cout << "    "<< "<line:" << (*it)->location.line<<", col:"<< (*it)->location.col << "> "<<(*it)->name <<" " <<(*it)->type <<endl;
     }
+    tab--;
 }
 
 DeclarationNode::~DeclarationNode(){

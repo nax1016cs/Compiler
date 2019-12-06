@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 ForNode::ForNode(uint32_t line, uint32_t col,DeclarationNode* d_t, AssignmentNode* a_t,ExpressionNode* e_t ,  std::vector<StatementNode*>* vector_of_stat_t): StatementNode(line,col){
@@ -14,19 +15,19 @@ ForNode::ForNode(uint32_t line, uint32_t col,DeclarationNode* d_t, AssignmentNod
 
 void ForNode::printNode(){
     DumpVisitor dvisitor;
-	cout << "  ";
+    print_tab( tab);
     cout << "for statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<<endl;
-	cout << "  ";
+    tab++;
     d->accept(dvisitor);
-	cout << "  ";
     a->accept(dvisitor);
-    cout << "  ";
     e->accept(dvisitor);
+    tab--;
     if(vector_of_stat!=NULL){
+        tab++;
         for(auto it:*vector_of_stat){
-            cout << "    ";
             it->accept(dvisitor);
-        }        
+        }       
+        tab--; 
     }
 
 }

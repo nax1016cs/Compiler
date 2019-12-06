@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 AssignmentNode::AssignmentNode(uint32_t line, uint32_t col, VariableReferenceNode * v_t ,ExpressionNode * e_t): StatementNode(line,col){
@@ -12,12 +13,12 @@ AssignmentNode::AssignmentNode(uint32_t line, uint32_t col, VariableReferenceNod
 
 void AssignmentNode::printNode(){
     DumpVisitor dvisitor;
-	cout<<"  ";
+    print_tab(tab);
     cout << "assignment statement "<< "<line:" << location.line<<", col:"<< location.col << "> " <<endl;
-	cout<<"  ";
+    tab++;
     v->accept(dvisitor);
-    cout<<"    ";
     e->accept(dvisitor);
+    tab--;
 
 
 }

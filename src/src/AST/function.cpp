@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 FunctionNode::FunctionNode(uint32_t line, uint32_t col,CompoundStatementNode* c_t,std::vector<DeclarationNode*>* d_t): ASTNodeBase(line,col){
@@ -17,6 +18,7 @@ void FunctionNode::printNode(){
         type = "void";
     }
 	int ct =0;
+    print_tab(tab);
     cout << "function declaration "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name  <<" "<< type <<" (";
     if(v_string.size()!=0){
    		for(it = v_string.begin(); it!=v_string.end(); it++){
@@ -30,11 +32,15 @@ void FunctionNode::printNode(){
     cout<<")";
     cout<<endl;
     if(d!=NULL){
+        tab++;
     	for(auto it :*d){
             it->accept(dvisitor);
         }
+        tab--;
     }
+    tab++;
     c->accept(dvisitor);
+    tab--;
 
     
 

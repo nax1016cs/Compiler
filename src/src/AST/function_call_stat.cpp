@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 FunctionCallStatNode::FunctionCallStatNode(uint32_t line, uint32_t col, std::vector<ExpressionNode*>* vector_of_exp_t): StatementNode(line,col){
@@ -11,12 +12,15 @@ FunctionCallStatNode::FunctionCallStatNode(uint32_t line, uint32_t col, std::vec
 
 void FunctionCallStatNode::printNode(){
     DumpVisitor dvisitor;
-	cout << "  ";
+    print_tab(tab);
     cout << "function call statement "<< "<line:" << location.line<<", col:"<< location.col << "> "<< name <<endl;
-    for(auto it:*vector_of_exp){
-    	cout << "    ";
-    	it->accept(dvisitor);
+    tab++;
+    if(vector_of_exp !=NULL){
+        for(auto it:*vector_of_exp){
+            it->accept(dvisitor);
+        }
     }
+    tab--;
 }
 
 FunctionCallStatNode::~FunctionCallStatNode(){

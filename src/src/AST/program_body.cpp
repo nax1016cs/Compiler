@@ -2,7 +2,8 @@
 #include "AST/program.hpp"
 #include "visitor/visitor.hpp"
 #include "visitor/dumpvisitor.hpp"
-
+extern int tab;
+extern void print_tab(int tab);
 
 using namespace std;
 ProgramBodyNode::ProgramBodyNode(uint32_t line, uint32_t col): ASTNodeBase(line,col){
