@@ -168,9 +168,9 @@ static ProgramNode *root;
 	FunctionNode*           function_type;
     std::vector<FunctionNode*>* vector_of_fun_type;
     ProgramBodyNode*        program_body_type;
-
-
 }
+
+
 %type<program_type>         Program
 %type<declaration_type>     Declaration
 %type<constant_type>        LiteralConstant

@@ -144,3 +144,23 @@ Program:
 
 - With the Nodes created above, My AST could recognize the P language
 
+
+
+## Use visitor pattern
+
+- The codes below are how I traverse in `print node`. The other nodes are implemented in the same way.
+
+```cpp=
+void PrintNode::printNode(){
+    DumpVisitor dvisitor;
+    print_tab(tab);
+    cout << "print statement "<< "<line: " << location.line<<", col: "<< location.col << "> "<<endl;
+    tab++;
+    e->accept(dvisitor);
+    tab--;
+}
+
+```
+
+## Result 
+![imgur](https://imgur.com/b08KUnn.jpg)
