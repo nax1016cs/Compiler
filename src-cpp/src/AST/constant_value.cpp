@@ -41,3 +41,21 @@ void ConstantValueNode::print() {
 
     std::cout << std::endl;
 }
+
+string ConstantValueNode::getValue(){
+    string attr;
+    switch(this->constant_value->type){
+        case TYPE_INTEGER: attr = std::to_string(this->constant_value->int_literal) ; break;
+        case TYPE_REAL:    attr = std::to_string(this->constant_value->real_literal); break;
+        case TYPE_STRING:  attr =  this->constant_value->string_literal; break;
+        case TYPE_BOOLEAN:
+            switch(this->constant_value->boolean_literal){
+                case Boolean_TRUE:  attr = "true"; break;
+                case Boolean_FALSE: attr = "false"; break;
+                default: std::cout << "unknown"; break;
+            } 
+            break;
+        default: std::cout << "unknown"; break;
+    }
+    return attr;
+}

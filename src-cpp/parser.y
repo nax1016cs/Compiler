@@ -1147,6 +1147,11 @@ void dumpAST(ASTNodeBase* node){
     node->accept(visitor);
 }
 
+void semanticAST(ASTNodeBase* node){
+    SemanticAnalyzer visitor;
+    node->accept(visitor);
+}
+
 int main(int argc, const char *argv[]) {
     CHECK((argc >= 2) && (argc<=3), "Usage: ./parser <filename> [--dump-ast]\n");
     
@@ -1167,7 +1172,7 @@ int main(int argc, const char *argv[]) {
 
     if(argc == 3 && isDumpNeed == 0)
         dumpAST(AST);
-
+    semanticAST(AST);
 	// TODO: construct a SemanticAnalyzer to analyze the AST
 
     // Memory_Free

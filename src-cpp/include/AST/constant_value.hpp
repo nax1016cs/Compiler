@@ -17,4 +17,5 @@ class ConstantValueNode : public ASTNodeBase
         ~ConstantValueNode();
         void accept(ASTVisitorBase &v) {v.visit(this); }
         void print();
+        string getValue();
 };

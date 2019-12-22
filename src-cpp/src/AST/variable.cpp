@@ -32,6 +32,7 @@ void VariableNode::print() {
 }
 
 string VariableNode::getType() {
+    int first_bracket = 1;
     switch(this->type->type_set){
         case SET_SCALAR:
         case SET_CONSTANT_LITERAL:
@@ -51,12 +52,15 @@ string VariableNode::getType() {
                 case TYPE_BOOLEAN: this->variable_type = "boolean"; break;
                 default:           this->variable_type = "unknown"; break;
             }
-
+            
             for(uint i=0; i<this->type->array_range.size(); i++){
-                this->variable_type += "[";
-                this->variable_type += to_string(this->type->array_range[i].start);
-                this->variable_type += "...";
-                this->variable_type += to_string(this->type->array_range[i].end);
+                if(first_bracket){
+                    this->variable_type += " [";
+                    first_bracket = 0;
+                }
+                else
+                    this->variable_type += "[";
+                this->variable_type += to_string(this->type->array_range[i].end -this->type->array_range[i].start );
                 this->variable_type += "]";
             }
             break;
