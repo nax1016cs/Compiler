@@ -1,4 +1,5 @@
 #pragma once
+extern  int OptSymbol;
 #include <vector>
 #include <stack>
 #include <string.h>
@@ -80,7 +81,8 @@ public:
     	tables.push(new_scope);
     };
     void popScope(){
-    	dumpSymbol(tables.top());
+    	if(OptSymbol)
+    		dumpSymbol(tables.top());
     	tables.pop();
     };
     
