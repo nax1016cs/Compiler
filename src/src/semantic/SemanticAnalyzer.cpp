@@ -29,8 +29,25 @@ SymbolManager manager;
 SymbolTable* current_table;
 SymbolEntry* current_entry;
 
+extern long long int count_line[1000] ;
+extern char *file_name;;
 void SemanticAnalyzer::visit(ProgramNode *m) {
-    SymbolEntry* s = new SymbolEntry(m->program_name, "program", level, "void", "");
+
+    // check file
+    // FILE *fp = fopen(file_name, "r");
+    // for(int i=1; i<100; i++){
+    //     if(i!=1 && count_line[i]==0 ){
+    //         break;
+    //     }
+    //     // std::cout<<count_line[i]<<std::endl;
+    //     char code [1000];
+    //     fseek ( fp , count_line[i] , SEEK_SET );
+    //     fgets (code , 1000 , fp); 
+    //     printf("%s", code);
+    // }
+    // fclose (fp);
+
+    SymbolEntry* s = new SymbolEntry(m->program_name.substr(0,31), "program", level, "void", "");
     SymbolTable* first = new SymbolTable;
     first->addSymbol(*s);
     current_table = first;
@@ -50,9 +67,7 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
                 manager.tables.pop();
                 current_table = first;
             }
-            
         }
-
     }
     // current_table = NULL;
     // level++;
@@ -75,7 +90,7 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
 void SemanticAnalyzer::visit(VariableNode *m) {
 
     if (m->constant_value_node != nullptr){
-       	SymbolEntry* s = new SymbolEntry(m->variable_name, "constant", level, m->getType(), "");
+       	SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "constant", level, m->getType(), "");
        	current_entry = s;
         // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;       	
         m->constant_value_node->accept(*this);
@@ -86,7 +101,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     }
     else{
     	if(isparameter){
-        	SymbolEntry* s = new SymbolEntry(m->variable_name, "parameter", level, m->getType(), "");
+        	SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "parameter", level, m->getType(), "");
         	current_table->addSymbol(*s);
         // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;       	
 
@@ -94,7 +109,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
 
     	}
     	else{
-			SymbolEntry* s = new SymbolEntry(m->variable_name, "variable", level, m->getType(), "");
+			SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
         	current_table->addSymbol(*s);
         // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;       	
 
@@ -169,7 +184,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         }
     }
     // std::cout<<m->function_name<<" " <<attr;
-    SymbolEntry* s = new SymbolEntry(m->function_name, "function", level, function_type,attr);
+    SymbolEntry* s = new SymbolEntry(m->function_name.substr(0,31), "function", level, function_type,attr);
     current_table->addSymbol(*s);
     delete(s);
     manager.pushScope(*current_table);

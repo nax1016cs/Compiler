@@ -128,7 +128,7 @@ struct id_info{
 };
 
 static Node AST;
-
+char *file_name;
 
 #line 134 "parser.cpp" /* yacc.c:339  */
 
@@ -3108,11 +3108,11 @@ int main(int argc, const char *argv[]) {
     yyin = fp;
     yyparse();
 
+    file_name = strdup(argv[1]);
     if(argc == 3 && isDumpNeed == 0)
         dumpAST(AST);
     semanticAST(AST);
 	// TODO: construct a SemanticAnalyzer to analyze the AST
-
     // Memory_Free
     delete AST;
     //free(yytext);

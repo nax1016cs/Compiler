@@ -1,7 +1,5 @@
 //&S-
 //&T-
-
-
 test;
 // no global declaration(s)
 
