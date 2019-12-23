@@ -74,10 +74,6 @@ void dumpSymbol(SymbolTable s) {
 }
 
 
-
-
-
-
 class SymbolManager {
 public:
     void pushScope(SymbolTable new_scope){
@@ -88,7 +84,7 @@ public:
     	tables.pop();
     };
     
-private:
+public:
     std::stack <SymbolTable> tables;
 };
 

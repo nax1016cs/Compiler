@@ -35,17 +35,30 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     first->addSymbol(*s);
     current_table = first;
     delete(s);
-    if (m->declaration_node_list != nullptr)
+    if (m->declaration_node_list != nullptr){
         for(uint i=0; i< m->declaration_node_list->size(); i++){
             (*(m->declaration_node_list))[i]->accept(*this);
         }
+    }
+        
 
-    if (m->function_node_list != nullptr)
+    if (m->function_node_list != nullptr){
         for(uint i=0; i< m->function_node_list->size(); i++){
             (*(m->function_node_list))[i]->accept(*this);
+            // current_table = &manager.tables.top();
+            if(i!=m->function_node_list->size()-1){
+                manager.tables.pop();
+                current_table = first;
+            }
+            
         }
+
+    }
+    // current_table = NULL;
     // level++;
     if (m->compound_statement_node != nullptr){
+        SymbolTable* temp_table = new SymbolTable;
+        current_table = temp_table;
         m->compound_statement_node->accept(*this);
     }
  	// level--;
@@ -68,6 +81,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         m->constant_value_node->accept(*this);
         // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;
         current_table->addSymbol(*s);
+        // cout<<current_table->entries[current_table->entries.size()-1].name<<current_table->entries[current_table->entries.size()-1].type<<endl;
    		delete(s);
     }
     else{
@@ -159,9 +173,10 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
     current_table->addSymbol(*s);
     delete(s);
     manager.pushScope(*current_table);
-
+    // manager.popScope();
     // create the next table
     // level++;
+
     SymbolTable* temp_table = new SymbolTable;
     current_table = temp_table;
     if (m->parameters != nullptr){
