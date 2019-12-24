@@ -54,31 +54,17 @@ void print_error_code(int end_line_number, int end_col_number){
 
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
-    string temp = "./test-cases/"+m->program_name + ".p";
+    // string temp = "./test-cases/"+m->program_name + ".p";
     // string temp = m->program_name + ".p";
 
 
     // Here need to restore!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if(strcmp(temp.c_str(), file_name)){
-        fprintf(stderr, "<Error> Found in line %d, column %d: program name must be the same as filename\n", m->line_number, m->col_number);
-        // FILE *fp = fopen(file_name, "r");  
-        // char code [1000];
-        // fseek ( fp , count_line[m->line_number-1] , SEEK_SET );
-        // fgets (code , 1000 , fp);
-        // print_tab(4); 
-        // fprintf(stderr, "%s",code);
-        // print_tab(4 + m->col_number-1); 
-        // fprintf(stderr, "%c\n",'^');
-        // fclose (fp);
-        print_error_code(m->line_number, m->col_number);
-        error_found = 1;
-        // printf("program name %s\n", temp.c_str());
-        // printf("file name %s\n", file_name);
+    // if(strcmp(temp.c_str(), file_name)){
+    //     fprintf(stderr, "<Error> Found in line %d, column %d: program name must be the same as filename\n", m->line_number, m->col_number);
+    //     print_error_code(m->line_number, m->col_number);
+    // }
 
-    }
-
-    
     SymbolEntry* s = new SymbolEntry(m->program_name.substr(0,31), "program", level, "void", "");
     SymbolTable* first = new SymbolTable;
     first->addSymbol(*s);
@@ -100,6 +86,7 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
             }
         }
     }
+    // i forget why
     if (m->function_node_list == nullptr){
         manager.pushScope(*current_table);
     }
@@ -111,10 +98,10 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     }
 
     manager.popScope();
-    if(strcmp(m->program_name.c_str(), m->end_name.c_str())){
-        fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", m->end_line_number, m->end_col_number);
-        print_error_code(m->end_line_number, m->end_col_number);
-    }
+    // if(strcmp(m->program_name.c_str(), m->end_name.c_str())){
+    //     fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", m->end_line_number, m->end_col_number);
+    //     print_error_code(m->end_line_number, m->end_col_number);
+    // }
 }
 
 void SemanticAnalyzer::visit(DeclarationNode *m) {
@@ -131,24 +118,20 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         if(declared){
             fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s is redeclared \n", m->line_number, m->col_number, m->variable_name.c_str());
             print_error_code(m->line_number, m->col_number);
-            break;
+            return;
         }
     }
-    if(!declared){
-        if(m->type->array_range.size()!=0){
-            // if(m->type->array_range[0]>=)
-            for(int i=0; i<m->type->array_range.size(); i++){
-                if(m->type->array_range[i].start<0 || m->type->array_range[i].end<0 || m->type->array_range[i].start > m->type->array_range[i].end){
-                    fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s declared as an array with a lower bound greater or equal to upper bound \n", m->line_number, m->col_number, m->variable_name.c_str());
-                    print_error_code(m->line_number, m->col_number);
-                    break;
-                }
+    if(m->type->array_range.size()!=0){
+        for(int i=0; i<m->type->array_range.size(); i++){
+            if(m->type->array_range[i].start<0 || m->type->array_range[i].end<0 || m->type->array_range[i].start > m->type->array_range[i].end){
+                fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s declared as an array with a lower bound greater or equal to upper bound \n", m->line_number, m->col_number, m->variable_name.c_str());
+                print_error_code(m->line_number, m->col_number);
+                return;
             }
-            // std::cout<<m->type->array_range[0].start<<" "<<m->type->array_range[0].end<<'\n';
-            // std::cout<<m->type->array_range[1].start<<" "<<m->type->array_range[1].end<<'\n';
         }
-        // constant value
-        if (m->constant_value_node != nullptr){
+    }
+    // constant value
+    if (m->constant_value_node != nullptr){
         SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "constant", level, m->getType(), "");
         current_entry = s;
         // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
@@ -157,37 +140,49 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         current_table->addSymbol(*s);
         // cout<<current_table->entries[current_table->entries.size()-1].name<<current_table->entries[current_table->entries.size()-1].type<<endl;
         delete(s);
+    }
+    else{
+        //function's parameter
+        if(isparameter){
+            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "parameter", level, m->getType(), "");
+            current_table->addSymbol(*s);
+        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
+
+            delete(s);
+
         }
+        //normal variable
         else{
-            //function's parameter
-            if(isparameter){
-                SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "parameter", level, m->getType(), "");
-                current_table->addSymbol(*s);
-            // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
+            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
+            current_table->addSymbol(*s);
+        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
 
-                delete(s);
-
-            }
-            //normal variable
-            else{
-                SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
-                current_table->addSymbol(*s);
-            // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
-
-                delete(s);
-            }
+            delete(s);
         }
     }
+
 
 }
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) {
 	current_entry->attr = m->getValue();
-	// cout<<current_entry->name<<" "<<current_entry->kind<<current_entry->level<<current_entry->type<<current_entry->attr<<endl;
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
 	// get the function return type
+    if(strcmp(m->function_name.c_str(), m->end_name.c_str())){
+        fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of function must be the same as identifier at the beginning of function\n", m->end_line_number, m->end_col_number);
+        print_error_code(m->end_line_number,m->end_col_number);
+    }
+
+    for(int i=0; i<current_table->entries.size(); i++){
+        if(m->function_name.substr(0,31) ==current_table->entries[i].name){
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s is redeclared \n", m->line_number, m->col_number, m->function_name.c_str());
+            print_error_code(m->line_number, m->col_number);
+            manager.pushScope(*current_table);
+            return;
+        }
+    }
 
     string function_type;
     switch(m->return_type->type_set){
@@ -246,12 +241,11 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
             default: std::cout<<"unknown"; break;
         }
     }
-    // std::cout<<m->function_name<<" " <<attr;
+
     SymbolEntry* s = new SymbolEntry(m->function_name.substr(0,31), "function", level, function_type,attr);
     current_table->addSymbol(*s);
     delete(s);
     manager.pushScope(*current_table);
-    // manager.popScope();
     // create the next table
     // level++;
 
@@ -270,31 +264,14 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         function_cmp = 1;
         m->body->accept(*this);
     }
-        // std::cout<<"this is "<<m->function_name<<" end"<<m->end_name<<std::endl;
-    
-    if(strcmp(m->function_name.c_str(), m->end_name.c_str())){
-        fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of function must be the same as identifier at the beginning of function\n", m->end_line_number, m->end_col_number);
-        // FILE *fp = fopen(file_name, "r");  
-        // char code [1000];
-        // fseek ( fp , count_line[m->end_line_number-1] , SEEK_SET );
-        // fgets (code , 1000 , fp);
-        // print_tab(4); 
-        // fprintf(stderr, "%s",code);
-        // print_tab(4 + m->end_col_number-1); 
-        // fprintf(stderr, "%c\n",'^');
-        print_error_code(m->end_line_number,m->end_col_number);
-        // fclose (fp);
 
-    }
+
     // level--;
-    // manager.pushScope(*current_table);
 }
 
 void SemanticAnalyzer::visit(CompoundStatementNode *m) {
     level++;
-    // if(function_cmp){
-    //     level--;
-    // }
+
     if (m->declaration_node_list != nullptr){
 
         if(!function_cmp){
@@ -321,24 +298,106 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) {
 
 }
 
-void SemanticAnalyzer::visit(AssignmentNode *m) {}
+void SemanticAnalyzer::visit(AssignmentNode *m) {
 
-void SemanticAnalyzer::visit(PrintNode *m) {}
+    if (m->variable_reference_node != nullptr)
+        m->variable_reference_node->accept(*this);
 
-void SemanticAnalyzer::visit(ReadNode *m) {}
+    if (m->expression_node != nullptr)
+        m->expression_node->accept(*this);
+}
 
-void SemanticAnalyzer::visit(VariableReferenceNode *m) {}
+void SemanticAnalyzer::visit(PrintNode *m) {
+    if (m->expression_node != nullptr)
+         m->expression_node->accept(*this);
+}
 
-void SemanticAnalyzer::visit(BinaryOperatorNode *m) {}
+void SemanticAnalyzer::visit(ReadNode *m) {
+    if (m->variable_reference_node != nullptr)
+        m->variable_reference_node->accept(*this);    
+}
 
-void SemanticAnalyzer::visit(UnaryOperatorNode *m) {}
+void SemanticAnalyzer::visit(VariableReferenceNode *m) {
+    int declared = 0;
+    for(int i=0; i<current_table->entries.size(); i++){
+        declared = (m->variable_name.substr(0,31) == current_table->entries[i].name) ? 1 :0;
+    }
+    if(!declared){
+        fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier %s\n", m->line_number, m->col_number, m->variable_name.c_str());
+        print_error_code(m->line_number, m->col_number);
+    }
+    if (m->expression_node_list != nullptr){
+        for(uint i=0; i< m->expression_node_list->size(); i++){
+            std::cout<<"["<<std::endl;
+            (*(m->expression_node_list))[i]->accept(*this);
+            std::cout<<"]"<<std::endl;
+        }
+     }
+}
 
-void SemanticAnalyzer::visit(IfNode *m) {}
+void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
+    if (m->left_operand != nullptr)
+            m->left_operand->accept(*this);
 
-void SemanticAnalyzer::visit(WhileNode *m) {}
+    if (m->right_operand != nullptr)
+        m->right_operand->accept(*this);
+}
 
-void SemanticAnalyzer::visit(ForNode *m) {}
+void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
+    if (m->operand != nullptr)
+        m->operand->accept(*this);
+}
 
-void SemanticAnalyzer::visit(ReturnNode *m) {}
+void SemanticAnalyzer::visit(IfNode *m) {
+    if (m->condition != nullptr)
+            m->condition->accept(*this);
 
-void SemanticAnalyzer::visit(FunctionCallNode *m) {}
+    if (m->body != nullptr)
+        for(uint i=0; i< m->body->size(); i++)
+            (*(m->body))[i]->accept(*this);
+
+    if (m->body_of_else != nullptr){
+        this->print_space();
+        std::cout<<"else"<<std::endl;
+
+        this->space_counter_increase();
+            for(uint i=0; i< m->body_of_else->size(); i++)
+                (*(m->body_of_else))[i]->accept(*this);
+        this->space_counter_decrease();
+    }
+}
+
+void SemanticAnalyzer::visit(WhileNode *m) {
+     if (m->condition != nullptr)
+            m->condition->accept(*this);
+
+    if (m->body != nullptr)
+        for(uint i=0; i< m->body->size(); i++)
+            (*(m->body))[i]->accept(*this);
+}
+
+void SemanticAnalyzer::visit(ForNode *m) {
+    if (m->loop_variable_declaration != nullptr)
+            m->loop_variable_declaration->accept(*this);
+        
+    if (m->initial_statement != nullptr)
+        m->initial_statement->accept(*this);
+
+    if (m->condition != nullptr)
+        m->condition->accept(*this);
+
+    if (m->body != nullptr)
+        for(uint i=0; i< m->body->size(); i++)
+            (*(m->body))[i]->accept(*this);
+}
+
+void SemanticAnalyzer::visit(ReturnNode *m) {
+    if (m->return_value != nullptr)
+        m->return_value->accept(*this);
+}
+
+void SemanticAnalyzer::visit(FunctionCallNode *m) {
+    if (m->arguments != nullptr)
+        for(uint i=0; i< m->arguments->size(); i++)
+            (*(m->arguments))[i]->accept(*this);
+}
