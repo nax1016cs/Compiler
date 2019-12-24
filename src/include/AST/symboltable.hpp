@@ -85,6 +85,8 @@ public:
     		dumpSymbol(tables.top());
     	tables.pop();
     };
+
+    // Point(const Point &p2) {x = p2.x; y = p2.y; } 
     
 public:
     std::stack <SymbolTable> tables;

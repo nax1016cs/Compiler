@@ -24,13 +24,45 @@ using namespace std;
 int isparameter = 0;
 int level = 0;
 int function_cmp = 0;
+int is_array_var = 0;
 extern int error_found;
 extern long long int count_line[1000] ;
 extern char *file_name;;
 SymbolManager manager;
 
+
 SymbolTable* current_table;
 SymbolEntry* current_entry;
+
+bool check_declared_reference(string id){
+    // SymbolManager temp;
+    std::stack <SymbolTable> temp_manager_stack;
+    bool find = false;
+    while(manager.tables.size()!=0){
+        SymbolTable temp = manager.tables.top();
+        manager.tables.pop();
+        for(int j=0; j<temp.entries.size(); j++){
+            if(temp.entries[j].name==id){
+                find = true;
+            }
+        // cout<<temp.entries[j].name<<"current "<<j<< " "<<temp.entries.size()<<endl;
+
+        }
+        // printf("1111");
+
+        temp_manager_stack.push(temp);
+    }
+
+    while(!temp_manager_stack.empty()){
+        SymbolTable temp = temp_manager_stack.top();
+        temp_manager_stack.pop();
+        manager.tables.push(temp);
+    }
+
+    return find;
+}
+
+
 
 void print_tab(int n){
     for(int i=0; i<n; i++){
@@ -96,8 +128,10 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
         current_table = temp_table;
         m->compound_statement_node->accept(*this);
     }
+    // std::cout<<check_declared_reference("fun");
 
     manager.popScope();
+
     // if(strcmp(m->program_name.c_str(), m->end_name.c_str())){
     //     fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", m->end_line_number, m->end_col_number);
     //     print_error_code(m->end_line_number, m->end_col_number);
@@ -180,7 +214,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
             fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s is redeclared \n", m->line_number, m->col_number, m->function_name.c_str());
             print_error_code(m->line_number, m->col_number);
             manager.pushScope(*current_table);
-            return;
+            break;
         }
     }
 
@@ -308,8 +342,9 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
 }
 
 void SemanticAnalyzer::visit(PrintNode *m) {
-    if (m->expression_node != nullptr)
+    if (m->expression_node != nullptr){
          m->expression_node->accept(*this);
+    }
 }
 
 void SemanticAnalyzer::visit(ReadNode *m) {
@@ -318,19 +353,24 @@ void SemanticAnalyzer::visit(ReadNode *m) {
 }
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) {
-    int declared = 0;
-    for(int i=0; i<current_table->entries.size(); i++){
-        declared = (m->variable_name.substr(0,31) == current_table->entries[i].name) ? 1 :0;
-    }
-    if(!declared){
+    if(!check_declared_reference(m->variable_name)){
+        cout<<"this is variable reference: "<<m->variable_name<<endl;
         fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier %s\n", m->line_number, m->col_number, m->variable_name.c_str());
         print_error_code(m->line_number, m->col_number);
+        //fix
+        return;
     }
+    // if(is_array_var){
+        // std::cout<<m->variable_name<<endl;
+
+    // }
     if (m->expression_node_list != nullptr){
         for(uint i=0; i< m->expression_node_list->size(); i++){
-            std::cout<<"["<<std::endl;
+            is_array_var = 1;
+            // std::cout<<"["<<std::endl;
             (*(m->expression_node_list))[i]->accept(*this);
-            std::cout<<"]"<<std::endl;
+            // std::cout<<"]"<<std::endl;
+            is_array_var = 0;
         }
      }
 }
