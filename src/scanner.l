@@ -162,12 +162,11 @@ float {integer}\.(0|[0-9]*[1-9])
 
     /* Newline */
 <INITIAL,CCOMMENT>\n {
-
+    count += 1;
+    count_line[LineNum] = count;
     if (OptSrc)
         printf("%d: %s\n", LineNum, Buffer);
     ++LineNum;
-    count += 1;
-    count_line[LineNum] = count;
     ColNum = 1;
     Buffer[0] = '\0';
     BufferPtr = Buffer;

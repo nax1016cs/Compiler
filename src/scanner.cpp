@@ -1190,12 +1190,11 @@ case 57:
 YY_RULE_SETUP
 #line 164 "scanner.l"
 {
-
+    count += 1;
+    count_line[LineNum] = count;
     if (OptSrc)
         printf("%d: %s\n", LineNum, Buffer);
     ++LineNum;
-    count += 1;
-    count_line[LineNum] = count;
     ColNum = 1;
     Buffer[0] = '\0';
     BufferPtr = Buffer;
@@ -1204,7 +1203,7 @@ YY_RULE_SETUP
 /* Catch the character which is not accepted by rules above */
 case 58:
 YY_RULE_SETUP
-#line 177 "scanner.l"
+#line 176 "scanner.l"
 {
     printf("Error at line %d: bad character \"%s\"\n", LineNum, yytext);
     exit(-1);
@@ -1212,10 +1211,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 59:
 YY_RULE_SETUP
-#line 182 "scanner.l"
+#line 181 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1219 "scanner.cpp"
+#line 1218 "scanner.cpp"
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(CCOMMENT):
 	yyterminate();
@@ -2210,7 +2209,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 182 "scanner.l"
+#line 181 "scanner.l"
 
 
 

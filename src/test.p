@@ -1,22 +1,16 @@
 //&S-
 //&T-
-test;
-// no global declaration(s)
+basic;
 
-func(a : integer ; b : array 1 to 2 of array 2 to 4 of real) : boolean;
-begin
-    var c : "hello world!";
-    begin
-        var d : real;
-        return (b[1][4] >= 1.0);
-    end
-end
-end func
+// scaler type
+var a,a1,a2 : integer;
+var arr: array 55146 to 80 of array 123 to 456 of integer;
+//Constant
+var g,gg : 10;
+var g : "hahah";
+
 
 begin
-    var a : integer;
-    begin
-        var a : boolean;  // outer 'a' has been hidden in this scope
-    end
+    var dump: string;
 end
-end test
+end basic

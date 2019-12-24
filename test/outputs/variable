@@ -1,0 +1,12 @@
+1: //&T-
+2: //&D-
+3: variable;
+4: 
+5: begin
+6:     var arrErr1: array 55146 to 80 of integer;
+7: end
+8: end variable
+
+|---------------------------------------------|
+|  There is no syntactic and semantic error!  |
+|---------------------------------------------|

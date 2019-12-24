@@ -64,6 +64,7 @@ struct id_info{
 
 static Node AST;
 char *file_name;
+int error_found = 0;
 %}
     /* Useful Header */
 %code requires { #include "AST/ast.hpp" }
@@ -1182,9 +1183,12 @@ int main(int argc, const char *argv[]) {
     yylex_destroy();
     // Memory_Free_END
 
-    printf("\n"
-           "|---------------------------------------------|\n"
-           "|  There is no syntactic and semantic error!  |\n"
-           "|---------------------------------------------|\n");
+    if(!error_found){
+        printf("\n"
+               "|---------------------------------------------|\n"
+               "|  There is no syntactic and semantic error!  |\n"
+               "|---------------------------------------------|\n");        
+    }
+
     return 0;
 }

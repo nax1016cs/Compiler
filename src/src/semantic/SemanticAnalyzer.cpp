@@ -24,29 +24,61 @@ using namespace std;
 int isparameter = 0;
 int level = 0;
 int function_cmp = 0;
+extern int error_found;
+extern long long int count_line[1000] ;
+extern char *file_name;;
 SymbolManager manager;
 
 SymbolTable* current_table;
 SymbolEntry* current_entry;
 
-extern long long int count_line[1000] ;
-extern char *file_name;;
+void print_tab(int n){
+    for(int i=0; i<n; i++){
+         fprintf(stderr, " ");
+    }
+}
+
+void print_error_code(int end_line_number, int end_col_number){
+    FILE *fp = fopen(file_name, "r");  
+    char code [1000];
+    fseek ( fp , count_line[end_line_number-1] , SEEK_SET );
+    fgets (code , 1000 , fp);
+    print_tab(4); 
+    fprintf(stderr, "%s",code);
+    print_tab(4 + end_col_number-1); 
+    fprintf(stderr, "%c\n",'^');
+    fclose (fp);
+    error_found = 1;
+
+}
+
+
 void SemanticAnalyzer::visit(ProgramNode *m) {
+    string temp = "./test-cases/"+m->program_name + ".p";
+    // string temp = m->program_name + ".p";
 
-    // check file
-    // FILE *fp = fopen(file_name, "r");
-    // for(int i=1; i<100; i++){
-    //     if(i!=1 && count_line[i]==0 ){
-    //         break;
-    //     }
-    //     // std::cout<<count_line[i]<<std::endl;
-    //     char code [1000];
-    //     fseek ( fp , count_line[i] , SEEK_SET );
-    //     fgets (code , 1000 , fp); 
-    //     printf("%s", code);
-    // }
-    // fclose (fp);
 
+    // Here need to restore!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+    if(strcmp(temp.c_str(), file_name)){
+        fprintf(stderr, "<Error> Found in line %d, column %d: program name must be the same as filename\n", m->line_number, m->col_number);
+        // FILE *fp = fopen(file_name, "r");  
+        // char code [1000];
+        // fseek ( fp , count_line[m->line_number-1] , SEEK_SET );
+        // fgets (code , 1000 , fp);
+        // print_tab(4); 
+        // fprintf(stderr, "%s",code);
+        // print_tab(4 + m->col_number-1); 
+        // fprintf(stderr, "%c\n",'^');
+        // fclose (fp);
+        print_error_code(m->line_number, m->col_number);
+        error_found = 1;
+        // printf("program name %s\n", temp.c_str());
+        // printf("file name %s\n", file_name);
+
+    }
+
+    
     SymbolEntry* s = new SymbolEntry(m->program_name.substr(0,31), "program", level, "void", "");
     SymbolTable* first = new SymbolTable;
     first->addSymbol(*s);
@@ -62,22 +94,27 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     if (m->function_node_list != nullptr){
         for(uint i=0; i< m->function_node_list->size(); i++){
             (*(m->function_node_list))[i]->accept(*this);
-            // current_table = &manager.tables.top();
             if(i!=m->function_node_list->size()-1){
                 manager.tables.pop();
                 current_table = first;
             }
         }
     }
-    // current_table = NULL;
-    // level++;
+    if (m->function_node_list == nullptr){
+        manager.pushScope(*current_table);
+    }
+
     if (m->compound_statement_node != nullptr){
         SymbolTable* temp_table = new SymbolTable;
         current_table = temp_table;
         m->compound_statement_node->accept(*this);
     }
- 	// level--;
+
     manager.popScope();
+    if(strcmp(m->program_name.c_str(), m->end_name.c_str())){
+        fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", m->end_line_number, m->end_col_number);
+        print_error_code(m->end_line_number, m->end_col_number);
+    }
 }
 
 void SemanticAnalyzer::visit(DeclarationNode *m) {
@@ -88,35 +125,60 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
 }
 
 void SemanticAnalyzer::visit(VariableNode *m) {
-
-    if (m->constant_value_node != nullptr){
-       	SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "constant", level, m->getType(), "");
-       	current_entry = s;
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;       	
+    int declared = 0;
+    for(int i=0; i<current_table->entries.size(); i++){
+        declared = (m->variable_name.substr(0,31) ==current_table->entries[i].name) ? 1 :0;
+        if(declared){
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s is redeclared \n", m->line_number, m->col_number, m->variable_name.c_str());
+            print_error_code(m->line_number, m->col_number);
+            break;
+        }
+    }
+    if(!declared){
+        if(m->type->array_range.size()!=0){
+            // if(m->type->array_range[0]>=)
+            for(int i=0; i<m->type->array_range.size(); i++){
+                if(m->type->array_range[i].start<0 || m->type->array_range[i].end<0 || m->type->array_range[i].start > m->type->array_range[i].end){
+                    fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s declared as an array with a lower bound greater or equal to upper bound \n", m->line_number, m->col_number, m->variable_name.c_str());
+                    print_error_code(m->line_number, m->col_number);
+                    break;
+                }
+            }
+            // std::cout<<m->type->array_range[0].start<<" "<<m->type->array_range[0].end<<'\n';
+            // std::cout<<m->type->array_range[1].start<<" "<<m->type->array_range[1].end<<'\n';
+        }
+        // constant value
+        if (m->constant_value_node != nullptr){
+        SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "constant", level, m->getType(), "");
+        current_entry = s;
+        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
         m->constant_value_node->accept(*this);
         // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;
         current_table->addSymbol(*s);
         // cout<<current_table->entries[current_table->entries.size()-1].name<<current_table->entries[current_table->entries.size()-1].type<<endl;
-   		delete(s);
+        delete(s);
+        }
+        else{
+            //function's parameter
+            if(isparameter){
+                SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "parameter", level, m->getType(), "");
+                current_table->addSymbol(*s);
+            // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
+
+                delete(s);
+
+            }
+            //normal variable
+            else{
+                SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
+                current_table->addSymbol(*s);
+            // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
+
+                delete(s);
+            }
+        }
     }
-    else{
-    	if(isparameter){
-        	SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "parameter", level, m->getType(), "");
-        	current_table->addSymbol(*s);
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;       	
 
-        	delete(s);
-
-    	}
-    	else{
-			SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
-        	current_table->addSymbol(*s);
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;       	
-
-   			delete(s);
-
-    	}
-    }
 }
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) {
@@ -126,6 +188,7 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
 	// get the function return type
+
     string function_type;
     switch(m->return_type->type_set){
         case SET_SCALAR:
@@ -207,8 +270,22 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         function_cmp = 1;
         m->body->accept(*this);
     }
+        // std::cout<<"this is "<<m->function_name<<" end"<<m->end_name<<std::endl;
     
+    if(strcmp(m->function_name.c_str(), m->end_name.c_str())){
+        fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of function must be the same as identifier at the beginning of function\n", m->end_line_number, m->end_col_number);
+        // FILE *fp = fopen(file_name, "r");  
+        // char code [1000];
+        // fseek ( fp , count_line[m->end_line_number-1] , SEEK_SET );
+        // fgets (code , 1000 , fp);
+        // print_tab(4); 
+        // fprintf(stderr, "%s",code);
+        // print_tab(4 + m->end_col_number-1); 
+        // fprintf(stderr, "%c\n",'^');
+        print_error_code(m->end_line_number,m->end_col_number);
+        // fclose (fp);
 
+    }
     // level--;
     // manager.pushScope(*current_table);
 }
