@@ -23,8 +23,9 @@
 using namespace std;
 
 std:: stack <string> current_type;
-
 int set_error = 0;
+int check_return = 0;
+int set_error_num = 0;
 int isparameter = 0;
 int level = 0;
 int function_cmp = 0;
@@ -32,6 +33,7 @@ int is_array_var = 0;
 int lack_attr = 0;
 int is_assignment = 0;
 int array_int_error = 0;
+string return_type ;
 extern int error_found;
 extern long long int count_line[1000] ;
 extern char *file_name;;
@@ -59,11 +61,7 @@ bool check_declared_reference(string id){
             if(temp.entries[j].name==id){
                 find = true;
             }
-        // cout<<temp.entries[j].name<<"current "<<j<< " "<<temp.entries.size()<<endl;
-
         }
-        // printf("1111");
-
         temp_manager_stack.push(temp);
     }
     while(!temp_manager_stack.empty()){
@@ -88,6 +86,7 @@ string find_type_or_kind(string id, int type_or_kind){
             if(temp.entries[j].name==id){
                 ans_type = temp.entries[j].type;
                 ans_kind = temp.entries[j].kind;
+                // cout<<"type: "<< ans_type<<" kind: "<<ans_kind<<endl;
             }
         }
         temp_manager_stack.push(temp);
@@ -153,6 +152,15 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
             break;
         case 14:
             fprintf(stderr, "<Error> Found in line %d, column %d: invalid operand to unary operation '%s' ('%s')\n", line_number, col_number,s1.c_str(), s2.c_str() );
+            break;
+        case 15:
+            fprintf(stderr, "<Error> Found in line %d, column %d:  program/procedure should not return a value\n", line_number, col_number);
+            break;
+        case 16:
+            fprintf(stderr, "<Error> Found in line %d, column %d:  return '%s' from a function with return type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
+            break;
+
+
     }
     FILE *fp = fopen(file_name, "r");  
     char code [1000];
@@ -288,6 +296,8 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
 	// get the function return type
+
+    // cout<<"the return type is "<<return_type<<endl;
     if(strcmp(m->function_name.c_str(), m->end_name.c_str())){
         print_error_code(m->end_line_number,m->end_col_number, 5 , "", "", "");
     }
@@ -296,7 +306,6 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         if(m->function_name.substr(0,31) ==current_table->entries[i].name){
             print_error_code(m->line_number, m->col_number, 6 , m->function_name, "", "");
             manager.pushScope(*current_table);
-            break;
         }
     }
 
@@ -376,6 +385,8 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         level--;
     }
     isparameter = 0;
+    check_return = 1;
+    return_type = find_type_or_kind(m->function_name, 1);
     if (m->body != nullptr){
         function_cmp = 1;
         m->body->accept(*this);
@@ -776,8 +787,17 @@ void SemanticAnalyzer::visit(ForNode *m) {
 }
 
 void SemanticAnalyzer::visit(ReturnNode *m) {
+    if(!check_return){
+        print_error_code(m->line_number, m->col_number, 15, "", "", "");
+        return;
+    }
     if (m->return_value != nullptr)
         m->return_value->accept(*this);
+    // cout<<"return value:"<<return_type<<endl;
+    if(check_return && return_type !=  current_type.top() && current_type.top() != "error"){
+        check_return = 0;
+        print_error_code(m->line_number, m->col_number, 16 , current_type.top(), return_type, "");
+    } 
 }
 
 void SemanticAnalyzer::visit(FunctionCallNode *m) {
