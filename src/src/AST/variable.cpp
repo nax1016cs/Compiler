@@ -33,40 +33,42 @@ void VariableNode::print() {
 
 string VariableNode::getType() {
     int first_bracket = 1;
+    string temp;
     switch(this->type->type_set){
+
         case SET_SCALAR:
         case SET_CONSTANT_LITERAL:
             switch(this->type->type){
-                case TYPE_INTEGER: this->variable_type = "integer"; break;
-                case TYPE_REAL:    this->variable_type = "real"; break;
-                case TYPE_STRING:  this->variable_type = "string"; break;
-                case TYPE_BOOLEAN: this->variable_type = "boolean"; break;
-                default:           this->variable_type = "unknown"; break;
+                case TYPE_INTEGER: temp = "integer"; break;
+                case TYPE_REAL:    temp = "real"; break;
+                case TYPE_STRING:  temp = "string"; break;
+                case TYPE_BOOLEAN: temp = "boolean"; break;
+                default:           temp = "unknown"; break;
             }
             break;
         case SET_ACCUMLATED:
             switch(this->type->type){
-                case TYPE_INTEGER: this->variable_type = "integer"; break;
-                case TYPE_REAL:    this->variable_type = "real"; break;
-                case TYPE_STRING:  this->variable_type = "string"; break;
-                case TYPE_BOOLEAN: this->variable_type = "boolean"; break;
-                default:           this->variable_type = "unknown"; break;
+                case TYPE_INTEGER: temp = "integer"; break;
+                case TYPE_REAL:    temp = "real"; break;
+                case TYPE_STRING:  temp = "string"; break;
+                case TYPE_BOOLEAN: temp = "boolean"; break;
+                default:           temp = "unknown"; break;
             }
             
             for(uint i=0; i<this->type->array_range.size(); i++){
                 if(first_bracket){
-                    this->variable_type += " [";
+                    temp += " [";
                     first_bracket = 0;
                 }
                 else
-                    this->variable_type += "[";
-                this->variable_type += to_string(this->type->array_range[i].end -this->type->array_range[i].start );
-                this->variable_type += "]";
+                    temp += "[";
+                temp += to_string(this->type->array_range[i].end -this->type->array_range[i].start );
+                temp += "]";
             }
             break;
         default:
-            this->variable_type = "unknown";
+            temp = "unknown";
             break;
     }
-    return this->variable_type;
+    return temp;
 }

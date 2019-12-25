@@ -21,11 +21,13 @@
 #include <iostream>
 #include <string.h>
 using namespace std;
+bool find_arr_const = false;
 int isparameter = 0;
 int level = 0;
 int function_cmp = 0;
 int is_array_var = 0;
 int lack_attr = 0;
+int is_assignment = 0;
 extern int error_found;
 extern long long int count_line[1000] ;
 extern char *file_name;;
@@ -53,16 +55,42 @@ bool check_declared_reference(string id){
 
         temp_manager_stack.push(temp);
     }
+    while(!temp_manager_stack.empty()){
+        SymbolTable temp = temp_manager_stack.top();
+        temp_manager_stack.pop();
+        manager.tables.push(temp);
+    }
+    return find;
+}
+
+// 0 for kind , 1 for type
+string find_type_or_kind(string id, int type_or_kind){
+    // SymbolManager temp;
+    std::stack <SymbolTable> temp_manager_stack;
+    bool find = false;
+    string ans_type;
+    string ans_kind;
+    while(manager.tables.size()!=0){
+        SymbolTable temp = manager.tables.top();
+        manager.tables.pop();
+        for(int j=0; j<temp.entries.size(); j++){
+            if(temp.entries[j].name==id){
+                ans_type = temp.entries[j].type;
+                ans_kind = temp.entries[j].kind;
+            }
+        }
+        temp_manager_stack.push(temp);
+    }
 
     while(!temp_manager_stack.empty()){
         SymbolTable temp = temp_manager_stack.top();
         temp_manager_stack.pop();
         manager.tables.push(temp);
     }
-
-    return find;
+    if(type_or_kind) 
+        return ans_type;
+    return ans_kind;
 }
-
 
 
 void print_tab(int n){
@@ -208,6 +236,13 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
     // cout<<"this constant is "<<m->getValue()<<endl;
     if(lack_attr)
 	   current_entry->attr = m->getValue();
+    if(find_arr_const){
+        find_arr_const = m->check_int_in_array();
+        if(!find_arr_const){
+            fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number);
+        }
+    }
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
@@ -342,11 +377,20 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) {
 
 void SemanticAnalyzer::visit(AssignmentNode *m) {
 
-    if (m->variable_reference_node != nullptr)
+    if (m->variable_reference_node != nullptr){
+        is_assignment = 1;
         m->variable_reference_node->accept(*this);
+    }
+    if(is_assignment!=1){
+        return ;
 
-    if (m->expression_node != nullptr)
+    }
+
+    if (m->expression_node != nullptr){
+        is_assignment = 1;
         m->expression_node->accept(*this);
+    }
+    is_assignment = 0;
 }
 
 void SemanticAnalyzer::visit(PrintNode *m) {
@@ -361,42 +405,82 @@ void SemanticAnalyzer::visit(ReadNode *m) {
 }
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) {
-    // cout<<"this variable is " <<m->variable_name<<endl;
+    // cout<<"this variable is " <<m->variable_name<<" and its type is "<<m->getType()<<endl;
+    if(is_assignment){
+        string type_finding = find_type_or_kind(m->variable_name, 0);
+        string kind_finding = find_type_or_kind(m->variable_name, 1);
+        size_t found = kind_finding.find('[');
+        if(found !=std::string::npos){
+            fprintf(stderr, "<Error> Found in line %d, column %d: array assignment is not allowed\n", m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number);
+            is_assignment = 0;
+            return;           
+        }
+        else if( type_finding == "constant"){
+            fprintf(stderr, "<Error> Found in line %d, column %d: cannot assign to variable %s which is a constant\n", m->line_number, m->col_number, m->variable_name.c_str());
+            print_error_code(m->line_number, m->col_number);
+            return;
+        }
+        else if(type_finding == "loop_var"){
+            fprintf(stderr, "<Error> Found in line %d, column %d: the value of loop variable cannot be modified inside the loop\n", m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number);
+            return;            
+        }
 
+    }
     if(!check_declared_reference(m->variable_name)){
-        cout<<"this is variable reference: "<<m->variable_name<<endl;
+        // cout<<"this is variable reference: "<<m->variable_name<<endl;
         fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier %s\n", m->line_number, m->col_number, m->variable_name.c_str());
         print_error_code(m->line_number, m->col_number);
         //fix
         return;
     }
-    // if(is_array_var){
-        // std::cout<<m->variable_name<<endl;
 
-    // }
     if (m->expression_node_list != nullptr){
+        int count_bracket = 0;
+        string ans = find_type_or_kind(m->variable_name,1);
+        for(int i=0; i<ans.size(); i++){
+            if(ans[i]=='[') count_bracket++;
+        }
+        if(m->expression_node_list->size() > count_bracket ){
+            fprintf(stderr, "<Error> Found in line %d, column %d: there is an over array subscript\n", m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number);
+        }
         for(uint i=0; i< m->expression_node_list->size(); i++){
-            // is_array_var = 1;
+            // need to check the constant is integer or not
+            find_arr_const = true;
+
             // std::cout<<"["<<std::endl;
             (*(m->expression_node_list))[i]->accept(*this);
-
+            // the constant is not int
+            if(!find_arr_const){
+                return;
+            }
             // std::cout<<"]"<<std::endl;
-            // is_array_var = 0;
+            // 判斷array裡面 integer 
         }
-     }
+    }
+
+    // push type
+
 }
 
 void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
+
     if (m->left_operand != nullptr)
-            m->left_operand->accept(*this);
+        m->left_operand->accept(*this);
 
     if (m->right_operand != nullptr)
         m->right_operand->accept(*this);
+
+    // a[ b + c]
+    // (456 + 123) + "str"
 }
 
 void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
-    if (m->operand != nullptr)
+    if (m->operand != nullptr){
         m->operand->accept(*this);
+    }
 }
 
 void SemanticAnalyzer::visit(IfNode *m) {

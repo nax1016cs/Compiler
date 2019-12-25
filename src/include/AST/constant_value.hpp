@@ -18,4 +18,5 @@ class ConstantValueNode : public ASTNodeBase
         void accept(ASTVisitorBase &v) {v.visit(this); }
         void print();
         string getValue();
+        bool check_int_in_array();
 };
