@@ -15,7 +15,7 @@ begin
 
     arr := a;
 
-    read arr[h][2];
+    read arr[(2>3) and true][2];
     // read arr[1];
     read arr[1];
     a := 5 + arr[1];
@@ -30,6 +30,7 @@ begin
     print -hse;
     print not hs;
     print not 1235;
+    print h + h; 
 
 
 

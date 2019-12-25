@@ -64,11 +64,8 @@ bool ConstantValueNode::check_int_in_array(){
     bool find_int = false;
     switch(this->constant_value->type){
         case TYPE_INTEGER: 
-            if(this->constant_value->int_literal >= 0){
-                find_int = true ; 
-                break;
-            }
-                
+            find_int = true;
+            break;        
     }
     return find_int;
 }

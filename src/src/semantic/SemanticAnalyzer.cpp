@@ -24,7 +24,7 @@ using namespace std;
 
 std:: stack <string> current_type;
 
-bool find_arr_const = false;
+
 int isparameter = 0;
 int level = 0;
 int function_cmp = 0;
@@ -248,14 +248,14 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
     // cout<<"this constant is "<<m->getValue()<<endl;
     if(lack_attr)
 	   current_entry->attr = m->getValue();
-    if(find_arr_const){
-        find_arr_const = m->check_int_in_array();
-        if(!find_arr_const){
-            fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
-            print_error_code(m->line_number, m->col_number);
-            return;
-        }
-    }
+    // if(find_arr_const){
+    //     find_arr_const = m->check_int_in_array();
+    //     if(!find_arr_const){
+    //         fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
+    //         print_error_code(m->line_number, m->col_number);
+    //         // return;
+    //     }
+    // }
     string attr;
     switch(m->constant_value->type){
         case TYPE_INTEGER: attr = "integer" ; break;
@@ -434,14 +434,6 @@ void SemanticAnalyzer::visit(ReadNode *m) {
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     // cout<<"this variable is " <<m->variable_name<<" and its type is "<<m->getType()<<endl;
-    if(find_arr_const){
-        string arr_type = current_type.top();
-        if(arr_type != "integer"){
-            fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
-            print_error_code(m->line_number, m->col_number);
-            return;
-        } 
-    }
     if(is_assignment){
         string type_finding = find_type_or_kind(m->variable_name, 0);
         string kind_finding = find_type_or_kind(m->variable_name, 1);
@@ -484,26 +476,38 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
         }
         for(uint i=0; i< m->expression_node_list->size(); i++){
             // need to check the constant is integer or not
-            find_arr_const = true;
+            // find_arr_const = true;
 
             // std::cout<<"["<<std::endl;
             (*(m->expression_node_list))[i]->accept(*this);
+            // if(find_arr_const){
+                string arr_type = current_type.top();
+                // cout<< arr_type<< current_type.top()<<endl;
+                if(arr_type != "integer"){
+                    // cout<<"123131";
+                    fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
+                    print_error_code(m->line_number, m->col_number);
+                    current_type.push("error");
+                    // return;
+                } 
+            // }
             // the constant is not int
-            if(!find_arr_const){
-                return;
-            }
-            find_arr_const = false;
+            // if(!find_arr_const){
+            //     return;
+            // }
             // std::cout<<"]"<<std::endl;
             // 判斷array裡面 integer
 
 
         }
     }
+    // find_arr_const = false;
     string t = find_type_or_kind(m->variable_name, 1);
     // size_t f = t.find('[');
     // if(f !=std::string::npos){
     //     t = t.substr(0,f-1);
     // }
+    // cout<<m->variable_name<<t<<endl;
     current_type.push(t);
     // push type
 
@@ -521,6 +525,10 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
     current_type.pop();
     string second = current_type.top();
     current_type.pop(); 
+    if(first == "error" || second =="error"){
+        current_type.push("error");
+        return;
+    }
     int error = 0;
     string operation;
     switch(m->op){
@@ -528,6 +536,8 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "or"; 
             if(first != "boolean" || second != "boolean"){
                 error = 1;
+                current_type.push("error");
+
             }
             else{
                 current_type.push("boolean");
@@ -537,6 +547,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "and"; 
             if(first != "boolean" || second != "boolean"){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -546,6 +557,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "<"; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -555,6 +567,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "<="; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -564,6 +577,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "="; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -573,6 +587,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = ">"; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -582,6 +597,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = ">="; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -591,6 +607,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "<>"; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -599,7 +616,13 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
         case OP_PLUS:             
             operation = "+"; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
-                error = 1;
+                if(first == "string" && second == "string"){
+                    current_type.push("string");
+                }
+                else{
+                    error = 1;
+                    current_type.push("error");
+                }
             }
             else{
                 if(first == "real" || second == "real"){
@@ -614,6 +637,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "-"; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 if(first == "real" || second == "real"){
@@ -628,6 +652,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "*"; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 if(first == "real" || second == "real"){
@@ -642,6 +667,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "/"; 
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 if(first == "real" || second == "real"){
@@ -656,6 +682,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "mod"; 
             if(first!= "integer" || second!= "integer"){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("integer");
@@ -668,6 +695,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
         fprintf(stderr, "<Error> Found in line %d, column %d: invalid operands to binary operation '%s' ('%s' and '%s')\n", m->line_number, m->col_number,operation.c_str(), second.c_str(), first.c_str() );
         print_error_code(m->line_number, m->col_number);
     }
+                // cout<<current_type.top();
 
     // a[ b + c]
     // (456 + 123) + "str"
@@ -687,6 +715,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
             operation = "not"; 
             if(first != "boolean"){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 current_type.push("boolean");
@@ -696,6 +725,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
             operation = "neg"; 
             if( !(first == "integer" || first == "real")  ){
                 error = 1;
+                current_type.push("error");
             }
             else{
                 if(first == "real"){
