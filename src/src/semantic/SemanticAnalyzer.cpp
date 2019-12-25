@@ -24,7 +24,7 @@ using namespace std;
 
 std:: stack <string> current_type;
 
-
+int set_error = 0;
 int isparameter = 0;
 int level = 0;
 int function_cmp = 0;
@@ -110,14 +110,57 @@ void print_tab(int n){
     }
 }
 
-void print_error_code(int end_line_number, int end_col_number){
+void print_error_code(int line_number, int col_number, int error_num, string s1, string s2, string s3){
+    switch(error_num){
+        case 1:
+            fprintf(stderr, "<Error> Found in line %d, column %d: program name must be the same as filename\n", line_number, col_number);
+            break;
+        case 2:
+            fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", line_number, col_number);
+            break;
+        case 3:
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", line_number, col_number, s1.c_str());
+            break;
+        case 4:
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' declared as an array with a lower bound greater or equal to upper bound \n", line_number, col_number, s1.c_str());
+            break;
+        case 5:
+            fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of function must be the same as identifier at the beginning of function\n", line_number,col_number);
+            break;
+        case 6:
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", line_number, col_number, s1.c_str());
+            break;
+        case 7:
+            fprintf(stderr, "<Error> Found in line %d, column %d: array assignment is not allowed\n", line_number, col_number);
+            break;
+        case 8:
+            fprintf(stderr, "<Error> Found in line %d, column %d: cannot assign to variable '%s' which is a constant\n", line_number, col_number, s1.c_str());
+            break;
+        case 9:
+            fprintf(stderr, "<Error> Found in line %d, column %d: the value of loop variable cannot be modified inside the loop\n", line_number, col_number);
+            break;
+        case 10:
+            fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier '%s'\n", line_number, col_number, s1.c_str());
+            break;
+        case 11:
+            fprintf(stderr, "<Error> Found in line %d, column %d: there is an over array subscript\n", line_number, col_number);
+            break;
+        case 12:
+            fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", line_number,col_number);
+            break;
+        case 13:
+            fprintf(stderr, "<Error> Found in line %d, column %d: invalid operands to binary operation '%s' ('%s' and '%s')\n", line_number, col_number,s1.c_str(), s2.c_str(), s3.c_str() );
+            break;
+        case 14:
+            fprintf(stderr, "<Error> Found in line %d, column %d: invalid operand to unary operation '%s' ('%s')\n", line_number, col_number,s1.c_str(), s2.c_str() );
+    }
     FILE *fp = fopen(file_name, "r");  
     char code [1000];
-    fseek ( fp , count_line[end_line_number-1] , SEEK_SET );
+    fseek ( fp , count_line[line_number-1] , SEEK_SET );
     fgets (code , 1000 , fp);
     print_tab(4); 
     fprintf(stderr, "%s",code);
-    print_tab(4 + end_col_number-1); 
+    print_tab(4 + col_number-1); 
     fprintf(stderr, "%c\n",'^');
     fclose (fp);
     error_found = 1;
@@ -126,16 +169,15 @@ void print_error_code(int end_line_number, int end_col_number){
 
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
-    // string temp = "./test-cases/"+m->program_name + ".p";
+    string temp = "./test-cases/"+m->program_name + ".p";
     // string temp = m->program_name + ".p";
 
 
     // Here need to restore!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    // if(strcmp(temp.c_str(), file_name)){
-    //     fprintf(stderr, "<Error> Found in line %d, column %d: program name must be the same as filename\n", m->line_number, m->col_number);
-    //     print_error_code(m->line_number, m->col_number);
-    // }
+    if(strcmp(temp.c_str(), file_name)){
+        print_error_code(m->line_number, m->col_number, 1 , "", "", "");
+    }
 
     SymbolEntry* s = new SymbolEntry(m->program_name.substr(0,31), "program", level, "void", "");
     SymbolTable* first = new SymbolTable;
@@ -172,10 +214,9 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
 
     manager.popScope();
 
-    // if(strcmp(m->program_name.c_str(), m->end_name.c_str())){
-    //     fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", m->end_line_number, m->end_col_number);
-    //     print_error_code(m->end_line_number, m->end_col_number);
-    // }
+    if(strcmp(m->program_name.c_str(), m->end_name.c_str())){
+        print_error_code(m->end_line_number, m->end_col_number, 2 , "", "", "");
+    }
 }
 
 void SemanticAnalyzer::visit(DeclarationNode *m) {
@@ -191,16 +232,14 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     for(int i=0; i<current_table->entries.size(); i++){
         declared = (m->variable_name.substr(0,31) ==current_table->entries[i].name) ? 1 :0;
         if(declared){
-            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", m->line_number, m->col_number, m->variable_name.c_str());
-            print_error_code(m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number, 3 , m->variable_name, "", "");
             return;
         }
     }
     if(m->type->array_range.size()!=0){
         for(int i=0; i<m->type->array_range.size(); i++){
             if(m->type->array_range[i].start<0 || m->type->array_range[i].end<0 || m->type->array_range[i].start > m->type->array_range[i].end){
-                fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' declared as an array with a lower bound greater or equal to upper bound \n", m->line_number, m->col_number, m->variable_name.c_str());
-                print_error_code(m->line_number, m->col_number);
+                print_error_code(m->line_number, m->col_number, 4 , m->variable_name, "", "");
                 return;
             }
         }
@@ -208,35 +247,24 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     // constant value
     if (m->constant_value_node != nullptr){
         SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "constant", level, m->getType(), "");
-        current_entry = s;
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;      
+        current_entry = s;    
         lack_attr = 1;
-
         m->constant_value_node->accept(*this);
-
         lack_attr = 0;
-
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;
         current_table->addSymbol(*s);
-        // cout<<current_table->entries[current_table->entries.size()-1].name<<current_table->entries[current_table->entries.size()-1].type<<endl;
         delete(s);
     }
     else{
         //function's parameter
         if(isparameter){
             SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "parameter", level, m->getType(), "");
-            current_table->addSymbol(*s);
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
-
+            current_table->addSymbol(*s);           
             delete(s);
-
         }
         //normal variable
         else{
             SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
-            current_table->addSymbol(*s);
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
-
+            current_table->addSymbol(*s);         
             delete(s);
         }
     }
@@ -245,17 +273,8 @@ void SemanticAnalyzer::visit(VariableNode *m) {
 }
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) {
-    // cout<<"this constant is "<<m->getValue()<<endl;
     if(lack_attr)
 	   current_entry->attr = m->getValue();
-    // if(find_arr_const){
-    //     find_arr_const = m->check_int_in_array();
-    //     if(!find_arr_const){
-    //         fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
-    //         print_error_code(m->line_number, m->col_number);
-    //         // return;
-    //     }
-    // }
     string attr;
     switch(m->constant_value->type){
         case TYPE_INTEGER: attr = "integer" ; break;
@@ -270,14 +289,12 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
 void SemanticAnalyzer::visit(FunctionNode *m) {
 	// get the function return type
     if(strcmp(m->function_name.c_str(), m->end_name.c_str())){
-        fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of function must be the same as identifier at the beginning of function\n", m->end_line_number, m->end_col_number);
-        print_error_code(m->end_line_number,m->end_col_number);
+        print_error_code(m->end_line_number,m->end_col_number, 5 , "", "", "");
     }
 
     for(int i=0; i<current_table->entries.size(); i++){
         if(m->function_name.substr(0,31) ==current_table->entries[i].name){
-            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", m->line_number, m->col_number, m->function_name.c_str());
-            print_error_code(m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number, 6 , m->function_name, "", "");
             manager.pushScope(*current_table);
             break;
         }
@@ -439,28 +456,23 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
         string kind_finding = find_type_or_kind(m->variable_name, 1);
         size_t found = kind_finding.find('[');
         if(found !=std::string::npos){
-            fprintf(stderr, "<Error> Found in line %d, column %d: array assignment is not allowed\n", m->line_number, m->col_number);
-            print_error_code(m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number, 7, "", "", "");
             is_assignment = 0;
             return;           
         }
         else if( type_finding == "constant"){
-            fprintf(stderr, "<Error> Found in line %d, column %d: cannot assign to variable '%s' which is a constant\n", m->line_number, m->col_number, m->variable_name.c_str());
-            print_error_code(m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number, 8 , m->variable_name, "", "");
             return;
         }
         else if(type_finding == "loop_var"){
-            fprintf(stderr, "<Error> Found in line %d, column %d: the value of loop variable cannot be modified inside the loop\n", m->line_number, m->col_number);
-            print_error_code(m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number, 9 ,"", "", "");
             return;            
         }
 
     }
     if(!check_declared_reference(m->variable_name)){
         // cout<<"this is variable reference: "<<m->variable_name<<endl;
-        fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier '%s'\n", m->line_number, m->col_number, m->variable_name.c_str());
-        print_error_code(m->line_number, m->col_number);
-        //fix
+        print_error_code(m->line_number, m->col_number, 10 , m->variable_name, "", "");
         return;
     }
 
@@ -471,45 +483,22 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
             if(ans[i]=='[') count_bracket++;
         }
         if(m->expression_node_list->size() > count_bracket ){
-            fprintf(stderr, "<Error> Found in line %d, column %d: there is an over array subscript\n", m->line_number, m->col_number);
-            print_error_code(m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number, 11, "", "", "");
         }
         for(uint i=0; i< m->expression_node_list->size(); i++){
-            // need to check the constant is integer or not
-            // find_arr_const = true;
-
-            // std::cout<<"["<<std::endl;
             (*(m->expression_node_list))[i]->accept(*this);
-            // if(find_arr_const){
                 string arr_type = current_type.top();
-                // cout<< arr_type<< current_type.top()<<endl;
                 if(arr_type != "integer"){
-                    // cout<<"123131";
-                    fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
-                    print_error_code(m->line_number, m->col_number);
+                    set_error = 1;
+                    print_error_code(m->line_number, m->col_number, 12 , "", "", "");
                     current_type.push("error");
-                    // return;
+                    return;
                 } 
-            // }
-            // the constant is not int
-            // if(!find_arr_const){
-            //     return;
-            // }
-            // std::cout<<"]"<<std::endl;
-            // 判斷array裡面 integer
-
-
         }
     }
-    // find_arr_const = false;
     string t = find_type_or_kind(m->variable_name, 1);
-    // size_t f = t.find('[');
-    // if(f !=std::string::npos){
-    //     t = t.substr(0,f-1);
-    // }
-    // cout<<m->variable_name<<t<<endl;
     current_type.push(t);
-    // push type
+
 
 }
 
@@ -692,8 +681,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             operation = "unknown"; break;
     }
     if(error){
-        fprintf(stderr, "<Error> Found in line %d, column %d: invalid operands to binary operation '%s' ('%s' and '%s')\n", m->line_number, m->col_number,operation.c_str(), second.c_str(), first.c_str() );
-        print_error_code(m->line_number, m->col_number);
+        print_error_code(m->line_number, m->col_number, 13, operation, second, first);
     }
                 // cout<<current_type.top();
 
@@ -740,8 +728,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
             operation = "unknown"; break;
     }
     if(error){
-        fprintf(stderr, "<Error> Found in line %d, column %d: invalid operand to unary operation '%s' ('%s')\n", m->line_number, m->col_number,operation.c_str(), first.c_str() );
-        print_error_code(m->line_number, m->col_number);
+        print_error_code(m->line_number, m->col_number, 14, operation, first, "");
     }
 }
 
