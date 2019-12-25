@@ -25,6 +25,7 @@ int isparameter = 0;
 int level = 0;
 int function_cmp = 0;
 int is_array_var = 0;
+int lack_attr = 0;
 extern int error_found;
 extern long long int count_line[1000] ;
 extern char *file_name;;
@@ -168,8 +169,13 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     if (m->constant_value_node != nullptr){
         SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "constant", level, m->getType(), "");
         current_entry = s;
-        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;           
+        // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;      
+        lack_attr = 1;
+
         m->constant_value_node->accept(*this);
+
+        lack_attr = 0;
+
         // cout<<s->name<<" "<<s->kind<<s->level<<s->type<<s->attr<<endl;
         current_table->addSymbol(*s);
         // cout<<current_table->entries[current_table->entries.size()-1].name<<current_table->entries[current_table->entries.size()-1].type<<endl;
@@ -199,7 +205,9 @@ void SemanticAnalyzer::visit(VariableNode *m) {
 }
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) {
-	current_entry->attr = m->getValue();
+    // cout<<"this constant is "<<m->getValue()<<endl;
+    if(lack_attr)
+	   current_entry->attr = m->getValue();
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
@@ -353,6 +361,8 @@ void SemanticAnalyzer::visit(ReadNode *m) {
 }
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) {
+    // cout<<"this variable is " <<m->variable_name<<endl;
+
     if(!check_declared_reference(m->variable_name)){
         cout<<"this is variable reference: "<<m->variable_name<<endl;
         fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier %s\n", m->line_number, m->col_number, m->variable_name.c_str());
@@ -366,11 +376,12 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     // }
     if (m->expression_node_list != nullptr){
         for(uint i=0; i< m->expression_node_list->size(); i++){
-            is_array_var = 1;
+            // is_array_var = 1;
             // std::cout<<"["<<std::endl;
             (*(m->expression_node_list))[i]->accept(*this);
+
             // std::cout<<"]"<<std::endl;
-            is_array_var = 0;
+            // is_array_var = 0;
         }
      }
 }
