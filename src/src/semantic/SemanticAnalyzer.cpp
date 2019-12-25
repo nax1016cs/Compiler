@@ -21,6 +21,9 @@
 #include <iostream>
 #include <string.h>
 using namespace std;
+
+std:: stack <string> current_type;
+
 bool find_arr_const = false;
 int isparameter = 0;
 int level = 0;
@@ -28,6 +31,7 @@ int function_cmp = 0;
 int is_array_var = 0;
 int lack_attr = 0;
 int is_assignment = 0;
+int array_int_error = 0;
 extern int error_found;
 extern long long int count_line[1000] ;
 extern char *file_name;;
@@ -36,6 +40,13 @@ SymbolManager manager;
 
 SymbolTable* current_table;
 SymbolEntry* current_entry;
+
+void clear_the_stack(){
+    while(!current_type.empty()){
+        current_type.pop();
+    }
+}
+
 
 bool check_declared_reference(string id){
     // SymbolManager temp;
@@ -172,6 +183,7 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
         for(uint i=0; i< m->variables_node_list->size(); i++){
             (*(m->variables_node_list))[i]->accept(*this);
         }
+    // clear_the_stack();
 }
 
 void SemanticAnalyzer::visit(VariableNode *m) {
@@ -179,7 +191,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     for(int i=0; i<current_table->entries.size(); i++){
         declared = (m->variable_name.substr(0,31) ==current_table->entries[i].name) ? 1 :0;
         if(declared){
-            fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s is redeclared \n", m->line_number, m->col_number, m->variable_name.c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", m->line_number, m->col_number, m->variable_name.c_str());
             print_error_code(m->line_number, m->col_number);
             return;
         }
@@ -187,7 +199,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     if(m->type->array_range.size()!=0){
         for(int i=0; i<m->type->array_range.size(); i++){
             if(m->type->array_range[i].start<0 || m->type->array_range[i].end<0 || m->type->array_range[i].start > m->type->array_range[i].end){
-                fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s declared as an array with a lower bound greater or equal to upper bound \n", m->line_number, m->col_number, m->variable_name.c_str());
+                fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' declared as an array with a lower bound greater or equal to upper bound \n", m->line_number, m->col_number, m->variable_name.c_str());
                 print_error_code(m->line_number, m->col_number);
                 return;
             }
@@ -228,7 +240,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             delete(s);
         }
     }
-
+    // clear_the_stack();
 
 }
 
@@ -241,8 +253,18 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
         if(!find_arr_const){
             fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
             print_error_code(m->line_number, m->col_number);
+            return;
         }
     }
+    string attr;
+    switch(m->constant_value->type){
+        case TYPE_INTEGER: attr = "integer" ; break;
+        case TYPE_REAL:    attr = "real"; break;
+        case TYPE_STRING:  attr = "string"; break;
+        case TYPE_BOOLEAN: attr = "boolean"; break;
+        default: std::cout << "unknown"; break;
+    }
+    current_type.push(attr);
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
@@ -254,7 +276,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
 
     for(int i=0; i<current_table->entries.size(); i++){
         if(m->function_name.substr(0,31) ==current_table->entries[i].name){
-            fprintf(stderr, "<Error> Found in line %d, column %d: symbol %s is redeclared \n", m->line_number, m->col_number, m->function_name.c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", m->line_number, m->col_number, m->function_name.c_str());
             print_error_code(m->line_number, m->col_number);
             manager.pushScope(*current_table);
             break;
@@ -342,7 +364,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         m->body->accept(*this);
     }
 
-
+    // clear_the_stack();
     // level--;
 }
 
@@ -371,6 +393,7 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) {
     }
     level--;
     manager.popScope();
+    // clear_the_stack();
 
 
 }
@@ -385,27 +408,40 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
         return ;
 
     }
+    is_assignment = 0;
 
     if (m->expression_node != nullptr){
-        is_assignment = 1;
+        // is_assignment = 1;
         m->expression_node->accept(*this);
     }
-    is_assignment = 0;
+    // clear_the_stack();
+
 }
 
 void SemanticAnalyzer::visit(PrintNode *m) {
     if (m->expression_node != nullptr){
          m->expression_node->accept(*this);
     }
+    // clear_the_stack();
+
 }
 
 void SemanticAnalyzer::visit(ReadNode *m) {
     if (m->variable_reference_node != nullptr)
         m->variable_reference_node->accept(*this);    
+    // clear_the_stack();
 }
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     // cout<<"this variable is " <<m->variable_name<<" and its type is "<<m->getType()<<endl;
+    if(find_arr_const){
+        string arr_type = current_type.top();
+        if(arr_type != "integer"){
+            fprintf(stderr, "<Error> Found in line %d, column %d: index of array reference must be an integer \n", m->line_number, m->col_number);
+            print_error_code(m->line_number, m->col_number);
+            return;
+        } 
+    }
     if(is_assignment){
         string type_finding = find_type_or_kind(m->variable_name, 0);
         string kind_finding = find_type_or_kind(m->variable_name, 1);
@@ -417,7 +453,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
             return;           
         }
         else if( type_finding == "constant"){
-            fprintf(stderr, "<Error> Found in line %d, column %d: cannot assign to variable %s which is a constant\n", m->line_number, m->col_number, m->variable_name.c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: cannot assign to variable '%s' which is a constant\n", m->line_number, m->col_number, m->variable_name.c_str());
             print_error_code(m->line_number, m->col_number);
             return;
         }
@@ -430,7 +466,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     }
     if(!check_declared_reference(m->variable_name)){
         // cout<<"this is variable reference: "<<m->variable_name<<endl;
-        fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier %s\n", m->line_number, m->col_number, m->variable_name.c_str());
+        fprintf(stderr, "<Error> Found in line %d, column %d: use of undeclared identifier '%s'\n", m->line_number, m->col_number, m->variable_name.c_str());
         print_error_code(m->line_number, m->col_number);
         //fix
         return;
@@ -456,11 +492,19 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
             if(!find_arr_const){
                 return;
             }
+            find_arr_const = false;
             // std::cout<<"]"<<std::endl;
-            // 判斷array裡面 integer 
+            // 判斷array裡面 integer
+
+
         }
     }
-
+    string t = find_type_or_kind(m->variable_name, 1);
+    // size_t f = t.find('[');
+    // if(f !=std::string::npos){
+    //     t = t.substr(0,f-1);
+    // }
+    current_type.push(t);
     // push type
 
 }
@@ -473,13 +517,201 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
     if (m->right_operand != nullptr)
         m->right_operand->accept(*this);
 
+    string first = current_type.top();
+    current_type.pop();
+    string second = current_type.top();
+    current_type.pop(); 
+    int error = 0;
+    string operation;
+    switch(m->op){
+        case OP_OR:               
+            operation = "or"; 
+            if(first != "boolean" || second != "boolean"){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break;
+        case OP_AND:              
+            operation = "and"; 
+            if(first != "boolean" || second != "boolean"){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break;
+        case OP_LESS:             
+            operation = "<"; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break;            
+        case OP_LESS_OR_EQUAL:    
+            operation = "<="; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break; 
+        case OP_EQUAL:            
+            operation = "="; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break; 
+        case OP_GREATER:          
+            operation = ">"; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break; 
+        case OP_GREATER_OR_EQUAL: 
+            operation = ">="; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break; 
+        case OP_NOT_EQUAL:        
+            operation = "<>"; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break; 
+        case OP_PLUS:             
+            operation = "+"; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                if(first == "real" || second == "real"){
+                    current_type.push("real");
+                }
+                else{
+                    current_type.push("integer");
+                }
+            }
+            break; 
+        case OP_MINUS:            
+            operation = "-"; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                if(first == "real" || second == "real"){
+                    current_type.push("real");
+                }
+                else{
+                    current_type.push("integer");
+                }
+            }
+            break;             
+        case OP_MULTIPLY:         
+            operation = "*"; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                if(first == "real" || second == "real"){
+                    current_type.push("real");
+                }
+                else{
+                    current_type.push("integer");
+                }
+            }
+            break;             
+        case OP_DIVIDE:           
+            operation = "/"; 
+            if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
+                error = 1;
+            }
+            else{
+                if(first == "real" || second == "real"){
+                    current_type.push("real");
+                }
+                else{
+                    current_type.push("integer");
+                }
+            }
+            break;             
+        case OP_MOD:              
+            operation = "mod"; 
+            if(first!= "integer" || second!= "integer"){
+                error = 1;
+            }
+            else{
+                current_type.push("integer");
+            }
+            break;
+        default:                 
+            operation = "unknown"; break;
+    }
+    if(error){
+        fprintf(stderr, "<Error> Found in line %d, column %d: invalid operands to binary operation '%s' ('%s' and '%s')\n", m->line_number, m->col_number,operation.c_str(), second.c_str(), first.c_str() );
+        print_error_code(m->line_number, m->col_number);
+    }
+
     // a[ b + c]
     // (456 + 123) + "str"
 }
 
 void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
+    // not
     if (m->operand != nullptr){
         m->operand->accept(*this);
+    }
+    string first = current_type.top();
+    current_type.pop();
+    string operation;
+    int error = 0;
+    switch(m->op){
+        case OP_NOT:               
+            operation = "not"; 
+            if(first != "boolean"){
+                error = 1;
+            }
+            else{
+                current_type.push("boolean");
+            }
+            break;
+        case OP_MINUS:              
+            operation = "neg"; 
+            if( !(first == "integer" || first == "real")  ){
+                error = 1;
+            }
+            else{
+                if(first == "real"){
+                    current_type.push("real");
+                }
+                else{
+                    current_type.push("integer");
+                }
+            }
+            break;         
+        default:                 
+            operation = "unknown"; break;
+    }
+    if(error){
+        fprintf(stderr, "<Error> Found in line %d, column %d: invalid operand to unary operation '%s' ('%s')\n", m->line_number, m->col_number,operation.c_str(), first.c_str() );
+        print_error_code(m->line_number, m->col_number);
     }
 }
 
