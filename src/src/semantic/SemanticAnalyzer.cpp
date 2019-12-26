@@ -671,6 +671,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
         t = temp;
     }
     // cout<<t<<endl;
+    // cout<<m->variable_name<<"type: "<<t<<endl;
     current_type.push(t);
     var_kind = find_type_or_kind(m->variable_name, 0);
     // cout<<m->variable_name <<" "<<var_kind<<endl;
@@ -688,13 +689,16 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
     if (m->left_operand != nullptr)
         m->left_operand->accept(*this);
 
+    string second = current_type.top();
+    current_type.pop();
+
     if (m->right_operand != nullptr)
         m->right_operand->accept(*this);
 
+    
     string first = current_type.top();
-    current_type.pop();
-    string second = current_type.top();
     current_type.pop(); 
+    // cout<<first<<" "<<second<<endl;
     if(first == "error" || second =="error"){
         current_type.push("error");
         return;
@@ -1047,6 +1051,9 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) {
             // current_type.pop();
         }
     }
+    string fun_type = find_type_or_kind(m->function_name, 1);
+    current_type.push(fun_type);
+
         
         
 }
