@@ -133,7 +133,7 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
             fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", line_number, col_number);
             break;
         case 3:
-            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", line_number, col_number, s1.c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", line_number, col_number, s1.substr(0,31).c_str());
             break;
         case 4:
             fprintf(stderr, "<Error> Found in line %d, column %d: '%s' declared as an array with a lower bound greater or equal to upper bound \n", line_number, col_number, s1.c_str());
@@ -504,16 +504,20 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
     }
     is_assignment = 0;
 
+    string first = current_type.top();//expr
+    current_type.pop();
+
+    if(first =="error") return;
+
     if (m->expression_node != nullptr){
         is_assignment = 1;
         m->expression_node->accept(*this);
     }
     // clear_the_stack();
-    string first = current_type.top();//expr
-    current_type.pop();
+    
     string second = current_type.top();
     current_type.pop();
-    if(first =="error" || second == "error") return;
+    if( second == "error") return;
     if(first!=second) {
         print_error_code(m->line_number, m->col_number, 17 , second, first, "");
     }
@@ -591,24 +595,62 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
         string kind_finding = find_type_or_kind(m->variable_name, 1);
         size_t found = kind_finding.find('[');
         if(found !=std::string::npos){
-            print_error_code(m->line_number, m->col_number, 7, "", "", "");
-            is_assignment = 0;
-            return;           
+            string temp = "";
+            int ct=0;
+            int append = 1;
+            if(m->expression_node_list != nullptr){
+                string temp = "";
+                int ct=0;
+                int append = 1;
+                for(int i=0; i<kind_finding.size(); i++){
+                    if(kind_finding[i] == '['){
+                        if(ct < m->expression_node_list->size()){
+                            append = 0;
+                        }
+                        else{
+                            append = 1;
+                        }
+                    }
+                    if(kind_finding[i] == ']'){
+                        ct++;
+                    }
+                    if(append){
+                        temp += kind_finding[i];
+                    }
+                }
+                // cout<<temp<<endl;
+                if(temp.find('[') == std::string::npos){
+                    if(temp[temp.size()-1] == ' ') temp = temp.substr(0, temp.size()-1);
+                }
+                // cout<<temp;
+                kind_finding = temp;
+            }
+            size_t tt = kind_finding.find('[');
+            if(tt!=std::string::npos){
+                print_error_code(m->line_number, m->col_number, 7, "", "", "");
+                is_assignment = 0;
+                current_type.push("error");
+                return;
+            }
+                       
         }
         else if( type_finding == "constant"){
             print_error_code(m->line_number, m->col_number, 8 , m->variable_name, "", "");
+            current_type.push("error");
             is_assignment = 0;
             return;
         }
         else if(type_finding == "loop_var" && !isloop){
             print_error_code(m->line_number, m->col_number, 9 ,"", "", "");
             is_assignment = 0;
+            current_type.push("error");
             return;            
         }
     }
     if(!check_declared_reference(m->variable_name) ){
         // cout<<"this is variable reference: "<<m->variable_name<<endl;
         print_error_code(m->line_number, m->col_number, 10 , m->variable_name, "", "");
+        current_type.push("error");
         return;
     }
     int count_bracket = 0;

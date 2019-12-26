@@ -1,18 +1,36 @@
+//&S-
 //&T-
-//&D-
-BinaryOperator;
+error;
 
-scientific(): real;
+func1(p1 : string; p2 : array 99 to 100 of integer) : real;
 begin
-    return 1.3e+123;
+    var p1 : boolean;  // error redeclare
 end
-end scientific
+end func1
+
+func1() : string;  // error redeclare
+begin
+end
+end func1
 
 begin
-    var vDecimal: integer;
-    var vBoolArr: array 1 to 2 of boolean;
-    print vBoolArr[3] or vBoolArr[2];
-    print vDecimal > scientific();
+    var a : integer;
+    var a : boolean;  // error redeclare
 
+    var bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb : boolean;
+    var bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbExtraCharIsUseless : string;
+
+    begin
+        var a : string;
+    end
+
+    for i := 1 to 10 do
+    begin
+        var i : integer;    // error redeclare
+        for i := 2 to 3 do  // error same iterator
+            a := 3;
+        end do
+    end
+    end do
 end
-end BinaryOperator
+end error
