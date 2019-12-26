@@ -10,6 +10,3 @@
 <Error> Found in line 21, column 9: symbol 'bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbExtraCharIsUseless' is redeclared 
         var bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbExtraCharIsUseless : string;
             ^
-<Error> Found in line 30, column 13: symbol 'i' is redeclared 
-            for i := 2 to 3 do  // error same iterator
-                ^

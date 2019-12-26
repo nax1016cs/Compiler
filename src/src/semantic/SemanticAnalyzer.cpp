@@ -643,13 +643,34 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     if(m->expression_node_list != nullptr){
         string temp = "";
         int ct=0;
+        int append = 1;
         for(int i=0; i<t.size(); i++){
-            if(t[i]=='[') ct++;
-            if(ct == count_bracket - m->expression_node_list->size() +1 ) break;
-            if(t[i] != ' ')temp+=t[i];
+            // if(t[i]=='[') ct++;
+            // if(ct == count_bracket - m->expression_node_list->size() +1 ) break;
+            // if(t[i] != ' ')temp+=t[i];
+            if(t[i] == '['){
+                if(ct < m->expression_node_list->size()){
+                    append = 0;
+                }
+                else{
+                    append = 1;
+                }
+            }
+            if(t[i] == ']'){
+                ct++;
+            }
+            if(append){
+                temp += t[i];
+            }
         }
+        // cout<<temp<<endl;
+        if(temp.find('[') == std::string::npos){
+            if(temp[temp.size()-1] == ' ') temp = temp.substr(0, temp.size()-1);
+        }
+        // cout<<temp;
         t = temp;
     }
+    // cout<<t<<endl;
     current_type.push(t);
     var_kind = find_type_or_kind(m->variable_name, 0);
     // cout<<m->variable_name <<" "<<var_kind<<endl;
@@ -659,6 +680,11 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
 
 void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
 
+    if(find_next_col){
+        record_col = m->col_number;
+        find_next_col = 0;
+        return;
+    }
     if (m->left_operand != nullptr)
         m->left_operand->accept(*this);
 
@@ -674,10 +700,10 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
         return;
     }
     int error = 0;
-    string operation;
+    char operation[100];
     switch(m->op){
-        case OP_OR:               
-            operation = "or"; 
+        case OP_OR:       
+            strcpy(operation, "or");         
             if(first != "boolean" || second != "boolean"){
                 error = 1;
                 current_type.push("error");
@@ -688,7 +714,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break;
         case OP_AND:              
-            operation = "and"; 
+            strcpy(operation, "and");  
             if(first != "boolean" || second != "boolean"){
                 error = 1;
                 current_type.push("error");
@@ -698,7 +724,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break;
         case OP_LESS:             
-            operation = "<"; 
+            strcpy(operation, "<");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -708,7 +734,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break;            
         case OP_LESS_OR_EQUAL:    
-            operation = "<="; 
+            strcpy(operation, "<=");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -718,7 +744,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break; 
         case OP_EQUAL:            
-            operation = "="; 
+            strcpy(operation, "=");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -728,7 +754,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break; 
         case OP_GREATER:          
-            operation = ">"; 
+            strcpy(operation, ">");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -738,7 +764,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break; 
         case OP_GREATER_OR_EQUAL: 
-            operation = ">="; 
+            strcpy(operation, ">=");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -748,7 +774,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break; 
         case OP_NOT_EQUAL:        
-            operation = "<>"; 
+            strcpy(operation, "<>");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -758,7 +784,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break; 
         case OP_PLUS:             
-            operation = "+"; 
+            strcpy(operation, "+");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 if(first == "string" && second == "string"){
                     current_type.push("string");
@@ -778,7 +804,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break; 
         case OP_MINUS:            
-            operation = "-"; 
+            strcpy(operation, "-");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -793,7 +819,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break;             
         case OP_MULTIPLY:         
-            operation = "*"; 
+            strcpy(operation, "*");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -808,7 +834,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break;             
         case OP_DIVIDE:           
-            operation = "/"; 
+            strcpy(operation, "/");  
             if( !((first == "integer" || first == "real") && (second == "integer" || second == "real")) ){
                 error = 1;
                 current_type.push("error");
@@ -823,7 +849,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break;             
         case OP_MOD:              
-            operation = "mod"; 
+            strcpy(operation, "mod");  
             if(first!= "integer" || second!= "integer"){
                 error = 1;
                 current_type.push("error");
@@ -833,7 +859,7 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
             }
             break;
         default:                 
-            operation = "unknown"; break;
+             break;
     }
     if(error){
         print_error_code(m->line_number, m->col_number, 13, operation, second, first);
@@ -846,16 +872,21 @@ void SemanticAnalyzer::visit(BinaryOperatorNode *m) {
 
 void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
     // not
+    if(find_next_col){
+        record_col = m->col_number;
+        find_next_col = 0;
+        return;
+    }
     if (m->operand != nullptr){
         m->operand->accept(*this);
     }
     string first = current_type.top();
     current_type.pop();
-    string operation;
+    char operation[100];
     int error = 0;
     switch(m->op){
-        case OP_NOT:               
-            operation = "not"; 
+        case OP_NOT:         
+            strcpy(operation, "not");      
             if(first != "boolean"){
                 error = 1;
                 current_type.push("error");
@@ -865,7 +896,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
             }
             break;
         case OP_MINUS:              
-            operation = "neg"; 
+            strcpy(operation, "neg"); 
             if( !(first == "integer" || first == "real")  ){
                 error = 1;
                 current_type.push("error");
@@ -880,7 +911,7 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
             }
             break;         
         default:                 
-            operation = "unknown"; break;
+             break;
     }
     if(error){
         print_error_code(m->line_number, m->col_number, 14, operation, first, "");
@@ -892,7 +923,11 @@ void SemanticAnalyzer::visit(IfNode *m) {
         m->condition->accept(*this);
 
     if(current_type.top()!="boolean"){
-        print_error_code(m->line_number, m->col_number, 18, "", "", "");
+        find_next_col = 1;
+        if (m->condition != nullptr){
+             m->condition->accept(*this);
+        }
+        print_error_code(m->line_number, record_col, 18, "", "", "");
     }
 
     if (m->body != nullptr)
@@ -910,7 +945,11 @@ void SemanticAnalyzer::visit(WhileNode *m) {
         m->condition->accept(*this);
 
     if(current_type.top()!="boolean"){
-        print_error_code(m->line_number, m->col_number, 18, "", "", "");
+        find_next_col = 1;
+        if (m->condition != nullptr){
+             m->condition->accept(*this);
+        }
+        print_error_code(m->line_number, record_col, 18, "", "", "");
     }
     if (m->body != nullptr)
         for(uint i=0; i< m->body->size(); i++)
@@ -922,6 +961,8 @@ void SemanticAnalyzer::visit(ForNode *m) {
     first_int = -999999999;
     second_int = -999999999;
     isloop = 1;
+    SymbolTable* temp_table = new SymbolTable;
+    current_table = temp_table;
     if (m->loop_variable_declaration != nullptr){
         m->loop_variable_declaration->accept(*this);
     }
@@ -935,7 +976,6 @@ void SemanticAnalyzer::visit(ForNode *m) {
         m->condition->accept(*this);
     if(first_int > second_int){
         print_error_code(m->line_number, m->col_number, 24, "", "", "");
-        // current_table.pop();
         isloop = 0;
         return;
     }
@@ -944,6 +984,7 @@ void SemanticAnalyzer::visit(ForNode *m) {
     if (m->body != nullptr)
         for(uint i=0; i< m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
+    // cout<<"for pop"<<endl;
     manager.popScope();
 }
 

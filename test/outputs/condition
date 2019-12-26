@@ -11,6 +11,6 @@
 11:     end do
 12: end
 13: end condition
-<Error> Found in line 7, column 5: the expression of condition must be boolean type
+<Error> Found in line 7, column 12: the expression of condition must be boolean type
         if int + 10 then
-        ^
+               ^
