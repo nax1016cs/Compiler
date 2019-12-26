@@ -48,6 +48,7 @@ begin
     var dump: string;
     read a["SSLAB"];
     read s;
-    reutrn (b[1][4][1] >= 1.0);
+    return f[1][1][1][1];
+
 end
 end basic

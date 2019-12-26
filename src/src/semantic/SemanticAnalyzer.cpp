@@ -606,6 +606,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
 
         if(m->expression_node_list->size() > count_bracket ){
             print_error_code(m->line_number, m->col_number, 11, "", "", "");
+            current_type.push("error");
             return;
         }
         // cout<<"this is var "<<m->variable_name<<" " <<m->expression_node_list->size()<<" "<<count_bracket<<endl;
@@ -619,6 +620,18 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     //     string temp = current_type.top();
     // if(temp=="error") return;
     string t = find_type_or_kind(m->variable_name, 1);
+    cout<<count_bracket<<endl;
+    if(m->expression_node_list != nullptr){
+        string temp = "";
+        int ct=0;
+        for(int i=0; i<t.size(); i++){
+            if(t[i]=='[') ct++;
+            if(ct == count_bracket - m->expression_node_list->size() +1 ) break;
+            if(t[i] != ' ')temp+=t[i];
+
+        }
+        t = temp;
+    }
     current_type.push(t);
     var_kind = find_type_or_kind(m->variable_name, 0);
     // cout<<m->variable_name <<" "<<var_kind<<endl;
@@ -923,6 +936,7 @@ void SemanticAnalyzer::visit(ReturnNode *m) {
     }
     if (m->return_value != nullptr)
         m->return_value->accept(*this);
+    if(current_type.top()=="error") return;
     // cout<<"return value:"<<return_type<<endl;
     if(check_return && return_type !=  current_type.top() && current_type.top() != "error"){
         check_return = 0;
