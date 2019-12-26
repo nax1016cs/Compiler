@@ -10,7 +10,9 @@
 10:     end do
 11: end
 12: end ForLoop
-
-|---------------------------------------------|
-|  There is no syntactic and semantic error!  |
-|---------------------------------------------|
+<Error> Found in line 6, column 5: the lower bound of iteration count must be smaller than or equal to the upper bound
+        for idx := 10 to 1 do
+        ^
+<Error> Found in line 9, column 9: symbol 'idx' is redeclared 
+        for idx := 1 to 10 do
+            ^

@@ -8,7 +8,9 @@
 8:     print arr;
 9: end
 10: end PrintStatement
-
-|---------------------------------------------|
-|  There is no syntactic and semantic error!  |
-|---------------------------------------------|
+<Error> Found in line 7, column 11: variable reference of print statement must be scalar type
+        print arr[1];
+              ^
+<Error> Found in line 8, column 11: variable reference of print statement must be scalar type
+        print arr;
+              ^

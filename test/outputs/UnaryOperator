@@ -10,7 +10,6 @@
 10:     print not arr;
 11: end
 12: end UnaryOperator
-
-|---------------------------------------------|
-|  There is no syntactic and semantic error!  |
-|---------------------------------------------|
+<Error> Found in line 10, column 11: invalid operand to unary operation 'not' ('boolean [9][99]')
+        print not arr;
+              ^

@@ -11,7 +11,6 @@
 11:     end do
 12: end
 13: end condition
-
-|---------------------------------------------|
-|  There is no syntactic and semantic error!  |
-|---------------------------------------------|
+<Error> Found in line 7, column 5: the expression of condition must be boolean type
+        if int + 10 then
+        ^

@@ -22,7 +22,12 @@
 22:     func(10);
 23: end
 24: end VariableReference
-
-|---------------------------------------------|
-|  There is no syntactic and semantic error!  |
-|---------------------------------------------|
+<Error> Found in line 10, column 15: use of undeclared identifier 'arrrrrrr'
+            print arrrrrrr["SSLAB"]["No.1"];
+                  ^
+<Error> Found in line 14, column 19: index of array reference must be an integer 
+            print arr[1.0];
+                      ^
+<Error> Found in line 17, column 11: there is an over array subscript
+        print arr[80][55146];
+              ^

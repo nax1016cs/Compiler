@@ -27,6 +27,8 @@ std:: stack <string> current_type;
 string var_type;
 string var_kind;
 
+int find_next_col = 0;
+int record_col = 0;
 int first_int = -999999999;
 int second_int = -999999999;
 int isloop = 0;
@@ -334,6 +336,8 @@ void SemanticAnalyzer::visit(VariableNode *m) {
 }
 
 void SemanticAnalyzer::visit(ConstantValueNode *m) {
+    record_col = m->col_number;
+
     if(lack_attr)
 	   current_entry->attr = m->getValue();
     string attr;
@@ -519,14 +523,21 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
 }
 
 void SemanticAnalyzer::visit(PrintNode *m) {
+    var_scalar = 1;
     if (m->expression_node != nullptr){
          m->expression_node->accept(*this);
     }
     string temp = current_type.top();
     if(temp=="error") return;
 
-    if(temp=="void"){
-
+    if(!var_scalar || temp == "void"){
+        find_next_col = 1;
+        if (m->expression_node != nullptr){
+             m->expression_node->accept(*this);
+        }
+        print_error_code(m->line_number, record_col, 23 , "", "", "");
+        var_scalar = 1;
+        return;  
     }
     // clear_the_stack();
 
@@ -540,18 +551,26 @@ void SemanticAnalyzer::visit(ReadNode *m) {
     string temp = current_type.top();
     if(temp == "error") return;
     if(var_kind == "constant"){
-        print_error_code(m->line_number, m->col_number, 20 , "", "", "");
+        find_next_col = 1;
+        if (m->variable_reference_node != nullptr)
+            m->variable_reference_node->accept(*this);
+        print_error_code(m->line_number, record_col, 20 , "", "", "");
         var_scalar = 1;
         return;
     }
     else if(var_kind == "loop_var"){
-        print_error_code(m->line_number, m->col_number, 21 , "", "", "");
+        find_next_col = 1;
+        if (m->variable_reference_node != nullptr)
+            m->variable_reference_node->accept(*this);
+        print_error_code(m->line_number, record_col, 21 , "", "", "");
         var_scalar = 1;
-
         return;  
     }
     else if(!var_scalar || temp == "void"){
-        print_error_code(m->line_number, m->col_number, 22 , "", "", "");
+        find_next_col = 1;
+        if (m->variable_reference_node != nullptr)
+            m->variable_reference_node->accept(*this);
+        print_error_code(m->line_number, record_col, 22 , "", "", "");
         var_scalar = 1;
         return;  
     }
@@ -562,6 +581,11 @@ void SemanticAnalyzer::visit(ReadNode *m) {
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     // cout<<"this variable is " <<m->variable_name<<" and its type is "<<m->getType()<<endl;
+    if(find_next_col){
+        record_col = m->col_number;
+        find_next_col = 0;
+        return;
+    }
     if(is_assignment){
         string type_finding = find_type_or_kind(m->variable_name, 0);
         string kind_finding = find_type_or_kind(m->variable_name, 1);
@@ -598,7 +622,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
                 string arr_type = current_type.top();
                 if(arr_type != "integer"){
                     // set_error = 1;
-                    print_error_code(m->line_number, m->col_number, 12 , "", "", "");
+                    print_error_code(m->line_number, record_col, 12 , "", "", "");
                     current_type.push("error");
                     return;
                 } 
@@ -609,18 +633,13 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
             current_type.push("error");
             return;
         }
-        // cout<<"this is var "<<m->variable_name<<" " <<m->expression_node_list->size()<<" "<<count_bracket<<endl;
         if(m->expression_node_list->size() != count_bracket ) var_scalar = 0;
     }
     else if (count_bracket){
-        // cout<<"tttttttttttttt"<<count_bracket<<endl;
         var_scalar = 0;
     }
 
-    //     string temp = current_type.top();
-    // if(temp=="error") return;
     string t = find_type_or_kind(m->variable_name, 1);
-    cout<<count_bracket<<endl;
     if(m->expression_node_list != nullptr){
         string temp = "";
         int ct=0;
@@ -628,7 +647,6 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
             if(t[i]=='[') ct++;
             if(ct == count_bracket - m->expression_node_list->size() +1 ) break;
             if(t[i] != ' ')temp+=t[i];
-
         }
         t = temp;
     }
@@ -939,8 +957,11 @@ void SemanticAnalyzer::visit(ReturnNode *m) {
     if(current_type.top()=="error") return;
     // cout<<"return value:"<<return_type<<endl;
     if(check_return && return_type !=  current_type.top() && current_type.top() != "error"){
+        find_next_col = 1;
+        if (m->return_value != nullptr)
+            m->return_value->accept(*this);
         check_return = 0;
-        print_error_code(m->line_number, m->col_number, 16 , current_type.top(), return_type, "");
+        print_error_code(m->line_number, record_col, 16 , current_type.top(), return_type, "");
     } 
 }
 
@@ -960,7 +981,7 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) {
             temp += attr[i];
         }
         if(attr[i] == ' '){
-            cout<<temp;
+            // cout<<temp;
             v.push_back(temp);
             temp.clear();
         }
