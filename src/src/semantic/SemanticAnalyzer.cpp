@@ -23,6 +23,10 @@
 using namespace std;
 
 std:: stack <string> current_type;
+string var_type;
+string var_kind;
+
+int var_scalar = 1;
 int set_error = 0;
 int check_return = 0;
 int set_error_num = 0;
@@ -72,13 +76,14 @@ bool check_declared_reference(string id){
     return find;
 }
 
-// 0 for kind , 1 for type
+// 0 for kind , 1 for type, 2 for attr
 string find_type_or_kind(string id, int type_or_kind){
     // SymbolManager temp;
     std::stack <SymbolTable> temp_manager_stack;
     bool find = false;
     string ans_type;
     string ans_kind;
+    string ans_attr;
     while(manager.tables.size()!=0){
         SymbolTable temp = manager.tables.top();
         manager.tables.pop();
@@ -86,6 +91,8 @@ string find_type_or_kind(string id, int type_or_kind){
             if(temp.entries[j].name==id){
                 ans_type = temp.entries[j].type;
                 ans_kind = temp.entries[j].kind;
+                ans_attr = temp.entries[j].attr;
+
                 // cout<<"type: "<< ans_type<<" kind: "<<ans_kind<<endl;
             }
         }
@@ -97,9 +104,11 @@ string find_type_or_kind(string id, int type_or_kind){
         temp_manager_stack.pop();
         manager.tables.push(temp);
     }
-    if(type_or_kind) 
+    if(type_or_kind == 0) 
+        return ans_kind ;
+    else if(type_or_kind == 1) 
         return ans_type;
-    return ans_kind;
+    return ans_attr;
 }
 
 
@@ -162,7 +171,24 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
         case 17:
             fprintf(stderr, "<Error> Found in line %d, column %d: assigning to '%s' from incompatible type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
         	break;
-
+        case 18:
+            fprintf(stderr, "<Error> Found in line %d, column %d: the expression of condition must be boolean type\n", line_number, col_number);
+            break;
+        case 19:
+            fprintf(stderr, "<Error> Found in line %d, column %d: variable reference of print statement must be scalar type\n", line_number, col_number);
+            break;
+        case 20:
+            fprintf(stderr, "<Error> Found in line %d, column %d: variable reference of read statement cannot be a constant variable reference\n", line_number, col_number);
+            break;
+        case 21:
+            fprintf(stderr, "<Error> Found in line %d, column %d: the value of loop variable cannot be modified inside the loop\n", line_number, col_number);
+            break;
+        case 22:
+            fprintf(stderr, "<Error> Found in line %d, column %d: variable reference of read statement must be scalar type\n", line_number, col_number);
+            break;    
+        case 23:
+            fprintf(stderr, "<Error> Found in line %d, column %d: variable reference of print statement must be scalar type\n", line_number, col_number);
+            break;                    
     }
     FILE *fp = fopen(file_name, "r");  
     char code [1000];
@@ -461,15 +487,39 @@ void SemanticAnalyzer::visit(PrintNode *m) {
     if (m->expression_node != nullptr){
          m->expression_node->accept(*this);
     }
+    string temp = current_type.top();
+    if(temp=="error") return;
+
+    if(temp=="void"){
+
+    }
     // clear_the_stack();
 
 }
 
 void SemanticAnalyzer::visit(ReadNode *m) {
+    var_scalar = 1;
+    var_kind = "";
     if (m->variable_reference_node != nullptr)
         m->variable_reference_node->accept(*this);
     string temp = current_type.top();
-    if(temp=="error") return;
+    if(temp == "error") return;
+    if(var_kind == "constant"){
+        print_error_code(m->line_number, m->col_number, 20 , "", "", "");
+        var_scalar = 1;
+        return;
+    }
+    else if(var_kind == "loop_var"){
+        print_error_code(m->line_number, m->col_number, 21 , "", "", "");
+        var_scalar = 1;
+
+        return;  
+    }
+    else if(!var_scalar || temp == "void"){
+        print_error_code(m->line_number, m->col_number, 22 , "", "", "");
+        var_scalar = 1;
+        return;  
+    }
 
 
     // clear_the_stack();
@@ -502,33 +552,41 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
         print_error_code(m->line_number, m->col_number, 10 , m->variable_name, "", "");
         return;
     }
-
+    int count_bracket = 0;
+    string ans = find_type_or_kind(m->variable_name,1);
+    for(int i=0; i<ans.size(); i++){
+        if(ans[i]=='[') count_bracket++;
+    }
     if (m->expression_node_list != nullptr){
-        int count_bracket = 0;
-        string ans = find_type_or_kind(m->variable_name,1);
         for(uint i=0; i< m->expression_node_list->size(); i++){
             (*(m->expression_node_list))[i]->accept(*this);
                 string arr_type = current_type.top();
                 if(arr_type != "integer"){
-                    set_error = 1;
+                    // set_error = 1;
                     print_error_code(m->line_number, m->col_number, 12 , "", "", "");
                     current_type.push("error");
                     return;
                 } 
         }
-        for(int i=0; i<ans.size(); i++){
-            if(ans[i]=='[') count_bracket++;
-        }
+
         if(m->expression_node_list->size() > count_bracket ){
             print_error_code(m->line_number, m->col_number, 11, "", "", "");
             return;
         }
-        
+        // cout<<"this is var "<<m->variable_name<<" " <<m->expression_node_list->size()<<" "<<count_bracket<<endl;
+        if(m->expression_node_list->size() != count_bracket ) var_scalar = 0;
     }
+    else if (count_bracket){
+        // cout<<"tttttttttttttt"<<count_bracket<<endl;
+        var_scalar = 0;
+    }
+
     //     string temp = current_type.top();
     // if(temp=="error") return;
     string t = find_type_or_kind(m->variable_name, 1);
     current_type.push(t);
+    var_kind = find_type_or_kind(m->variable_name, 0);
+    // cout<<m->variable_name <<" "<<var_kind<<endl;
 
 
 }
@@ -765,27 +823,29 @@ void SemanticAnalyzer::visit(UnaryOperatorNode *m) {
 
 void SemanticAnalyzer::visit(IfNode *m) {
     if (m->condition != nullptr)
-            m->condition->accept(*this);
+        m->condition->accept(*this);
+
+    if(current_type.top()!="boolean"){
+        print_error_code(m->line_number, m->col_number, 18, "", "", "");
+    }
 
     if (m->body != nullptr)
         for(uint i=0; i< m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
 
     if (m->body_of_else != nullptr){
-        this->print_space();
-        std::cout<<"else"<<std::endl;
-
-        this->space_counter_increase();
-            for(uint i=0; i< m->body_of_else->size(); i++)
-                (*(m->body_of_else))[i]->accept(*this);
-        this->space_counter_decrease();
+        for(uint i=0; i< m->body_of_else->size(); i++)
+            (*(m->body_of_else))[i]->accept(*this);
     }
 }
 
 void SemanticAnalyzer::visit(WhileNode *m) {
      if (m->condition != nullptr)
-            m->condition->accept(*this);
+        m->condition->accept(*this);
 
+    if(current_type.top()!="boolean"){
+        print_error_code(m->line_number, m->col_number, 18, "", "", "");
+    }
     if (m->body != nullptr)
         for(uint i=0; i< m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
@@ -793,7 +853,7 @@ void SemanticAnalyzer::visit(WhileNode *m) {
 
 void SemanticAnalyzer::visit(ForNode *m) {
     if (m->loop_variable_declaration != nullptr)
-            m->loop_variable_declaration->accept(*this);
+        m->loop_variable_declaration->accept(*this);
         
     if (m->initial_statement != nullptr)
         m->initial_statement->accept(*this);

@@ -1,41 +1,29 @@
 //&S-
 //&T-
-//&D-
-basic;
+test;
+// no global declaration(s)
 
-// scaler type
-var a,a1,a2 : integer;
-var b : boolean;
-var c : string;
-var d : real;
-var h : string;
-
-//array type
-var arr: array 80 to 80 of integer;
-var e,ee : array 1 to 10 of integer;
-var f : array 1 to 5 of array 1 to 5 of array 100 to 101 of integer;
-
-//Constant
-var g,gg : 10;
-var i : true;
-var j : 2.56;
-var k : 111.111E-3;
-var l : 0777;
-
-fun();
+func(a : integer ; b : array 1 to 2 of array 2 to 4 of real) : boolean;
 begin
-    h := 1+3+1.5 + true;
-    j := 5.87;
-    return h;
-    
-end
-end fun
+    var c : "hello world!";
+    begin
+        var d : real;
+        var e : array 1 to 2 of array 2 to 4 of real;
+        read c;
+        
+        return (b[1][4] >= 1.0);
+        read e;
+        // read c;
 
+    end
+end
+end func
 
 begin
-    var dump: string;
-    read a["SSLAB"+123];
-    read s;
-    reutrn (b[(2>3) and false][4][1] >= 1.0);
+    var a : integer;
+    begin
+        var a : boolean;  // outer 'a' has been hidden in this scope
+
+    end
 end
-end basic
+end test
