@@ -20,12 +20,16 @@
 
 #include <iostream>
 #include <string.h>
+#include <vector>
 using namespace std;
 
 std:: stack <string> current_type;
 string var_type;
 string var_kind;
 
+int first_int = -999999999;
+int second_int = -999999999;
+int isloop = 0;
 int var_scalar = 1;
 int set_error = 0;
 int check_return = 0;
@@ -188,7 +192,20 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
             break;    
         case 23:
             fprintf(stderr, "<Error> Found in line %d, column %d: variable reference of print statement must be scalar type\n", line_number, col_number);
-            break;                    
+            break;              
+        case 24:
+            fprintf(stderr, "<Error> Found in line %d, column %d: the lower bound of iteration count must be smaller than or equal to the upper bound\n", line_number, col_number);
+            break;
+        case 25:
+            fprintf(stderr, "<Error> Found in line %d, column %d: used of undeclared function '%s'\n", line_number, col_number,s1.c_str());
+            break;
+        case 26:
+            fprintf(stderr, "<Error> Found in line %d, column %d: too few/much arguments to function invocation\n", line_number, col_number);
+            break;
+        case 27:
+            fprintf(stderr, "<Error> Found in line %d, column %d: incompatible types passing '%s' to parameter of type '%s'\n", line_number, col_number,s1.c_str(),s2.c_str());
+            break;                   
+                  
     }
     FILE *fp = fopen(file_name, "r");  
     char code [1000];
@@ -300,6 +317,12 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             delete(s);
         }
         //normal variable
+        else if(isloop){
+            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "loop_var", level, m->getType(), "");
+            current_table->addSymbol(*s);     
+            delete(s);    
+
+        }
         else{
             SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
             current_table->addSymbol(*s);         
@@ -322,6 +345,14 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
         default: std::cout << "unknown"; break;
     }
     current_type.push(attr);
+    if(isloop){
+        if(first_int == -999999999){
+            first_int = m->constant_value->int_literal;
+        }
+        else{
+            second_int = m->constant_value->int_literal;
+        }
+    }
 }
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
@@ -335,7 +366,8 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
     for(int i=0; i<current_table->entries.size(); i++){
         if(m->function_name.substr(0,31) ==current_table->entries[i].name){
             print_error_code(m->line_number, m->col_number, 6 , m->function_name, "", "");
-            manager.pushScope(*current_table);
+            // manager.pushScope(*current_table);
+            return;
         }
     }
 
@@ -473,13 +505,16 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
         m->expression_node->accept(*this);
     }
     // clear_the_stack();
-    string first = current_type.top();
+    string first = current_type.top();//expr
     current_type.pop();
     string second = current_type.top();
     current_type.pop();
     if(first =="error" || second == "error") return;
     if(first!=second) {
         print_error_code(m->line_number, m->col_number, 17 , second, first, "");
+    }
+    if(isloop){
+        current_type.push(first);
     }
 }
 
@@ -541,13 +576,13 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
             is_assignment = 0;
             return;
         }
-        else if(type_finding == "loop_var"){
+        else if(type_finding == "loop_var" && !isloop){
             print_error_code(m->line_number, m->col_number, 9 ,"", "", "");
             is_assignment = 0;
             return;            
         }
     }
-    if(!check_declared_reference(m->variable_name)){
+    if(!check_declared_reference(m->variable_name) ){
         // cout<<"this is variable reference: "<<m->variable_name<<endl;
         print_error_code(m->line_number, m->col_number, 10 , m->variable_name, "", "");
         return;
@@ -852,18 +887,33 @@ void SemanticAnalyzer::visit(WhileNode *m) {
 }
 
 void SemanticAnalyzer::visit(ForNode *m) {
-    if (m->loop_variable_declaration != nullptr)
+    level++;
+    first_int = -999999999;
+    second_int = -999999999;
+    isloop = 1;
+    if (m->loop_variable_declaration != nullptr){
         m->loop_variable_declaration->accept(*this);
-        
+    }
+    level--;    
+    manager.pushScope(*current_table);
     if (m->initial_statement != nullptr)
         m->initial_statement->accept(*this);
 
+    // cout<<"first"<<" "<<current_type.top()<<endl;
     if (m->condition != nullptr)
         m->condition->accept(*this);
+    if(first_int > second_int){
+        print_error_code(m->line_number, m->col_number, 24, "", "", "");
+        // current_table.pop();
+        isloop = 0;
+        return;
+    }
+    isloop = 0;
 
     if (m->body != nullptr)
         for(uint i=0; i< m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
+    manager.popScope();
 }
 
 void SemanticAnalyzer::visit(ReturnNode *m) {
@@ -881,7 +931,46 @@ void SemanticAnalyzer::visit(ReturnNode *m) {
 }
 
 void SemanticAnalyzer::visit(FunctionCallNode *m) {
-    if (m->arguments != nullptr)
-        for(uint i=0; i< m->arguments->size(); i++)
+    if(!check_declared_reference(m->function_name) ){
+        print_error_code(m->line_number, m->col_number, 25 , m->function_name, "", "");
+        return;
+    }
+    int num = 0;
+    string attr = find_type_or_kind(m->function_name, 2);
+    // cout<<attr<<endl;
+    vector<string> v;
+    string temp = "";
+    for(int i=0; i<attr.size(); i++){
+        if(attr[i] == ',') num++;
+        if(attr[i]!= ' ' || attr[i]!= ','){
+            temp += attr[i];
+        }
+        if(attr[i] == ' '){
+            cout<<temp;
+            v.push_back(temp);
+            temp.clear();
+        }
+    }
+    v.push_back(temp);
+
+    if(attr.size()!=0)num++;
+
+    if (m->arguments != nullptr){
+        if(num != m->arguments->size()){
+            print_error_code(m->line_number, m->col_number, 26 ,"", "", "");
+            return;
+        }
+
+        for(uint i=0; i< m->arguments->size(); i++){
             (*(m->arguments))[i]->accept(*this);
+            // cout<<current_type.top()<<endl;
+            if(current_type.top()!= v[i]){
+                print_error_code(m->line_number, m->col_number, 27 ,current_type.top(), v[i], "");
+                return;
+            }
+            // current_type.pop();
+        }
+    }
+        
+        
 }
