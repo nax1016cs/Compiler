@@ -1,5 +1,6 @@
 //&S-
 //&T-
+//&D-
 basic;
 
 // scaler type
@@ -9,6 +10,7 @@ var c : string;
 var d : real;
 
 //array type
+var arr: array 80 to 80 of integer;
 var e,ee : array 1 to 10 of integer;
 var f : array 1 to 5 of array 1 to 5 of array 100 to 101 of integer;
 
@@ -22,10 +24,14 @@ var l : 0777;
 
 fun();
 begin
-    return "Sss";
+    h := i;
+    j := 5.87;
+    return h;
     
 end
 end fun
+
+
 
 fun2( a, b : integer; c : string ) : integer;
 begin
@@ -40,5 +46,8 @@ end fun3
 
 begin
     var dump: string;
+    read a["SSLAB"];
+    read s;
+    reutrn (b[1][4][1] >= 1.0);
 end
 end basic

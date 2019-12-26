@@ -159,7 +159,9 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
         case 16:
             fprintf(stderr, "<Error> Found in line %d, column %d:  return '%s' from a function with return type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
             break;
-
+        case 17:
+            fprintf(stderr, "<Error> Found in line %d, column %d:  assigning to '%s' from incompatible type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
+        	break;
 
     }
     FILE *fp = fopen(file_name, "r");  
@@ -237,6 +239,8 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
 
 void SemanticAnalyzer::visit(VariableNode *m) {
     int declared = 0;
+
+    // redeclared
     for(int i=0; i<current_table->entries.size(); i++){
         declared = (m->variable_name.substr(0,31) ==current_table->entries[i].name) ? 1 :0;
         if(declared){
@@ -246,7 +250,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     }
     if(m->type->array_range.size()!=0){
         for(int i=0; i<m->type->array_range.size(); i++){
-            if(m->type->array_range[i].start<0 || m->type->array_range[i].end<0 || m->type->array_range[i].start > m->type->array_range[i].end){
+            if(m->type->array_range[i].start<0 || m->type->array_range[i].end<0 || m->type->array_range[i].start >= m->type->array_range[i].end){
                 print_error_code(m->line_number, m->col_number, 4 , m->variable_name, "", "");
                 return;
             }
@@ -434,7 +438,6 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
     }
     if(is_assignment!=1){
         return ;
-
     }
     is_assignment = 0;
 
@@ -443,7 +446,13 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
         m->expression_node->accept(*this);
     }
     // clear_the_stack();
-
+    string first = current_type.top();
+    current_type.pop();
+    string second = current_type.top();
+    current_type.pop();
+    if(first!=second) {
+        print_error_code(m->line_number, m->col_number, 17 , second, first, "");
+    }
 }
 
 void SemanticAnalyzer::visit(PrintNode *m) {
@@ -456,7 +465,9 @@ void SemanticAnalyzer::visit(PrintNode *m) {
 
 void SemanticAnalyzer::visit(ReadNode *m) {
     if (m->variable_reference_node != nullptr)
-        m->variable_reference_node->accept(*this);    
+        m->variable_reference_node->accept(*this);
+    string type = current_type.top();
+
     // clear_the_stack();
 }
 
@@ -473,10 +484,12 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
         }
         else if( type_finding == "constant"){
             print_error_code(m->line_number, m->col_number, 8 , m->variable_name, "", "");
+            is_assignment = 0;
             return;
         }
         else if(type_finding == "loop_var"){
             print_error_code(m->line_number, m->col_number, 9 ,"", "", "");
+            is_assignment = 0;
             return;            
         }
 
@@ -490,12 +503,6 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
     if (m->expression_node_list != nullptr){
         int count_bracket = 0;
         string ans = find_type_or_kind(m->variable_name,1);
-        for(int i=0; i<ans.size(); i++){
-            if(ans[i]=='[') count_bracket++;
-        }
-        if(m->expression_node_list->size() > count_bracket ){
-            print_error_code(m->line_number, m->col_number, 11, "", "", "");
-        }
         for(uint i=0; i< m->expression_node_list->size(); i++){
             (*(m->expression_node_list))[i]->accept(*this);
                 string arr_type = current_type.top();
@@ -506,6 +513,14 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
                     return;
                 } 
         }
+        for(int i=0; i<ans.size(); i++){
+            if(ans[i]=='[') count_bracket++;
+        }
+        if(m->expression_node_list->size() > count_bracket ){
+            print_error_code(m->line_number, m->col_number, 11, "", "", "");
+            return;
+        }
+        
     }
     string t = find_type_or_kind(m->variable_name, 1);
     current_type.push(t);
