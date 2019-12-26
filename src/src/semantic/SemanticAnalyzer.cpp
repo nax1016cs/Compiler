@@ -121,7 +121,7 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
             fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", line_number, col_number, s1.c_str());
             break;
         case 4:
-            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' declared as an array with a lower bound greater or equal to upper bound \n", line_number, col_number, s1.c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: '%s' declared as an array with a lower bound greater or equal to upper bound \n", line_number, col_number, s1.c_str());
             break;
         case 5:
             fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of function must be the same as identifier at the beginning of function\n", line_number,col_number);
@@ -154,13 +154,13 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
             fprintf(stderr, "<Error> Found in line %d, column %d: invalid operand to unary operation '%s' ('%s')\n", line_number, col_number,s1.c_str(), s2.c_str() );
             break;
         case 15:
-            fprintf(stderr, "<Error> Found in line %d, column %d:  program/procedure should not return a value\n", line_number, col_number);
+            fprintf(stderr, "<Error> Found in line %d, column %d: program/procedure should not return a value\n", line_number, col_number);
             break;
         case 16:
-            fprintf(stderr, "<Error> Found in line %d, column %d:  return '%s' from a function with return type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: return '%s' from a function with return type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
             break;
         case 17:
-            fprintf(stderr, "<Error> Found in line %d, column %d:  assigning to '%s' from incompatible type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: assigning to '%s' from incompatible type '%s'\n", line_number, col_number, s1.c_str(), s2.c_str());
         	break;
 
     }
@@ -401,6 +401,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
 }
 
 void SemanticAnalyzer::visit(CompoundStatementNode *m) {
+
     level++;
 
     if (m->declaration_node_list != nullptr){
@@ -442,7 +443,7 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
     is_assignment = 0;
 
     if (m->expression_node != nullptr){
-        // is_assignment = 1;
+        is_assignment = 1;
         m->expression_node->accept(*this);
     }
     // clear_the_stack();
@@ -450,6 +451,7 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
     current_type.pop();
     string second = current_type.top();
     current_type.pop();
+    if(first =="error" || second == "error") return;
     if(first!=second) {
         print_error_code(m->line_number, m->col_number, 17 , second, first, "");
     }
@@ -466,7 +468,9 @@ void SemanticAnalyzer::visit(PrintNode *m) {
 void SemanticAnalyzer::visit(ReadNode *m) {
     if (m->variable_reference_node != nullptr)
         m->variable_reference_node->accept(*this);
-    string type = current_type.top();
+    string temp = current_type.top();
+    if(temp=="error") return;
+
 
     // clear_the_stack();
 }
@@ -492,7 +496,6 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
             is_assignment = 0;
             return;            
         }
-
     }
     if(!check_declared_reference(m->variable_name)){
         // cout<<"this is variable reference: "<<m->variable_name<<endl;
@@ -522,6 +525,8 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) {
         }
         
     }
+    //     string temp = current_type.top();
+    // if(temp=="error") return;
     string t = find_type_or_kind(m->variable_name, 1);
     current_type.push(t);
 
