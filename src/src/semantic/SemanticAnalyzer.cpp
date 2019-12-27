@@ -24,6 +24,7 @@
 using namespace std;
 
 std:: stack <string> current_type;
+std:: stack <int > return_available;
 string var_type;
 string var_kind;
 
@@ -227,6 +228,7 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
 
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
+    while(!return_available.empty()) return_available.pop();
     // string temp = "./test-cases/"+m->program_name + ".p";
     string temp = "";
     // string temp = m->program_name + ".p";
@@ -273,7 +275,9 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     if (m->compound_statement_node != nullptr){
         SymbolTable* temp_table = new SymbolTable;
         current_table = temp_table;
+
         m->compound_statement_node->accept(*this);
+
     }
     // std::cout<<check_declared_reference("fun");
 
@@ -484,13 +488,16 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         level--;
     }
     isparameter = 0;
-    check_return = 1;
+    // check_return = 1;
+    return_available.push(1);
     return_type = find_type_or_kind(m->function_name, 1);
     if (m->body != nullptr){
         function_cmp = 1;
         m->body->accept(*this);
     }
-
+    // cout<<"111111"<<endl;
+    return_available.pop();
+    // cout<<"111111"<<endl;
     // clear_the_stack();
     // level--;
 }
@@ -520,6 +527,7 @@ void SemanticAnalyzer::visit(CompoundStatementNode *m) {
         }
     }
     level--;
+
     manager.popScope();
     // clear_the_stack();
 
@@ -1083,19 +1091,22 @@ void SemanticAnalyzer::visit(ForNode *m) {
 }
 
 void SemanticAnalyzer::visit(ReturnNode *m) {
-    if(!check_return){
+
+    if(return_available.empty()){        
         print_error_code(m->line_number, m->col_number, 15, "", "", "");
         return;
     }
+    // cout<<"size is "<< return_available.size()<<endl;    
     if (m->return_value != nullptr)
         m->return_value->accept(*this);
     if(current_type.top()=="error") return;
     // cout<<"return value:"<<return_type<<endl;
-    if(check_return && return_type !=  current_type.top() && current_type.top() != "error"){
+    if(!return_available.empty() && return_type !=  current_type.top() && current_type.top() != "error"){
         find_next_col = 1;
         if (m->return_value != nullptr)
             m->return_value->accept(*this);
         check_return = 0;
+        // while(!return_available.empty()) return_available.pop();
         print_error_code(m->line_number, record_col, 16 , current_type.top(), return_type, "");
     } 
 }
@@ -1110,6 +1121,7 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) {
     int num = 0;
     string attr = find_type_or_kind(m->function_name, 2);
     // cout<<attr<<endl;
+    // cout<<"tttttttt"<<attr<<endl;
     vector<string> v;
     string temp = "";
     for(int i=0; i<attr.size(); i++){
@@ -1117,16 +1129,21 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) {
         if(attr[i]!= ' ' || attr[i]!= ','){
             temp += attr[i];
         }
-        if(attr[i] == ' '){
+        if(attr[i] == ' ' && i< attr.size() && attr[i+1] != '['){
             // cout<<temp;
             v.push_back(temp);
             temp.clear();
         }
     }
+    // cout<<"tttttttt"<<temp<<endl;
     v.push_back(temp);
 
     if(attr.size()!=0)num++;
-
+    if(num > 0 && m->arguments == nullptr){
+        print_error_code(m->line_number, m->col_number, 26 ,"", "", "");
+        current_type.push("error");
+        return;
+    }
     if (m->arguments != nullptr){
         if(num != m->arguments->size()){
             print_error_code(m->line_number, m->col_number, 26 ,"", "", "");
@@ -1145,6 +1162,7 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) {
             // current_type.pop();
         }
     }
+    
     string fun_type = find_type_or_kind(m->function_name, 1);
     current_type.push(fun_type);      
 }

@@ -1,36 +1,15 @@
-//&S-
 //&T-
-error;
+//&D-
+ret;
 
-func1(p1 : string; p2 : array 99 to 100 of integer) : real;
+func() : boolean;
 begin
-    var p1 : boolean;  // error redeclare
+    var bool : array 1 to 10 of array 1 to 100 of boolean;
+    return bool[1];
 end
-end func1
-
-func1() : string;  // error redeclare
-begin
-end
-end func1
+end func
 
 begin
-    var a : integer;
-    var a : boolean;  // error redeclare
-
-    var bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb : boolean;
-    var bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbExtraCharIsUseless : string;
-
-    begin
-        var a : string;
-    end
-
-    for i := 1 to 10 do
-    begin
-        var i : integer;    // error redeclare
-        for i := 2 to 3 do  // error same iterator
-            a := 3;
-        end do
-    end
-    end do
+    return 10;
 end
-end error
+end ret
