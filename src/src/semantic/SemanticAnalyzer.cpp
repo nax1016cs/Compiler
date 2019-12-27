@@ -49,7 +49,7 @@ int array_int_error = 0;
 string return_type ;
 extern int error_found;
 extern long long int count_line[1000] ;
-extern char *file_name;;
+extern char *file_name;
 SymbolManager manager;
 
 
@@ -227,13 +227,20 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
 
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
-    string temp = "./test-cases/"+m->program_name + ".p";
+    // string temp = "./test-cases/"+m->program_name + ".p";
+    string temp = "";
     // string temp = m->program_name + ".p";
-
-
+    for(int i=0; i<strlen(file_name); i++){
+        temp += file_name[i];
+        if(i>0 && file_name[i] == '/'){
+            temp.clear();
+        }
+    }
+    temp = temp.substr(0, temp.size()-2);
+    // cout<<"ffffffffffff"<<temp;
     // Here need to restore!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-    if(strcmp(temp.c_str(), file_name)){
+    if(strcmp(temp.c_str(), m->program_name.c_str())){
         print_error_code(m->line_number, m->col_number, 1 , "", "", "");
     }
 
