@@ -14,7 +14,8 @@ var e,ee : array 1 to 10 of integer;
 var f : array 1 to 5 of array 1 to 5 of array 100 to 101 of integer;
 
 //Constant
-var g,gg : 10;
+var g,gg : 3;
+var x : 0;
 var h : "Gimme Gimme Gimme!!";
 var i : true;
 var j : 2.56;
@@ -23,7 +24,9 @@ var l : 0777;
 
 fun();
 begin
-    return 3;
+    // c := "SSLAB" + "sssss" + h;
+    // fun(123);
+
 end
 end fun
 
@@ -38,6 +41,6 @@ end
 end fun3
 
 begin
-    var dump: string;
+    fun3(b);
 end
 end test

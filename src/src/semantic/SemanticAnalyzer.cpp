@@ -565,7 +565,11 @@ void SemanticAnalyzer::visit(AssignmentNode *m) {
     current_type.pop();
     if( second == "error") return;
     if(first!=second) {
-        print_error_code(m->line_number, m->col_number, 17 , second, first, "");
+        if (m->expression_node != nullptr){
+             m->expression_node->accept(*this);
+        }
+        print_error_code(m->line_number, record_col, 17 , second, first, "");
+
     }
     if(isloop){
         current_type.push(first);
