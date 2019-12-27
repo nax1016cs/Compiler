@@ -428,6 +428,9 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
             break;
         default: function_type = "unknown"; break; break;
     }
+    if((strcmp(function_type.c_str(), "void")) ){
+        return_available.push(1);
+    }
     string attr;
  	for(uint i=0; i<m->prototype.size(); i++){
         int first_bracket = 1;
@@ -489,14 +492,16 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
     }
     isparameter = 0;
     // check_return = 1;
-    return_available.push(1);
+    
     return_type = find_type_or_kind(m->function_name, 1);
     if (m->body != nullptr){
         function_cmp = 1;
         m->body->accept(*this);
     }
     // cout<<"111111"<<endl;
-    return_available.pop();
+    if((strcmp(function_type.c_str(), "void")) ){
+        return_available.pop();
+    }
     // cout<<"111111"<<endl;
     // clear_the_stack();
     // level--;
