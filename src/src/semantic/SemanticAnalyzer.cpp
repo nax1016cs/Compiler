@@ -27,6 +27,8 @@ std:: stack <string> current_type;
 string var_type;
 string var_kind;
 
+int state = 0;
+int loop_error = 0;
 int fun_redeclared = 0;
 int find_next_col = 0;
 int record_col = 0;
@@ -134,7 +136,7 @@ void print_error_code(int line_number, int col_number, int error_num, string s1,
             fprintf(stderr, "<Error> Found in line %d, column %d: identifier at the end of program must be the same as identifier at the beginning of program\n", line_number, col_number);
             break;
         case 3:
-            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", line_number, col_number, s1.substr(0,31).c_str());
+            fprintf(stderr, "<Error> Found in line %d, column %d: symbol '%s' is redeclared \n", line_number, col_number, s1.substr(0,32).c_str());
             break;
         case 4:
             fprintf(stderr, "<Error> Found in line %d, column %d: '%s' declared as an array with a lower bound greater or equal to upper bound \n", line_number, col_number, s1.c_str());
@@ -235,7 +237,7 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
         print_error_code(m->line_number, m->col_number, 1 , "", "", "");
     }
 
-    SymbolEntry* s = new SymbolEntry(m->program_name.substr(0,31), "program", level, "void", "");
+    SymbolEntry* s = new SymbolEntry(m->program_name.substr(0,32), "program", level, "void", "");
     SymbolTable* first = new SymbolTable;
     first->addSymbol(*s);
     current_table = first;
@@ -260,7 +262,7 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
     if (m->function_node_list == nullptr){
         manager.pushScope(*current_table);
     }
-
+    
     if (m->compound_statement_node != nullptr){
         SymbolTable* temp_table = new SymbolTable;
         current_table = temp_table;
@@ -285,20 +287,25 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
 
 void SemanticAnalyzer::visit(VariableNode *m) {
     int declared = 0;
+    // cout<<m->variable_name<<endl;
+
     if(fun_redeclared){
         fun_redeclared =0;
         return;
     }
     // redeclared
-
     string var_kind = find_type_or_kind(m->variable_name, 0);
     if(var_kind == "loop_var"){
         print_error_code(m->line_number, m->col_number, 3 , m->variable_name, "", "");
+        loop_error = 1;
+        // cout<<"loop redesdssssssssss";
         // current_type.push("error");
         return;
     }
     for(int i=0; i<current_table->entries.size(); i++){
-        declared = (m->variable_name.substr(0,31) ==current_table->entries[i].name) ? 1 :0;
+        // cout<<"this is "<<m->variable_name<<endl;
+        // cout<<"the check var is "<< current_table->entries[i].name<<endl;
+        declared = (m->variable_name.substr(0,32) ==current_table->entries[i].name) ? 1 :0;
         if(declared){
             // cout<<"dddddddddddd"<<endl;
             print_error_code(m->line_number, m->col_number, 3 , m->variable_name, "", "");
@@ -316,7 +323,7 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     }
     // constant value
     if (m->constant_value_node != nullptr){
-        SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "constant", level, m->getType(), "");
+        SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,32), "constant", level, m->getType(), "");
         current_entry = s;    
         lack_attr = 1;
         m->constant_value_node->accept(*this);
@@ -327,20 +334,20 @@ void SemanticAnalyzer::visit(VariableNode *m) {
     else{
         //function's parameter
         if(isparameter){
-            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "parameter", level, m->getType(), "");
+            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,32), "parameter", level, m->getType(), "");
             current_table->addSymbol(*s);           
             delete(s);
         }
         //normal variable
         else if(isloop){
-            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "loop_var", level, m->getType(), "");
+            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,32), "loop_var", level, m->getType(), "");
             current_table->addSymbol(*s);     
             delete(s);    
 
         }
         else{
-            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,31), "variable", level, m->getType(), "");
-            current_table->addSymbol(*s);         
+            SymbolEntry* s = new SymbolEntry(m->variable_name.substr(0,32), "variable", level, m->getType(), "");
+            current_table->addSymbol(*s);    
             delete(s);
         }
     }
@@ -374,14 +381,13 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) {
 
 void SemanticAnalyzer::visit(FunctionNode *m) {
 	// get the function return type
-
     // cout<<"the return type is "<<return_type<<endl;
     if(strcmp(m->function_name.c_str(), m->end_name.c_str())){
         print_error_code(m->end_line_number,m->end_col_number, 5 , "", "", "");
     }
 
     for(int i=0; i<current_table->entries.size(); i++){
-        if(m->function_name.substr(0,31) ==current_table->entries[i].name){
+        if(m->function_name.substr(0,32) ==current_table->entries[i].name){
             print_error_code(m->line_number, m->col_number, 6 , m->function_name, "", "");
             // manager.pushScope(*current_table);
             // return;
@@ -390,6 +396,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
 
         }
     }
+            
 
     string function_type;
     switch(m->return_type->type_set){
@@ -449,11 +456,13 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         }
     }
 
-    SymbolEntry* s = new SymbolEntry(m->function_name.substr(0,31), "function", level, function_type,attr);
+    SymbolEntry* s = new SymbolEntry(m->function_name.substr(0,32), "function", level, function_type,attr);
     current_table->addSymbol(*s);
     delete(s);
     if(!fun_redeclared)
         manager.pushScope(*current_table);
+    fun_redeclared = 0;
+    
     // create the next table
     // level++;
 
@@ -1024,12 +1033,22 @@ void SemanticAnalyzer::visit(ForNode *m) {
     first_int = -999999999;
     second_int = -999999999;
     isloop = 1;
+    loop_error = 0;
+
     SymbolTable* temp_table = new SymbolTable;
     current_table = temp_table;
     if (m->loop_variable_declaration != nullptr){
         m->loop_variable_declaration->accept(*this);
     }
-    if(current_type.top()=="error") return;
+    if(loop_error){
+        // cout<<"11111111";
+        manager.pushScope(*current_table);
+        manager.popScope();
+        loop_error = 0;
+        current_table = &manager.tables.top();
+        return;
+    }
+    // if(current_type.top()=="error") return;
     level--;    
     manager.pushScope(*current_table);
     if (m->initial_statement != nullptr)
@@ -1041,7 +1060,7 @@ void SemanticAnalyzer::visit(ForNode *m) {
     if(first_int > second_int){
         print_error_code(m->line_number, m->col_number, 24, "", "", "");
         isloop = 0;
-        return;
+        // return;
     }
     isloop = 0;
 
