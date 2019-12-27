@@ -173,6 +173,25 @@ semanticAST(AST);
 
 - Doing semantic analyzer in all the nodes
 
+## Result
+```cpp=
+Running test case: basic  ==>  Pass!
+Running test case: error  ==>  Pass!
+Running test case: test  ==>  Pass!
+Running test case: Assignment  ==>  Pass!
+Running test case: BinaryOperator  ==>  Pass!
+Running test case: condition  ==>  Pass!
+Running test case: ForLoop  ==>  Pass!
+Running test case: function  ==>  Pass!
+Running test case: PrintStatement  ==>  Pass!
+Running test case: program  ==>  Pass!
+Running test case: ReadStatement  ==>  Pass!
+Running test case: ret  ==>  Pass!
+Running test case: UnaryOperator  ==>  Pass!
+Running test case: variable  ==>  Pass!
+Running test case: VariableReference  ==>  Pass!
+```
+
 ## Some advice for TA:
 
 - Make the spec more detailed :  There are still some trivial cases that spec does not specify. Although the classmates will ask the question in issues, it's still a little confusing.
