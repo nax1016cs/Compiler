@@ -1007,6 +1007,8 @@ void SemanticAnalyzer::visit(IfNode *m) {
              m->condition->accept(*this);
         }
         print_error_code(m->line_number, record_col, 18, "", "", "");
+        current_type.push("error");
+
     }
 
     if (m->body != nullptr)
@@ -1029,6 +1031,8 @@ void SemanticAnalyzer::visit(WhileNode *m) {
              m->condition->accept(*this);
         }
         print_error_code(m->line_number, record_col, 18, "", "", "");
+        current_type.push("error");
+
     }
     if (m->body != nullptr)
         for(uint i=0; i< m->body->size(); i++)
@@ -1099,8 +1103,10 @@ void SemanticAnalyzer::visit(ReturnNode *m) {
 void SemanticAnalyzer::visit(FunctionCallNode *m) {
     if(!check_declared_reference(m->function_name) ){
         print_error_code(m->line_number, m->col_number, 25 , m->function_name, "", "");
+        current_type.push("error");
         return;
     }
+    // if(current_type.top()=="error") return;
     int num = 0;
     string attr = find_type_or_kind(m->function_name, 2);
     // cout<<attr<<endl;
@@ -1124,6 +1130,7 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) {
     if (m->arguments != nullptr){
         if(num != m->arguments->size()){
             print_error_code(m->line_number, m->col_number, 26 ,"", "", "");
+            current_type.push("error");
             return;
         }
 
@@ -1132,14 +1139,12 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) {
             // cout<<current_type.top()<<endl;
             if(current_type.top()!= v[i]){
                 print_error_code(m->line_number, m->col_number, 27 ,current_type.top(), v[i], "");
+                current_type.push("error");
                 return;
             }
             // current_type.pop();
         }
     }
     string fun_type = find_type_or_kind(m->function_name, 1);
-    current_type.push(fun_type);
-
-        
-        
+    current_type.push(fun_type);      
 }
