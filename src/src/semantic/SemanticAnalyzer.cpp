@@ -27,6 +27,7 @@ std:: stack <string> current_type;
 string var_type;
 string var_kind;
 
+int fun_redeclared = 0;
 int find_next_col = 0;
 int record_col = 0;
 int first_int = -999999999;
@@ -284,12 +285,24 @@ void SemanticAnalyzer::visit(DeclarationNode *m) {
 
 void SemanticAnalyzer::visit(VariableNode *m) {
     int declared = 0;
-
+    if(fun_redeclared){
+        fun_redeclared =0;
+        return;
+    }
     // redeclared
+
+    string var_kind = find_type_or_kind(m->variable_name, 0);
+    if(var_kind == "loop_var"){
+        print_error_code(m->line_number, m->col_number, 3 , m->variable_name, "", "");
+        // current_type.push("error");
+        return;
+    }
     for(int i=0; i<current_table->entries.size(); i++){
         declared = (m->variable_name.substr(0,31) ==current_table->entries[i].name) ? 1 :0;
         if(declared){
+            // cout<<"dddddddddddd"<<endl;
             print_error_code(m->line_number, m->col_number, 3 , m->variable_name, "", "");
+            // current_type.push("error");
             return;
         }
     }
@@ -371,7 +384,10 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         if(m->function_name.substr(0,31) ==current_table->entries[i].name){
             print_error_code(m->line_number, m->col_number, 6 , m->function_name, "", "");
             // manager.pushScope(*current_table);
-            return;
+            // return;
+            fun_redeclared = 1;
+            manager.pushScope(*current_table);
+
         }
     }
 
@@ -436,7 +452,8 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
     SymbolEntry* s = new SymbolEntry(m->function_name.substr(0,31), "function", level, function_type,attr);
     current_table->addSymbol(*s);
     delete(s);
-    manager.pushScope(*current_table);
+    if(!fun_redeclared)
+        manager.pushScope(*current_table);
     // create the next table
     // level++;
 
@@ -1012,6 +1029,7 @@ void SemanticAnalyzer::visit(ForNode *m) {
     if (m->loop_variable_declaration != nullptr){
         m->loop_variable_declaration->accept(*this);
     }
+    if(current_type.top()=="error") return;
     level--;    
     manager.pushScope(*current_table);
     if (m->initial_statement != nullptr)

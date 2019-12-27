@@ -4,7 +4,7 @@ error;
 
 func1(p1 : string; p2 : array 99 to 100 of integer) : real;
 begin
-    var p1 : boolean;  // error redeclare
+    var p2 : boolean;  // error redeclare
 end
 end func1
 
