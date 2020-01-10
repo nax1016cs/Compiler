@@ -26,14 +26,14 @@ void global_dec(string var_name, int value){
 }
 
 void local_assign(int sp_offset, int value){
-    fprintf(fp, "	sw t%d, %d(s0)\n",current_rg-1, sp_offset);
+    fprintf(fp, "	sw t%d, %d(s0)\n",0, sp_offset);
     current_rg = 0;
 }
 
 void global_assign(string global_name, int value){
 	// fprintf(fp, "	li t0, %d\n", value);
     // fprintf(fp, "	la t%d, %s\n", current_rg, global_name.c_str());
-	fprintf(fp, "	sw t%d, 0(t%d)\n", current_rg-1, 0);
+	fprintf(fp, "	sw t%d, 0(t%d)\n", 0, 0);
     current_rg = 0;
 }
 
@@ -85,8 +85,8 @@ void load_local_var(int offset){
 }
 
 void load_global_var(string name){
-    fprintf(fp, "    la t%d, %s\n", current_rg++, name.c_str());
-    // fprintf(fp, "    lw t%d, 0(t%d)\n", current_rg,current_rg++);
+    fprintf(fp, "    la t%d, %s\n", current_rg, name.c_str());
+    fprintf(fp, "    lw t%d, 0(t%d)\n", current_rg,current_rg++);
 }
 
 

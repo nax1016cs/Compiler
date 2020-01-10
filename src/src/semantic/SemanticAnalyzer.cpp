@@ -39,6 +39,7 @@ vector <string>  record_offset[10]; //pair <name , >
 int current_stack_num = 0;
 string global[100];
 int global_idx = 0;
+int is_assign = 0;
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
     // Put Symbol Table (Special Case)
@@ -298,8 +299,10 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { // STATEMENT
     // Visit Child Node
     // cout<< "assignment node: "<< (*(m->variable_reference_node)).name<<endl;
     this->push_src_node(ASSIGNMENT_NODE);
+    is_assign = 1;
     if (m->variable_reference_node != nullptr)
         m->variable_reference_node->accept(*this);
+    is_assign = 0;
 
     if (m->expression_node != nullptr)
         m->expression_node->accept(*this);
@@ -556,16 +559,19 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
     }
     int find_local = 0;
     int i;
-    for(i=0; i<record_offset[current_stack_num].size(); i++){
-        if(record_offset[current_stack_num][i] == (m->variable_name)){
-            load_local_var(-4*(i+5));
-            find_local = 1;
-            break;
+    if(!is_assign){
+        for(i=0; i<record_offset[current_stack_num].size(); i++){
+            if(record_offset[current_stack_num][i] == (m->variable_name)){
+                load_local_var(-4*(i+5));
+                find_local = 1;
+                break;
+            }
+        }
+        if(!find_local){
+            load_global_var(m->variable_name);
         }
     }
-    if(!find_local){
-        load_global_var(m->variable_name);
-    }
+    
 
     // Part 2:
     // Semantic Check

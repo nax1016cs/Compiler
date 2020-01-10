@@ -12,7 +12,7 @@ begin
 var b, c: integer;
 b := 3+ 4;
 c := b + b;
-a := b + c + c;
+a := a + (c * a);
 
 
 end
