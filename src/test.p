@@ -10,9 +10,9 @@ var d: 4;
 begin
 
 var b, c: integer;
-b := 3+ 4;
-c := b + b;
-a := a + (c * a);
+b :=  4;
+c := b ;
+a := 6 + (a * -b);
 
 
 end

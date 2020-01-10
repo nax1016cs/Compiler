@@ -32,8 +32,8 @@ void local_assign(int sp_offset, int value){
 
 void global_assign(string global_name, int value){
 	// fprintf(fp, "	li t0, %d\n", value);
-    // fprintf(fp, "	la t%d, %s\n", current_rg, global_name.c_str());
-	fprintf(fp, "	sw t%d, 0(t%d)\n", 0, 0);
+    fprintf(fp, "	la t%d, %s\n", current_rg, global_name.c_str());
+	fprintf(fp, "	sw t%d, 0(t%d)\n", 0, current_rg);
     current_rg = 0;
 }
 
