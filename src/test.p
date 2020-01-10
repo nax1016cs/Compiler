@@ -6,20 +6,18 @@ test;
 
 var a: integer;
 var d: 4;
-sum(a,b: integer): integer;
-begin
-    var c: integer;
-    c := a + b;
-    return c;
-end
-end sum
-begin
 
+begin
 var b, c: integer;
-b :=  4;
-print a;
-read a;
-
+while b < 8 do
+    print b;
+    b := b + 1;
+end do
+if ( a <= 40 ) then  
+    print a;
+else
+    print b;
+end if
 
 end
 end test

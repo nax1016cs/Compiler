@@ -29,6 +29,7 @@
 #include <string.h>
 #include <utility>
 #include <vector>
+#include <stack>
 using namespace std;
 
 //
@@ -41,6 +42,8 @@ string global[100];
 int global_idx = 0;
 int is_assign = 0;
 int is_parameter = 0;
+int label_num = 1;
+stack <int> label_stack;
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
     // Put Symbol Table (Special Case)
@@ -510,7 +513,7 @@ void SemanticAnalyzer::visit(ReadNode *m) { // STATEMENT
     if (m->variable_reference_node != nullptr)
         m->variable_reference_node->accept(*this);
     this->pop_src_node();
-    
+
     read((*( m->variable_reference_node)).name);
     // Semantic Check
     VariableInfo r_type = this->expression_stack.top();
@@ -974,14 +977,20 @@ void SemanticAnalyzer::visit(IfNode *m) { // STATEMENT
     this->push_src_node(IF_NODE);
     if (m->condition != nullptr)
         m->condition->accept(*this);
+    set_label(label_stack.top());
 
     if (m->body != nullptr)
         for (uint i = 0; i < m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
+    jump_label(label_stack.top()+2);
+    set_label(label_stack.top()+1);
 
     if (m->body_of_else != nullptr)
         for (uint i = 0; i < m->body_of_else->size(); i++)
             (*(m->body_of_else))[i]->accept(*this);
+    set_label(label_stack.top()+2);
+    label_stack.pop();
+    label_num += 3;
     this->pop_src_node();
 
     // Semantic Check
@@ -1012,7 +1021,9 @@ void SemanticAnalyzer::visit(WhileNode *m) { // STATEMENT
         for (uint i = 0; i < m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
     this->pop_src_node();
-
+    set_label(label_stack.top()+1);
+    label_stack.pop();
+    label_num += 2;
     // Semantic Check
     VariableInfo tmpInfo = this->expression_stack.top();
     this->expression_stack.pop();

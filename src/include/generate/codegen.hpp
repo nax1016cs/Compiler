@@ -27,5 +27,10 @@ void jump_and_load(string name);
 void print();
 void read(string name);
 
+//if
+void jump_label(int value);
+void set_label(int value);
+
+
 
 

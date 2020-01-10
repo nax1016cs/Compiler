@@ -3,7 +3,11 @@
 #include <iomanip>
 #include <iostream>
 #include <string.h>
+#include <stack>
 using namespace std;
+
+extern stack <int> label_stack;
+extern int label_num;
 
 FILE * fp;
 int current_rg = 0;
@@ -64,6 +68,37 @@ void binary_op(enumOperator op){
         case OP_PLUS:
             fprintf(fp, "    addw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
             current_rg--;
+            break;
+
+        case OP_LESS:
+            fprintf(fp, "    bge t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num + 1);
+            label_stack.push(label_num);
+            current_rg -= 2;
+            break;
+        case OP_LESS_OR_EQUAL:
+            fprintf(fp, "    bgt t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            label_stack.push(label_num);
+            current_rg -= 2;
+            break;
+        case OP_EQUAL:
+            fprintf(fp, "    bne t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            label_stack.push(label_num);
+            current_rg -= 2;
+            break;
+        case OP_GREATER:
+            fprintf(fp, "    ble t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            label_stack.push(label_num);
+            current_rg -= 2;
+            break;
+        case OP_GREATER_OR_EQUAL:
+            fprintf(fp, "    blt t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            label_stack.push(label_num);
+            current_rg -= 2;
+            break;
+        case OP_NOT_EQUAL:
+            fprintf(fp, "    beq t%d, t%d, t%d\n", current_rg-2, current_rg-1,label_num+1);
+            label_stack.push(label_num);
+            current_rg -= 2;
             break;
         default:
             break;
@@ -142,4 +177,12 @@ void read(string name){
     fprintf(fp, "    jal ra, read\n");
     fprintf(fp, "    la  t%d, %s\n", current_rg, name.c_str());
     fprintf(fp, "    sw a0, 0(t%d)\n", current_rg);
+}
+
+void jump_label(int value){
+    fprintf(fp, "    j L%d\n", value);
+}
+
+void set_label(int value){
+    fprintf(fp, "L%d:\n", value);
 }
