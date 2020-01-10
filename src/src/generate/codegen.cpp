@@ -117,5 +117,29 @@ void load_parameter(int offset){
 }
 
 void return_fun(){
-    fprintf(fp, "    lw a0, t0\n");
+    fprintf(fp, "    mv a0, t0\n");
+}
+
+void load_arg(int offset){
+    fprintf(fp, "    mv a%d, t0\n", offset);
+    current_rg--;
+}
+
+void jump_and_load(string name){
+    fprintf(fp, "    jal ra, %s\n", name.c_str());
+    fprintf(fp, "    mv t%d, a0\n", current_rg++);
+}
+
+void print(){
+    fprintf(fp, "    mv a0, t0\n");
+    fprintf(fp, "    jal ra, print\n");
+    current_rg--;
+}
+
+
+void read(string name){
+    current_rg--;
+    fprintf(fp, "    jal ra, read\n");
+    fprintf(fp, "    la  t%d, %s\n", current_rg, name.c_str());
+    fprintf(fp, "    sw a0, 0(t%d)\n", current_rg);
 }

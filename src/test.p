@@ -17,8 +17,8 @@ begin
 
 var b, c: integer;
 b :=  4;
-c := b ;
-a := 6 + (a * -b);
+print a;
+read a;
 
 
 end

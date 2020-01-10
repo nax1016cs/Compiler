@@ -40,6 +40,7 @@ int current_stack_num = 0;
 string global[100];
 int global_idx = 0;
 int is_assign = 0;
+int is_parameter = 0;
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
     // Put Symbol Table (Special Case)
@@ -498,15 +499,19 @@ void SemanticAnalyzer::visit(PrintNode *m) { // STATEMENT
             src_notation_msg(this->fp, m->expression_node->line_number,
                              m->expression_node->col_number);
     }
+    print();
+
 }
 
 void SemanticAnalyzer::visit(ReadNode *m) { // STATEMENT
     // Visit Child Node
+
     this->push_src_node(READ_NODE);
     if (m->variable_reference_node != nullptr)
         m->variable_reference_node->accept(*this);
     this->pop_src_node();
-
+    
+    read((*( m->variable_reference_node)).name);
     // Semantic Check
     VariableInfo r_type = this->expression_stack.top();
     this->expression_stack.pop();
@@ -553,6 +558,7 @@ void SemanticAnalyzer::visit(ReadNode *m) { // STATEMENT
                              m->variable_reference_node->col_number);
         return;
     }
+
 }
 
 void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
@@ -569,7 +575,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
     }
     int find_local = 0;
     int i;
-    if(!is_assign  ){
+    if(!is_assign){
         for(i=0; i<record_offset[current_stack_num].size(); i++){
             if(record_offset[current_stack_num][i] == (m->variable_name)){
                 load_local_var(-4*(i+5));
@@ -1111,8 +1117,10 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
     // Visit Child Node
     this->push_src_node(FUNCTION_CALL_NODE);
     if (m->arguments != nullptr)
-        for (int i = m->arguments->size() - 1; i >= 0; i--) // REVERSE TRAVERSE
+        for (int i = m->arguments->size() - 1; i >= 0; i--) {// REVERSE TRAVERSE
             (*(m->arguments))[i]->accept(*this);
+            load_arg(i);
+        }
     this->pop_src_node();
 
     // Semantic Check
@@ -1206,4 +1214,5 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
     } else {
         this->expression_stack.push(VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
     }
+    jump_and_load(m->function_name);
 }

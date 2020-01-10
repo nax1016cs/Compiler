@@ -22,5 +22,10 @@ void pend(string name);
 //function
 void load_parameter(int offset);
 void return_fun();
+void load_arg(int offset);
+void jump_and_load(string name);
+void print();
+void read(string name);
+
 
 
