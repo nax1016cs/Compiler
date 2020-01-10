@@ -26,16 +26,15 @@ void global_dec(string var_name, int value){
 }
 
 void local_assign(int sp_offset, int value){
-	// fprintf(fp, "	li t0, %d\n", value);
+    fprintf(fp, "	sw t%d, %d(s0)\n",current_rg-1, sp_offset);
     current_rg = 0;
-    fprintf(fp, "	sw t0, %d(s0)\n", sp_offset);
 }
 
 void global_assign(string global_name, int value){
 	// fprintf(fp, "	li t0, %d\n", value);
+    // fprintf(fp, "	la t%d, %s\n", current_rg, global_name.c_str());
+	fprintf(fp, "	sw t%d, 0(t%d)\n", current_rg-1, 0);
     current_rg = 0;
-    fprintf(fp, "	la t1, %s\n", global_name.c_str());
-	fprintf(fp, "	sw t0, 0(t1)\n");
 }
 
 
@@ -65,6 +64,8 @@ void binary_op(enumOperator op){
             fprintf(fp, "    addw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
             current_rg--;
             break;
+        default:
+            break;
     }
 }
 
@@ -79,16 +80,14 @@ void unary_op(enumOperator op){
 
 
 
+void load_local_var(int offset){
+    fprintf(fp, "    lw t%d, %d(s0)\n", current_rg++, offset);
+}
 
-
-
-
-
-
-
-
-
-
+void load_global_var(string name){
+    fprintf(fp, "    la t%d, %s\n", current_rg++, name.c_str());
+    // fprintf(fp, "    lw t%d, 0(t%d)\n", current_rg,current_rg++);
+}
 
 
 

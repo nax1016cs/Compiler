@@ -10,9 +10,9 @@ var d: 4;
 begin
 
 var b, c: integer;
-b := 4 + (9*5) / (-3);
-c := 6;
-
+b := 3+ 4;
+c := b + b;
+a := b + c + c;
 
 
 end

@@ -554,6 +554,18 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
         this->expression_stack.push(tmpInfo);
         return;
     }
+    int find_local = 0;
+    int i;
+    for(i=0; i<record_offset[current_stack_num].size(); i++){
+        if(record_offset[current_stack_num][i] == (m->variable_name)){
+            load_local_var(-4*(i+5));
+            find_local = 1;
+            break;
+        }
+    }
+    if(!find_local){
+        load_global_var(m->variable_name);
+    }
 
     // Part 2:
     // Semantic Check
