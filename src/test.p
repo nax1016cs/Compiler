@@ -2,11 +2,17 @@
 //&T-
 //&D-
 // test1.p
-test1;
+test;
 
 var a: integer;
 var d: 4;
-
+sum(a,b: integer): integer;
+begin
+    var c: integer;
+    c := a + b;
+    return c;
+end
+end sum
 begin
 
 var b, c: integer;
@@ -16,4 +22,4 @@ a := 6 + (a * -b);
 
 
 end
-end test1
+end test

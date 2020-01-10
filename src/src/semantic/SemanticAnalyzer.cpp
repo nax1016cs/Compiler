@@ -77,15 +77,17 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
         for (uint i = 0; i < m->function_node_list->size(); i++) {
             (*(m->function_node_list))[i]->accept(*this);
         }
-    main_text();
+
+    ptext("main");
 
 
 
     if (m->compound_statement_node != nullptr)
         m->compound_statement_node->accept(*this);
+
+    pend("main");
     this->pop_src_node();
 
-    main_end();
     // Semantic Analyses of Program Node
     if (m->program_name != this->filename) {
         this->semantic_error = 1;
@@ -105,6 +107,7 @@ void SemanticAnalyzer::visit(ProgramNode *m) {
             src_notation_msg(this->fp, m->end_line_number, m->end_col_number);
     }
 
+    // cout<<"14564646"<<endl;
     // Pop Scope
     this->pop();
 }
@@ -151,6 +154,9 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             this->current_scope->put(SymbolEntry(
                 m->variable_name, this->specify_kind, this->level, *(m->type),
                 Attribute(NO_ATTRIBUTE), VARIABLE_NODE, NULL, m, NULL));
+            record_offset[current_stack_num].push_back(m->variable_name);
+            load_parameter(-4*(record_offset[current_stack_num].size()+4));
+            // cout<<m->variable_name<<endl;
         } else {
             this->current_scope->put(SymbolEntry(
                 m->variable_name, this->specify_kind, this->level, *(m->type),
@@ -212,6 +218,8 @@ void SemanticAnalyzer::visit(ConstantValueNode *m) { // EXPRESSION
 void SemanticAnalyzer::visit(FunctionNode *m) {
     // Part 1:
     // Redeclare Check (current_scope still is global)
+    ptext(m->function_name);
+    current_stack_num++;
     if (this->current_scope->redeclare_check(m->function_name) == false) {
         // Error: Redeclare
         this->semantic_error = 1;
@@ -260,6 +268,8 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
         this->error_msg +=
             src_notation_msg(this->fp, m->end_line_number, m->end_col_number);
     }
+    pend(m->function_name);
+    current_stack_num--;
 
     // Pop Scope
     this->pop();
@@ -559,7 +569,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
     }
     int find_local = 0;
     int i;
-    if(!is_assign){
+    if(!is_assign  ){
         for(i=0; i<record_offset[current_stack_num].size(); i++){
             if(record_offset[current_stack_num][i] == (m->variable_name)){
                 load_local_var(-4*(i+5));
@@ -1066,6 +1076,7 @@ void SemanticAnalyzer::visit(ReturnNode *m) { // STATEMENT
     // Semantic Check Error
     VariableInfo r_type = this->expression_stack.top();
     this->expression_stack.pop();
+    return_fun();
 
     if (r_type.type_set == UNKNOWN_SET && r_type.type == UNKNOWN_TYPE) {
         return; // No Need Further Check
