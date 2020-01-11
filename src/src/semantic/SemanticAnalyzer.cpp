@@ -1157,11 +1157,6 @@ void SemanticAnalyzer::visit(ReturnNode *m) { // STATEMENT
 void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
     // Visit Child Node
     is_functioncall = 1;
-    // current_stack_num++;
-   //  cout<<"number : "<<current_stack_num<<endl;
-   // for(int i=0; i<record_offset[current_stack_num].size(); i++){
-   //      cout<<record_offset[current_stack_num][i]<<endl;
-   //  }
     this->push_src_node(FUNCTION_CALL_NODE);
     if (m->arguments != nullptr){
     	for (int i = m->arguments->size() - 1; i >= 0; i--) {// REVERSE TRAVERSE
@@ -1172,15 +1167,8 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
             // (*(m->arguments))[i]->accept(*this);
             load_arg(i);  
         }
-            
-
     }
-        
     this->pop_src_node();
-
-
- 
-
 
     // Semantic Check
     if (check_function_declaration(m->function_name) == false) {

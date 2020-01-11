@@ -2,52 +2,30 @@
 //&T-
 //&D-
 
-function;
+loop;
 
 var gv: integer;
 var gc: 2;
 
-product(a,b: integer): integer;
+sum(a,b,c,d,e,f,g,h,i,j: integer): integer;
 begin
-	var result: integer;
-	result := a * b;
-	return result;
-end
-end product
-
-sum(a,b: integer): integer;
-begin
-	var result: integer;
-	result := a + b;
-	return result;
+    print j;
+    print i;
+    print h;
+    print g;
+    print f;
+    print e;
+    print d;
+    print c;
+    print b;
+    print a;
+    return i;
 end
 end sum
 
-dot(x1,y1,x2,y2: integer): integer;
-begin
-	var result: integer;
-	result := sum(product(x1, y1), product(x2, y2));
-	return result;
-end
-end dot
-
 begin
 
-var lv: integer;
-var lc: 2;
-
-gv := 2;
-lv := 2;
-
-gv := product(gv, gc);
-lv := gv + product(lv, lc);
-
+gv := sum(1, 2, 3, 4, 5, 6, 7, 8, 9, 10) + gc;
 print gv;
-print lv;
-
-gv := dot(gv, gc, lv, lc);
-
-print gv;
-
 end
-end function
+end loop

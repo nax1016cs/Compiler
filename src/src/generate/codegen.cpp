@@ -27,23 +27,29 @@ void increase_rg(){
     if(current_rg >6){
         record_offset[current_stack_num].push_back("temprg" + to_string(current_rg));
         fprintf(fp,"    sw t%d, %d(s0)\n", current_rg %7, -4*(record_offset[current_stack_num].size()+4));
+         // cout<<"increase : "<<"  " <<record_offset[current_stack_num].back() <<endl;
+
     }
 }
 
 void decrease_rg(){
-    current_rg--;
     if(current_rg >6){
-        for(int i=0; i<record_offset[current_stack_num].size(); i++){
+        for(int i=record_offset[current_stack_num].size()-1; i>=0; i--){
             if(record_offset[current_stack_num][i].substr(0,6) == "temprg"){
-                if((record_offset[current_stack_num][i][6] - 48)%7 != get_rg(-1)){
-                    fprintf(fp,"    lw t%d, %d(s0)\n", (record_offset[current_stack_num][i][6] - 48)%7, -4*(i+5));
-                    record_offset[current_stack_num].erase(record_offset[current_stack_num].begin ()+ i);
+                // if((record_offset[current_stack_num][i][6] - 48)%7 != get_rg(-1)){
+                    ///////////////////////
+                    // cout<<"index : "<<i <<"  " <<record_offset[current_stack_num][i].substr(6,8) <<endl;
+                    fprintf(fp,"    lw t%d, %d(s0)\n", ( atoi(record_offset[current_stack_num][i].substr(6,8).c_str()))%7,  -4*(record_offset[current_stack_num].size()+4));
+                    record_offset[current_stack_num].pop_back();
+                    
                     break;
-                }
+                // }
             }
         }
         
     }
+    current_rg--;
+
 }
 
 void reset_rg(){
@@ -208,7 +214,7 @@ void pend(string name){
 }
 
 void load_parameter(int offset){
-    if(offset < 8)
+    if(idx_for_a < 8)
         fprintf(fp,"    sw a%d, %d(s0)\n", idx_for_a++, offset);
     //////////////////////
 }
