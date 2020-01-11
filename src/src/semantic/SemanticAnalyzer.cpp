@@ -993,6 +993,7 @@ void SemanticAnalyzer::visit(IfNode *m) { // STATEMENT
     if (m->condition != nullptr)
         m->condition->accept(*this);
     set_label(label_stack.top());
+    label_num += 3;
 
     if (m->body != nullptr)
         for (uint i = 0; i < m->body->size(); i++)
@@ -1005,7 +1006,6 @@ void SemanticAnalyzer::visit(IfNode *m) { // STATEMENT
             (*(m->body_of_else))[i]->accept(*this);
     set_label(label_stack.top()+2);
     label_stack.pop();
-    label_num += 3;
     this->pop_src_node();
 
     // Semantic Check
@@ -1032,6 +1032,7 @@ void SemanticAnalyzer::visit(WhileNode *m) { // STATEMENT
     this->push_src_node(WHILE_NODE);
     if (m->condition != nullptr)
         m->condition->accept(*this);
+    label_num += 2;
 
     if (m->body != nullptr)
         for (uint i = 0; i < m->body->size(); i++)
@@ -1040,7 +1041,6 @@ void SemanticAnalyzer::visit(WhileNode *m) { // STATEMENT
     jump_label(label_stack.top());
     set_label(label_stack.top()+1);
     label_stack.pop();
-    label_num += 2;
     // Semantic Check
     VariableInfo tmpInfo = this->expression_stack.top();
     this->expression_stack.pop();
@@ -1086,6 +1086,8 @@ void SemanticAnalyzer::visit(ForNode *m) { // STATEMENT
         m->condition->accept(*this);
 
     binary_op(OP_LESS);
+    label_num += 2;
+    
     if (m->body != nullptr)
         for (uint i = 0; i < m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
@@ -1097,7 +1099,6 @@ void SemanticAnalyzer::visit(ForNode *m) { // STATEMENT
     label_stack.pop();
 
 
-    label_num += 2;
     // Semantic Check
     if (m->lower_bound > m->upper_bound) {
         this->semantic_error = 1;
