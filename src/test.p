@@ -2,52 +2,44 @@
 //&T-
 //&D-
 
-function;
+specExample;
 
-var gv: integer;
-var gc: 2;
-
-product(a,b: integer): integer;
-begin
-	var result: integer;
-	result := a * b;
-	return result;
-end
-end product
+var a: integer;
+var d: 4;
 
 sum(a,b: integer): integer;
 begin
-	var result: integer;
-	result := a + b;
-	return result;
+	var c: integer;
+	c := a + b;
+	return c;
 end
 end sum
 
-dot(x1,y1,x2,y2: integer): integer;
-begin
-	var result: integer;
-	result := sum(product(x1, y1), product(x2, y2));
-	return result;
-end
-end dot
-
 begin
 
-var lv: integer;
-var lc: 2;
+var b, c: integer;
+b := 4;
+c := 6;
 
-gv := 2;
-lv := 2;
+read a;
+print a;
 
-gv := product(gv, gc);
-lv := gv + product(lv, lc);
+a := sum(b, d);
+print a;
 
-print gv;
-print lv;
+a := (b + c) * d;
+print a;
 
-gv := dot(gv, gc, lv, lc);
+if ( a <= 40 ) then  
+    print a;
+else
+    print b;
+end if
 
-print gv;
+while b < 8 do
+    print b;
+    b := b + 1;
+end do
 
 end
-end function
+end specExample

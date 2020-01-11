@@ -43,6 +43,7 @@ int global_idx = 0;
 int is_assign = 0;
 int is_parameter = 0;
 int label_num = 1;
+int is_read = 0;
 stack <int> label_stack;
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
@@ -511,8 +512,10 @@ void SemanticAnalyzer::visit(ReadNode *m) { // STATEMENT
     // Visit Child Node
 
     this->push_src_node(READ_NODE);
+    is_read = 1;
     if (m->variable_reference_node != nullptr)
         m->variable_reference_node->accept(*this);
+    is_read = 0;
     this->pop_src_node();
 
     read((*( m->variable_reference_node)).name);
@@ -579,7 +582,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
     }
     int find_local = 0;
     int i;
-    if(!is_assign){
+    if(!is_assign && !is_read){
         for(i=0; i<record_offset[current_stack_num].size(); i++){
             if(record_offset[current_stack_num][i] == (m->variable_name)){
                 load_local_var(-4*(i+5));

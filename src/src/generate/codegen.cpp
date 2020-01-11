@@ -14,6 +14,7 @@ int current_rg = 0;
 int idx_for_a = 0;
 
 void initilaize(string program_name){
+	current_rg = 0;
     string dir = "";
     dir += string(fdir) + "/" + program_name + ".s";
     fp = fopen( dir.c_str(),"w" );
@@ -134,6 +135,8 @@ void load_global_var(string name){
 
 void ptext(string name){
     idx_for_a = 0;
+	current_rg = 0;
+
     fprintf(fp,".text\n");
     fprintf(fp,"	.align 2\n");
     fprintf(fp,"	.global %s\n", name.c_str());
@@ -146,6 +149,8 @@ void ptext(string name){
 }
 
 void pend(string name){
+	current_rg = 0;
+
     fprintf(fp,"	ld ra, 56(sp)\n");
     fprintf(fp,"	ld s0, 48(sp)\n");
     fprintf(fp,"	addi sp, sp, 64\n");
@@ -181,7 +186,7 @@ void print(){
 
 
 void read(string name){
-    current_rg--;
+    // current_rg--;
     fprintf(fp,"    jal ra, read\n");
     fprintf(fp,"    la  t%d, %s\n", current_rg, name.c_str());
     fprintf(fp,"    sw a0, 0(t%d)\n", current_rg);
