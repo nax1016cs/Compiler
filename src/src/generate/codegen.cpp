@@ -208,8 +208,9 @@ void pend(string name){
 }
 
 void load_parameter(int offset){
-    fprintf(fp,"    sw a%d, %d(s0)\n", idx_for_a++, offset);
-    // fprintf(fp,"    lw t%d, %d(s0)\n", current_rg++, offset);
+    if(offset < 8)
+        fprintf(fp,"    sw a%d, %d(s0)\n", idx_for_a++, offset);
+    //////////////////////
 }
 
 void return_fun(){
@@ -217,13 +218,33 @@ void return_fun(){
 }
 
 void load_arg(int offset){
-    fprintf(fp,"    mv a%d, t%d\n", offset, get_rg(-1));
+    if(offset < 8){
+        fprintf(fp,"    mv a%d, t%d\n", offset, get_rg(-1));
+    }
+    else{
+        fprintf(fp,"    sw t%d, %d(s0)\n", get_rg(-1), -64-20-offset*4);
+    }
+    
+    ///////////
     // reset_rg();
     decrease_rg();
 }
 
 void jump_and_load(string name){
+    int temp_rg = get_rg(0);
+    // int occupy = temp_rg-1;
+    for(int i=0; i<temp_rg; i++){
+        //push to stack
+        record_offset[current_stack_num].push_back("temparg" + to_string(i));
+        fprintf(fp,"    sw t%d, %d(s0)\n", i, -4*(record_offset[current_stack_num].size()+4));
+        // fprintf(fp,"    lw t%d, %d(s0)\n", get_rg(0), offset);
+    }
     fprintf(fp,"    jal ra, %s\n", name.c_str());
+    for(int i=temp_rg-1; i>=0; i--){
+        fprintf(fp,"    lw t%d, %d(s0)\n", i, -4*(record_offset[current_stack_num].size()+4));
+        record_offset[current_stack_num].pop_back();
+        //push to stack
+    }
     fprintf(fp,"    mv t%d, a0\n", get_rg(0));
     increase_rg();
 }

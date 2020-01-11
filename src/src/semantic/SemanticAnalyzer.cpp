@@ -605,29 +605,6 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
             load_global_var(m->variable_name);
         }
     }
-    int function_call_find = 0;
-    int function_call_find_local = 0;
-
-    // if(is_functioncall){
-    //     for(int i=0; i<100; i++){
-    //         if(global[i] == m->variable_name){
-    //             load_global_var(m->variable_name);
-    //             function_call_find =1;
-    //             break;
-    //         }
-    //     }
-    //     if(!function_call_find){
-    //     	cout<<"function variable ref: " <<current_stack_num<<endl;
-    //     	cout<<"size: "<<record_offset[current_stack_num].size()<<endl;
-    //     	for(int i=0; i<record_offset[current_stack_num].size(); i++){
-    //     		cout<<record_offset[current_stack_num][i]<<endl;
-    //     		if(record_offset[current_stack_num][i] == m->variable_name){
-    //     			function_call_find_local = 1;
-    //     		}
-    //     	}
-    //         record_offset[current_stack_num].push_back(m->variable_name);
-    //         load_local_var(-4*(record_offset[current_stack_num].size()+4));
-    //     }
         
     // }
     // Part 2:
@@ -1191,7 +1168,7 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
             (*(m->arguments))[i]->accept(*this);
             // load_arg(i);  
         }
-        for (int i = m->arguments->size() - 1; i >= 0; i--) {// REVERSE TRAVERSE
+        for (int i = 0; i <m->arguments->size(); i++) {// REVERSE TRAVERSE
             // (*(m->arguments))[i]->accept(*this);
             load_arg(i);  
         }
