@@ -13,18 +13,24 @@ FILE * fp;
 int current_rg = 0;
 int idx_for_a = 0;
 
-void increase_rg(){
-    current_rg++;
+int get_rg(int offset){
+    return current_rg + offset;
 }
 
 
-void reset_rg(){
-    current_rg = 0;
+void increase_rg(){
+    current_rg++;
 }
 
 void decrease_rg(){
     current_rg--;
 }
+
+void reset_rg(){
+    current_rg = 0;
+}
+
+
 
 void initilaize(string program_name){
 	reset_rg();
@@ -45,8 +51,8 @@ void global_dec(string var_name, int value){
 }
 
 void local_dec(int offset, int value){
-    fprintf(fp,"	li t%d, %d\n", current_rg, value);
-    fprintf(fp,"	sw t%d, %d(s0)\n",current_rg, offset);
+    fprintf(fp,"	li t%d, %d\n",  get_rg(0), value);
+    fprintf(fp,"	sw t%d, %d(s0)\n",get_rg(0), offset);
 
 }
 
@@ -59,69 +65,75 @@ void local_assign(int sp_offset, int value){
 
 void global_assign(string global_name, int value){
     // fprintf(fp,"    li t0, %d\n", value);
-    fprintf(fp,"	la t%d, %s\n", current_rg, global_name.c_str());
-    fprintf(fp,"	sw t%d, 0(t%d)\n", 0, current_rg);
+    fprintf(fp,"	la t%d, %s\n", get_rg(0), global_name.c_str());
+    fprintf(fp,"	sw t%d, 0(t%d)\n", 0, get_rg(0));
     reset_rg();
 }
 
 
 void load_int_to_register(int value){
-    fprintf(fp,"	li t%d, %d\n", current_rg, value);
+    fprintf(fp,"	li t%d, %d\n", get_rg(0), value);
     increase_rg();
 }
 
 void binary_op(enumOperator op){
     switch(op){
         case OP_MINUS:
-            fprintf(fp,"    subw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
+            fprintf(fp,"    subw t%d, t%d, t%d\n", get_rg(-2), get_rg(-2), get_rg(-1));
             decrease_rg();
             break;
         case OP_MULTIPLY:
-            fprintf(fp,"    mulw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
+            fprintf(fp,"    mulw t%d, t%d, t%d\n", get_rg(-2), get_rg(-2), get_rg(-1));
             decrease_rg();
             break;
         case OP_DIVIDE:
-            fprintf(fp,"    divw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
+            fprintf(fp,"    divw t%d, t%d, t%d\n", get_rg(-2), get_rg(-2), get_rg(-1));
             decrease_rg();
             break;
         case OP_MOD:
-            fprintf(fp,"    remw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
+            fprintf(fp,"    remw t%d, t%d, t%d\n", get_rg(-2), get_rg(-2), get_rg(-1));
             decrease_rg();
             break;
         case OP_PLUS:
-            fprintf(fp,"    addw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
+            fprintf(fp,"    addw t%d, t%d, t%d\n", get_rg(-2), get_rg(-2), get_rg(-1));
             decrease_rg();
             break;
 
         case OP_LESS:
-            fprintf(fp,"    bge t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num + 1);
+            fprintf(fp,"    bge t%d, t%d, L%d\n", get_rg(-2), get_rg(-1),label_num + 1);
             label_stack.push(label_num);
-            current_rg -= 2;
+            decrease_rg();
+            decrease_rg();
             break;
         case OP_LESS_OR_EQUAL:
-            fprintf(fp,"    bgt t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            fprintf(fp,"    bgt t%d, t%d, L%d\n", get_rg(-2), get_rg(-1),label_num+1);
             label_stack.push(label_num);
-            current_rg -= 2;
+            decrease_rg();
+            decrease_rg();
             break;
         case OP_EQUAL:
-            fprintf(fp,"    bne t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            fprintf(fp,"    bne t%d, t%d, L%d\n", get_rg(-2), get_rg(-1),label_num+1);
             label_stack.push(label_num);
-            current_rg -= 2;
+            decrease_rg();
+            decrease_rg();
             break;
         case OP_GREATER:
-            fprintf(fp,"	ble t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            fprintf(fp,"	ble t%d, t%d, L%d\n", get_rg(-2), get_rg(-1),label_num+1);
             label_stack.push(label_num);
-            current_rg -= 2;
+            decrease_rg();
+            decrease_rg();
             break;
         case OP_GREATER_OR_EQUAL:
-            fprintf(fp,"    blt t%d, t%d, L%d\n", current_rg-2, current_rg-1,label_num+1);
+            fprintf(fp,"    blt t%d, t%d, L%d\n", get_rg(-2), get_rg(-1),label_num+1);
             label_stack.push(label_num);
-            current_rg -= 2;
+            decrease_rg();
+            decrease_rg();
             break;
         case OP_NOT_EQUAL:
-            fprintf(fp,"    beq t%d, t%d, t%d\n", current_rg-2, current_rg-1,label_num+1);
+            fprintf(fp,"    beq t%d, t%d, t%d\n", get_rg(-2), get_rg(-1),label_num+1);
             label_stack.push(label_num);
-            current_rg -= 2;
+            decrease_rg();
+            decrease_rg();
             break;
         default:
             break;
@@ -131,20 +143,20 @@ void binary_op(enumOperator op){
 void unary_op(enumOperator op){
     if(op == OP_MINUS ){
         load_int_to_register(-1);
-        fprintf(fp,"    mulw t%d, t%d, t%d\n", current_rg-2, current_rg-2, current_rg-1);
+        fprintf(fp,"    mulw t%d, t%d, t%d\n", get_rg(-2), get_rg(-2), get_rg(-1));
         decrease_rg();
     }
 }
 
 
 void load_local_var(int offset){
-    fprintf(fp,"    lw t%d, %d(s0)\n", current_rg, offset);
+    fprintf(fp,"    lw t%d, %d(s0)\n", get_rg(0), offset);
     increase_rg();
 }
 
 void load_global_var(string name){
-    fprintf(fp,"    la t%d, %s\n", current_rg, name.c_str());
-    fprintf(fp,"	lw t%d, 0(t%d)\n", current_rg,current_rg);
+    fprintf(fp,"    la t%d, %s\n", get_rg(0), name.c_str());
+    fprintf(fp,"	lw t%d, 0(t%d)\n", get_rg(0),get_rg(0));
     increase_rg();
 }
 
@@ -192,7 +204,7 @@ void load_arg(int offset){
 
 void jump_and_load(string name){
     fprintf(fp,"    jal ra, %s\n", name.c_str());
-    fprintf(fp,"    mv t%d, a0\n", current_rg);
+    fprintf(fp,"    mv t%d, a0\n", get_rg(0));
     increase_rg();
 }
 
@@ -206,8 +218,8 @@ void print(){
 void read(string name){
     // decrease_rg();
     fprintf(fp,"    jal ra, read\n");
-    fprintf(fp,"    la  t%d, %s\n", current_rg, name.c_str());
-    fprintf(fp,"    sw a0, 0(t%d)\n", current_rg);
+    fprintf(fp,"    la  t%d, %s\n", get_rg(0), name.c_str());
+    fprintf(fp,"    sw a0, 0(t%d)\n", get_rg(0));
 }
 
 void jump_label(int value){
@@ -220,12 +232,12 @@ void set_label(int value){
 
 
 void load_idx(int for_idx){
-    fprintf(fp,"	lw t%d, %d(s0)\n", current_rg,for_idx);
+    fprintf(fp,"	lw t%d, %d(s0)\n", get_rg(0),for_idx);
     increase_rg();
 }
 
 void add_idx(int for_idx){
-    fprintf(fp,"	lw t%d, %d(s0)\n", current_rg,for_idx);
+    fprintf(fp,"	lw t%d, %d(s0)\n", get_rg(0),for_idx);
     increase_rg();
 	load_int_to_register(1);
 	binary_op(OP_PLUS);

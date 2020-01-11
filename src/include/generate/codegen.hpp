@@ -7,6 +7,7 @@
 using namespace std;
 
 //register control
+int get_rg(int offset);
 void reset_rg();
 void decrease_rg();
 void increase_rg();
