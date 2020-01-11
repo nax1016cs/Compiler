@@ -44,11 +44,14 @@ int is_assign = 0;
 int is_parameter = 0;
 int label_num = 1;
 int is_read = 0;
+int is_functioncall = 0;
 stack <int> label_stack;
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
     // Put Symbol Table (Special Case)
-    
+    for(int i=0; i<10; i++){
+        record_offset[i].clear();
+    }
     SymbolTable *new_scope = new SymbolTable(0);
     this->push(new_scope, PROGRAM_NODE, VariableInfo(UNKNOWN_SET, TYPE_VOID));
 
@@ -161,7 +164,6 @@ void SemanticAnalyzer::visit(VariableNode *m) {
                 Attribute(NO_ATTRIBUTE), VARIABLE_NODE, NULL, m, NULL));
             record_offset[current_stack_num].push_back(m->variable_name);
             load_parameter(-4*(record_offset[current_stack_num].size()+4));
-            // cout<<m->variable_name<<endl;
         } else {
             this->current_scope->put(SymbolEntry(
                 m->variable_name, this->specify_kind, this->level, *(m->type),
@@ -171,10 +173,13 @@ void SemanticAnalyzer::visit(VariableNode *m) {
         if(global_declared)  {
             global_dec(m->variable_name,(*(m->type)).int_literal ) ;
             global[global_idx++] = m->variable_name;
+
         }
         else {
             record_offset[current_stack_num].push_back(m->variable_name);
+
         }
+
         if (m->constant_value_node == nullptr) { // Not Constant
             this->current_scope->put(SymbolEntry(
                 m->variable_name, KIND_VARIABLE, this->level, *(m->type),
@@ -275,6 +280,7 @@ void SemanticAnalyzer::visit(FunctionNode *m) {
             src_notation_msg(this->fp, m->end_line_number, m->end_col_number);
     }
     pend(m->function_name);
+    record_offset[current_stack_num].clear();
     current_stack_num--;
 
     // Pop Scope
@@ -582,7 +588,7 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
     }
     int find_local = 0;
     int i;
-    if(!is_assign && !is_read){
+    if(!is_assign && !is_read && !is_functioncall){
         for(i=0; i<record_offset[current_stack_num].size(); i++){
             if(record_offset[current_stack_num][i] == (m->variable_name)){
                 load_local_var(-4*(i+5));
@@ -594,8 +600,21 @@ void SemanticAnalyzer::visit(VariableReferenceNode *m) { // EXPRESSION
             load_global_var(m->variable_name);
         }
     }
-    
-
+    int function_call_find = 0;
+    if(is_functioncall){
+        for(int i=0; i<100; i++){
+            if(global[i] == m->variable_name){
+                load_global_var(m->variable_name);
+                function_call_find =1;
+                break;
+            }
+        }
+        if(!function_call_find){
+            record_offset[current_stack_num].push_back(m->variable_name);
+            load_local_var(-4*(record_offset[current_stack_num].size()+4));
+        }
+        
+    }
     // Part 2:
     // Semantic Check
     // Normal Case
@@ -1132,6 +1151,12 @@ void SemanticAnalyzer::visit(ReturnNode *m) { // STATEMENT
 
 void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
     // Visit Child Node
+    is_functioncall = 1;
+    current_stack_num++;
+
+   // for(int i=0; i<record_offset[current_stack_num].size(); i++){
+   //      cout<<record_offset[current_stack_num][i]<<endl;
+   //  }
     this->push_src_node(FUNCTION_CALL_NODE);
     if (m->arguments != nullptr)
         for (int i = m->arguments->size() - 1; i >= 0; i--) {// REVERSE TRAVERSE
@@ -1139,6 +1164,10 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
             load_arg(i);
         }
     this->pop_src_node();
+
+
+ 
+
 
     // Semantic Check
     if (check_function_declaration(m->function_name) == false) {
@@ -1232,4 +1261,8 @@ void SemanticAnalyzer::visit(FunctionCallNode *m) { // EXPRESSION //STATEMENT
         this->expression_stack.push(VariableInfo(UNKNOWN_SET, UNKNOWN_TYPE));
     }
     jump_and_load(m->function_name);
+    current_stack_num--;
+    is_functioncall = 0;
+
+
 }

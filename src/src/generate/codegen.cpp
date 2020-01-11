@@ -170,6 +170,7 @@ void return_fun(){
 
 void load_arg(int offset){
     fprintf(fp,"    mv a%d, t0\n", offset);
+    // current_rg = 0;
     current_rg--;
 }
 

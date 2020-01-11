@@ -2,10 +2,10 @@
 //&T-
 //&D-
 
-specExample;
+condition;
 
-var a: integer;
-var d: 4;
+var gv: integer;
+var gc: 2;
 
 sum(a,b: integer): integer;
 begin
@@ -17,29 +17,23 @@ end sum
 
 begin
 
-var b, c: integer;
-b := 4;
-c := 6;
+var lv: integer;
+var lc: 4;
 
-read a;
-print a;
+gv := 1;
+lv := 3;
 
-a := sum(b, d);
-print a;
-
-a := (b + c) * d;
-print a;
-
-if ( a <= 40 ) then  
-    print a;
+if ( gv = 1 ) then  
+    print gv;
 else
-    print b;
+    print lv;
 end if
 
-while b < 8 do
-    print b;
-    b := b + 1;
-end do
+if ( sum(gv, gc) > 4 ) then  
+    print gv;
+else
+    print lv;
+end if
 
 end
-end specExample
+end condition
