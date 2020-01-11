@@ -5,6 +5,8 @@
 #include <string.h>
 #include <stack>
 #include <stdlib.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 using namespace std;
 
 extern stack <int> label_stack;
@@ -53,6 +55,12 @@ void reset_rg(){
 
 void initilaize(string program_name){
 	reset_rg();
+    struct stat info;
+    string tmp1 = "./" + string(fdir);
+    string tmp2 = "mkdir " + string(fdir);
+    stat(tmp1.c_str() , &info );
+    if( !(info.st_mode & S_IFDIR) )
+        system(tmp2.c_str());
     string dir = "";
     dir += string(fdir) + "/" + program_name + ".s";
     fp = fopen( dir.c_str(),"w" );
