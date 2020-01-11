@@ -196,6 +196,7 @@ void ptext(string name){
 }
 
 void pend(string name){
+    idx_for_a = 0;
 	reset_rg();
 
     fprintf(fp,"	ld ra, 56(sp)\n");
@@ -216,7 +217,7 @@ void return_fun(){
 }
 
 void load_arg(int offset){
-    fprintf(fp,"    mv a%d, t0\n", offset);
+    fprintf(fp,"    mv a%d, t%d\n", offset, get_rg(-1));
     // reset_rg();
     decrease_rg();
 }
