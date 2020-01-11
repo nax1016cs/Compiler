@@ -2,35 +2,30 @@
 //&T-
 //&D-
 
-loop;
+expression;
 
 var gv: integer;
 var gc: 2;
 
-sum(a,b: integer): integer;
-begin
-	var c: integer;
-	c := a + b;
-	return c;
-end
-end sum
-
 begin
 
 var lv: integer;
-var lc: 4;
+var lc: 2;
 
-gv := 1;
-lv := 3;
+gv := 2;
+lv := 2;
 
-while gv <= 3 do
-    print gv;
-    gv := gv + 1;
-end do
+gv := lc + gv + gc + lv;
+lv := lc * gv * gc * lv;
 
-for i := 10 to 13 do 
-    print gv;
-end do
+print gv;
+print lv;
+
+gv := lc + ((gv + gc) * lv);
+lv := (lc + (gv + (gc + (lv + (lc + (gv + (gc + (lv + lc))))))));
+
+print gv;
+print lv;
 
 end
-end loop
+end expression
