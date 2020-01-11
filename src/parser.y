@@ -44,6 +44,8 @@ typedef struct YYLTYPE {
     uint32_t last_column;
 } yyltype;
 
+char fdir[100];
+
 /* Declared by scanner.l */
 extern int32_t LineNum;
 extern char Buffer[512];
@@ -1160,7 +1162,7 @@ void dumpAST(ASTNodeBase* node){
 }
 
 int main(int argc, const char *argv[]) {
-    CHECK((argc >= 2) && (argc<=3), "Usage: ./parser <filename> [--dump-ast]\n");
+    CHECK((argc >= 2) && (argc<=4), "Usage: ./parser <filename> [--dump-ast]\n");
     
     int isDumpNeed;
     if(argc == 3){
@@ -1179,7 +1181,7 @@ int main(int argc, const char *argv[]) {
 
     if(argc == 3 && isDumpNeed == 0)
         dumpAST(AST);
-
+    strcpy(fdir, argv[3]);
 	// TODO: construct a SemanticAnalyzer to analyze the AST
     SemanticAnalyzer semantic_analyzer(string(argv[1]), fp);
     AST->accept(semantic_analyzer);

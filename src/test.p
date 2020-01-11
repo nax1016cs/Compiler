@@ -1,23 +1,53 @@
 //&S-
 //&T-
 //&D-
-// test1.p
-test;
 
-var a: integer;
-var d: 4;
+function;
+
+var gv: integer;
+var gc: 2;
+
+product(a,b: integer): integer;
+begin
+	var result: integer;
+	result := a * b;
+	return result;
+end
+end product
+
+sum(a,b: integer): integer;
+begin
+	var result: integer;
+	result := a + b;
+	return result;
+end
+end sum
+
+dot(x1,y1,x2,y2: integer): integer;
+begin
+	var result: integer;
+	result := sum(product(x1, y1), product(x2, y2));
+	return result;
+end
+end dot
 
 begin
-var b, c: integer;
-while b < 8 do
-    print b;
-    b := b + 1;
-end do
-if ( a <= 40 ) then  
-    print a;
-else
-    print b;
-end if
+
+var lv: integer;
+var lc: 2;
+
+gv := 2;
+lv := 2;
+
+gv := product(gv, gc);
+lv := gv + product(lv, lc);
+
+print gv;
+print lv;
+
+gv := dot(gv, gc, lv, lc);
+
+print gv;
 
 end
-end test
+end function

@@ -9,6 +9,7 @@ using namespace std;
 // main 
 void initilaize(string program_name);
 void global_dec(string var_name, int value);
+void local_dec(int offset, int value);
 void local_assign(int sp_offset, int value);
 void global_assign(string global_name, int value);
 void load_int_to_register(int value);

@@ -167,7 +167,13 @@ void SemanticAnalyzer::visit(VariableNode *m) {
                 Attribute(*(m->type)), VARIABLE_NODE, NULL, m, NULL));
         }
     } else {
-
+        if(global_declared)  {
+            global_dec(m->variable_name,(*(m->type)).int_literal ) ;
+            global[global_idx++] = m->variable_name;
+        }
+        else {
+            record_offset[current_stack_num].push_back(m->variable_name);
+        }
         if (m->constant_value_node == nullptr) { // Not Constant
             this->current_scope->put(SymbolEntry(
                 m->variable_name, KIND_VARIABLE, this->level, *(m->type),
@@ -177,15 +183,10 @@ void SemanticAnalyzer::visit(VariableNode *m) {
             this->current_scope->put(SymbolEntry(
                 m->variable_name, KIND_CONSTANT, this->level, *(m->type),
                 Attribute(*(m->type)), VARIABLE_NODE, NULL, m, NULL));
-        }
-        if(global_declared)  {
-            global_dec(m->variable_name,(*(m->type)).int_literal ) ;
-            global[global_idx++] = m->variable_name;
-        }
+            if(!global_declared) local_dec( -4*(record_offset[current_stack_num].size()+4), (*(m->type)).int_literal);
 
-        else {
-            record_offset[current_stack_num].push_back(m->variable_name);
         }
+        
         
     }
 
@@ -324,7 +325,7 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { // STATEMENT
 
     // Semantic Check
     VariableInfo r_type = this->expression_stack.top();
-    cout<<r_type.int_literal<<endl;
+
 
     this->expression_stack.pop();
     // if(r_type.type == TYPE_INTEGER)
@@ -1013,6 +1014,7 @@ void SemanticAnalyzer::visit(IfNode *m) { // STATEMENT
 
 void SemanticAnalyzer::visit(WhileNode *m) { // STATEMENT
     // Visit Child Nodes
+    set_label(label_num);
     this->push_src_node(WHILE_NODE);
     if (m->condition != nullptr)
         m->condition->accept(*this);
@@ -1021,6 +1023,7 @@ void SemanticAnalyzer::visit(WhileNode *m) { // STATEMENT
         for (uint i = 0; i < m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
     this->pop_src_node();
+    jump_label(label_stack.top());
     set_label(label_stack.top()+1);
     label_stack.pop();
     label_num += 2;
