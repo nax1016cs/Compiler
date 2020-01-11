@@ -45,6 +45,7 @@ int is_parameter = 0;
 int label_num = 1;
 int is_read = 0;
 int is_functioncall = 0;
+int for_index = 0;
 stack <int> label_stack;
 
 void SemanticAnalyzer::visit(ProgramNode *m) {
@@ -163,11 +164,14 @@ void SemanticAnalyzer::visit(VariableNode *m) {
                 m->variable_name, this->specify_kind, this->level, *(m->type),
                 Attribute(NO_ATTRIBUTE), VARIABLE_NODE, NULL, m, NULL));
             record_offset[current_stack_num].push_back(m->variable_name);
-            load_parameter(-4*(record_offset[current_stack_num].size()+4));
+            // cout<<"asdfadfasdf "<<this->specify_kind<<endl;
+            if(this->specify_kind == 102)
+                load_parameter(-4*(record_offset[current_stack_num].size()+4));
         } else {
             this->current_scope->put(SymbolEntry(
                 m->variable_name, this->specify_kind, this->level, *(m->type),
                 Attribute(*(m->type)), VARIABLE_NODE, NULL, m, NULL));
+
         }
     } else {
         if(global_declared)  {
@@ -346,6 +350,7 @@ void SemanticAnalyzer::visit(AssignmentNode *m) { // STATEMENT
         if(record_offset[current_stack_num][i] == (*(m->variable_reference_node)).name){
             local_assign( -4*(i+5), r_type.int_literal);
             find_local = 1;
+            for_index = -4*(i+5);
             break;
         }
     }
@@ -1081,18 +1086,31 @@ void SemanticAnalyzer::visit(ForNode *m) { // STATEMENT
     this->specify_off();
 
     this->specify_on(KIND_LOOP_VAR);
-    if (m->initial_statement != nullptr)
+    if (m->initial_statement != nullptr){
         m->initial_statement->accept(*this);
+    }
     this->specify_off();
+    // cout<<"afsddddasdfa"<<for_index<<endl;
+    set_label(label_num);
+    load_idx(for_index);
+
 
     if (m->condition != nullptr)
         m->condition->accept(*this);
 
+    binary_op(OP_LESS);
     if (m->body != nullptr)
         for (uint i = 0; i < m->body->size(); i++)
             (*(m->body))[i]->accept(*this);
     this->pop_src_node();
+    add_idx(for_index);
 
+    jump_label(label_stack.top());
+    set_label(label_stack.top()+1);
+    label_stack.pop();
+
+
+    label_num += 2;
     // Semantic Check
     if (m->lower_bound > m->upper_bound) {
         this->semantic_error = 1;

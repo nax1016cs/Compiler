@@ -33,5 +33,7 @@ void jump_label(int value);
 void set_label(int value);
 
 
-
+//for
+void load_idx(int for_idx);
+void add_idx(int for_idx);
 

@@ -2,7 +2,7 @@
 //&T-
 //&D-
 
-condition;
+loop;
 
 var gv: integer;
 var gc: 2;
@@ -23,17 +23,14 @@ var lc: 4;
 gv := 1;
 lv := 3;
 
-if ( gv = 1 ) then  
+while gv <= 3 do
     print gv;
-else
-    print lv;
-end if
+    gv := gv + 1;
+end do
 
-if ( sum(gv, gc) > 4 ) then  
+for i := 10 to 13 do 
     print gv;
-else
-    print lv;
-end if
+end do
 
 end
-end condition
+end loop

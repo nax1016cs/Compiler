@@ -200,3 +200,16 @@ void jump_label(int value){
 void set_label(int value){
     fprintf(fp,"L%d:\n", value);
 }
+
+
+void load_idx(int for_idx){
+    fprintf(fp,"	lw t%d, %d(s0)\n", current_rg++,for_idx);
+}
+
+void add_idx(int for_idx){
+    fprintf(fp,"	lw t%d, %d(s0)\n", current_rg++,for_idx);
+	load_int_to_register(1);
+	binary_op(OP_PLUS);
+	local_assign(for_idx,0);
+    // fprintf(fp,"	lw t%d, %d(s0)\n", current_rg++,for_idx);
+}
