@@ -6,6 +6,10 @@
 #include <string.h>
 using namespace std;
 
+//register control
+void reset_rg();
+void decrease_rg();
+void increase_rg();
 // main 
 void initilaize(string program_name);
 void global_dec(string var_name, int value);
