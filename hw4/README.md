@@ -7,23 +7,24 @@ Due Date: **23:59, December 27, 2019**
 Your assignment is to perform semantic analyses for a `P` program. In the previous project, you have constructed an abstract syntax tree (AST). In this assignment, you will do some simple checking of semantic correctness. Code generation will be performed in the last phase of the project.
 
 **Table of Contents**
+
 - [Project Assignment 4 - Semantic Definitions](#project-assignment-4---semantic-definitions)
-	- [Assignment](#assignment)
-	- [Pseudocomments](#pseudocomments)
-	- [Symbol Table](#symbol-table)
-	- [Semantic Definition](#semantic-definition)
-	- [Implementation Hints](#implementation-hints)
-		- [Symbol Table Construction (one-pass)](#symbol-table-construction-one-pass)
-		- [Source Code Listing in Semantic Error](#source-code-listing-in-semantic-error)
-		- [Visiting of FunctionNode](#visiting-of-functionnode)
-		- [Type Information Propagation](#type-information-propagation)
-	- [What Should Your Parser Do?](#what-should-your-parser-do)
-	- [Project Structure](#project-structure)
-	- [Assessment Rubrics (Grading)](#assessment-rubrics-grading)
-	- [Build and Execute](#build-and-execute)
-		- [Build Project](#build-project)
-		- [Test your parser](#test-your-parser)
-	- [Submitting the Assignment](#submitting-the-assignment)
+  - [Assignment](#assignment)
+  - [Pseudocomments](#pseudocomments)
+  - [Symbol Table](#symbol-table)
+  - [Semantic Definition](#semantic-definition)
+  - [Implementation Hints](#implementation-hints)
+    - [Symbol Table Construction (one-pass)](#symbol-table-construction-one-pass)
+    - [Source Code Listing in Semantic Error](#source-code-listing-in-semantic-error)
+    - [Visiting of FunctionNode](#visiting-of-functionnode)
+    - [Type Information Propagation](#type-information-propagation)
+  - [What Should Your Parser Do?](#what-should-your-parser-do)
+  - [Project Structure](#project-structure)
+  - [Assessment Rubrics (Grading)](#assessment-rubrics-grading)
+  - [Build and Execute](#build-and-execute)
+    - [Build Project](#build-project)
+    - [Test your parser](#test-your-parser)
+  - [Submitting the Assignment](#submitting-the-assignment)
 
 ## Assignment
 
@@ -42,16 +43,16 @@ In summary, you need to implement the construction of symbol tables and semantic
 In the first assignment, we have defined:
 
 - `S`
-	- `&S+` turns on source program listing, and `&S-` turns it off.
+  - `&S+` turns on source program listing, and `&S-` turns it off.
 - `T`
-	- `&T+` turns on token (which will be returned to the parser) listing, and `&T-` turns it off.
+  - `&T+` turns on token (which will be returned to the parser) listing, and `&T-` turns it off.
 
 In this assignment, one more option is added:
 
 - `D`
-	- Dump the contents of the symbol table associated with a block when exiting from that block.
-	- `&D+` turns on symbol table dumping, and `&D-` turns it off.
-	- By default, this option is on.
+  - Dump the contents of the symbol table associated with a block when exiting from that block.
+  - `&D+` turns on symbol table dumping, and `&D-` turns it off.
+  - By default, this option is on.
 
 ## Symbol Table
 
@@ -63,13 +64,13 @@ In effect, the role of a symbol table is to pass information from declarations t
 
 Each entry of a symbol table consists of the name, kind, scope level, type, value, and additional attributes of a symbol. Symbols are placed in the symbol table in order of their appearance in the input file. Precise definitions of each entry are as follows.
 
-| Field | Description |
-| ----- | ----------- |
-| Name | The name of the symbol. Each symbol have the length between 1 to 32. |
-| Kind | The name type of the symbol. There are **six** kinds of symbols: program, function, parameter, variable, loop\_var, and constant. |
-| Level | The scope level of the symbol. 0 represents the global scope. Local scope levels start from 1, and the scope level is incremented at the start of a scope and decremented at the end of the scope.  |
-| Type | The type of the symbol. Each symbol is of types integer, real, boolean, string, or the signature of an array. (Note that this field can be used for the return type of a function ) |
-| Attribute | Other attributes of the symbol, such as the value of a constant, list of the types of the formal parameters of a function, etc. |
+| Field     | Description                                                                                                                                                                                        |
+| --------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Name      | The name of the symbol. Each symbol have the length between 1 to 32.                                                                                                                               |
+| Kind      | The name type of the symbol. There are **six** kinds of symbols: program, function, parameter, variable, loop_var, and constant.                                                                   |
+| Level     | The scope level of the symbol. 0 represents the global scope. Local scope levels start from 1, and the scope level is incremented at the start of a scope and decremented at the end of the scope. |
+| Type      | The type of the symbol. Each symbol is of types integer, real, boolean, string, or the signature of an array. (Note that this field can be used for the return type of a function )                |
+| Attribute | Other attributes of the symbol, such as the value of a constant, list of the types of the formal parameters of a function, etc.                                                                    |
 
 ### Output Format
 
@@ -189,7 +190,7 @@ Note that **once your parser has found a semantic error in a child node of an AS
 
 ### Program Unit
 
-The two program units are the *program* and the *function*.
+The two program units are the _program_ and the _function_.
 
 #### Program
 
@@ -227,7 +228,7 @@ The two program units are the *program* and the *function*.
 
 ### Expression
 
-- For an arithmetic operator (+, -, *, or /), the operands must be an integer or real type, and the operation produces an integer or real value. The type of operands of operation may be different. Check out the *Type Coercion and Comparison* subsection for more details.
+- For an arithmetic operator (+, -, *, or /), the operands must be an integer or real type, and the operation produces an integer or real value. The type of operands of operation may be different. Check out the *Type Coercion and Comparison\* subsection for more details.
 
 - For a **mod** operator, the operands must be an integer type, and it produces an integer value.
 
@@ -358,20 +359,20 @@ Notice that semantic errors should **not** cause the parser to stop its executio
 
 - `README.md`
 - /src
-	- Makefile
-	- `scanner.l`
-	- `parser.y`
-	- /include
-		- /AST
-		- /semantic
-		- /visitor
-	- /src
-		- /AST
-		- /semantic
-		- /visitor
-	- Other modules you may add
+  - Makefile
+  - `scanner.l`
+  - `parser.y`
+  - /include
+    - /AST
+    - /semantic
+    - /visitor
+  - /src
+    - /AST
+    - /semantic
+    - /visitor
+  - Other modules you may add
 - /report
-	- `README.md`
+  - `README.md`
 
 In this assignment, you have to do the following tasks:
 
@@ -385,12 +386,12 @@ If you want to preview your report in GitHub style markdown before pushing to Gi
 Total of 100 points, with 15 point available bonus points.
 (115 pts is the maximum grade you could get in this assignment)
 
-+ Passing all test cases (60 pts)
-+ Passing all hidden test cases (35 pts)
-+ Report (5 pts)
-+ Bonus
-  + Preserving symbol tables for multi-pass (+10 pts)
-  + No memory leak in your program (+5 pts)
+- Passing all test cases (60 pts)
+- Passing all hidden test cases (35 pts)
+- Report (5 pts)
+- Bonus
+  - Preserving symbol tables for multi-pass (+10 pts)
+  - No memory leak in your program (+5 pts)
 
 **Please note down what bonus you have done in your report.**
 
